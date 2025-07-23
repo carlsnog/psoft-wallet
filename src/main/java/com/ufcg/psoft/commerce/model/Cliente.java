@@ -13,22 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cliente {
+public class Cliente extends Usuario{
 
-    @JsonProperty("id")
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
-
-    @JsonProperty("nome")
     @Column(nullable = false)
-    private String nome;
-
-    @JsonProperty("endereco")
-    @Column(nullable = false)
-    private String endereco;
-
-    @JsonIgnore
-    @Column(nullable = false)
-    private String codigo;
+    private String plano;
 }
