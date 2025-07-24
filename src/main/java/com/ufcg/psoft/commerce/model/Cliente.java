@@ -13,8 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@DiscriminadorValue("CLIENTE")
 public class Cliente extends Usuario{
 
-    @Column(nullable = false)
-    private String plano;
+    @Enumerated(EnumType.STRING)
+    private PlanoEnum plano;
 }

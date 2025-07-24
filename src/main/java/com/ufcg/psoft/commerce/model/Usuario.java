@@ -12,13 +12,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_usuario", discriminatorType = DiscriminatorType.STRING)
+@Table(name = "usuarios")
 public abstract class Usuario {
+
     @Id
+    @JsonProperty("id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(nullable = false, name = "codigo_acesso")
+    @NotBlank(message = "Codigo de acesso obrigatorio")
+    @JsonIgnore
     private String codigoAcesso;
 
     @Column(nullable = false)

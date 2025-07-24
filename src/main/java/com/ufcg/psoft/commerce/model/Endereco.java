@@ -9,12 +9,20 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+
 public class Endereco {
+    
+    @NotBlank(message = "Endereco obrigatorio")
+    @Column(nullable = false)
     private String rua;
+
+    @NotBlank
+    @Column(nullable = false)
     private String numero;
-    private String bairro;
-    private String cidade;
-    private String estado;
+
+    @NotBlank
+    @Column(nullable = false)
     private String cep;
 
 }
