@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientePostPutRequestDTO {
+public class ClienteUpsertDTO {
 
     @JsonProperty("nome")
     @NotBlank(message = "Nome obrigatorio")
