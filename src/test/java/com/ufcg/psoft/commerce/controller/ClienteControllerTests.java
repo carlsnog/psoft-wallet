@@ -3,7 +3,7 @@ package com.ufcg.psoft.commerce.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.ufcg.psoft.commerce.dto.ClientePostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.exception.CustomErrorType;
 import com.ufcg.psoft.commerce.model.Cliente;
@@ -40,7 +40,7 @@ public class ClienteControllerTests {
 
     Cliente cliente;
 
-    ClientePostPutRequestDTO clientePostPutRequestDTO;
+    ClienteUpsertDTO clientePostPutRequestDTO;
 
     @BeforeEach
     void setup() {
@@ -52,7 +52,7 @@ public class ClienteControllerTests {
                 .codigo("123456")
                 .build()
         );
-        clientePostPutRequestDTO = ClientePostPutRequestDTO.builder()
+        clientePostPutRequestDTO = ClienteUpsertDTO.builder()
                 .nome(cliente.getNome())
                 .endereco(cliente.getEndereco())
                 .codigo(cliente.getCodigo())

@@ -1,7 +1,9 @@
 package com.ufcg.psoft.commerce.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,17 +14,18 @@ import lombok.NoArgsConstructor;
 @Builder
 
 public class Endereco {
-    
-    @NotBlank(message = "Endereco obrigatorio")
+
     @Column(nullable = false)
     private String rua;
 
-    @NotBlank
     @Column(nullable = false)
     private String numero;
 
-    @NotBlank
     @Column(nullable = false)
     private String cep;
 
+    @Override
+    public String toString() {
+        return rua + ", " + numero + " - " + cep;
+    }
 }

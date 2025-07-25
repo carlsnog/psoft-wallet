@@ -1,6 +1,10 @@
 package com.ufcg.psoft.commerce.controller;
 
-import com.ufcg.psoft.commerce.dto.ClientePostPutRequestDTO;
+import com.ufcg.psoft.commerce.auth.Autenticado;
+import com.ufcg.psoft.commerce.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.auth.Usuario;
+import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.http.request.RequestUser;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(
-        value = "/clientes",
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
+@RequestMapping(value = "/clientes", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ClienteController {
 
     @Autowired
@@ -28,6 +29,7 @@ public class ClienteController {
     }
 
     @GetMapping("")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> listarClientes(
             @RequestParam(required = false, defaultValue = "") String nome) {
 
@@ -43,29 +45,31 @@ public class ClienteController {
 
     @PostMapping()
     public ResponseEntity<?> criarCliente(
-            @RequestBody @Valid ClientePostPutRequestDTO clientePostPutRequestDto) {
+            @RequestBody @Valid ClienteUpsertDTO clienteDto) {
+
+        var response = clienteService.criar(clienteDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(clienteService.criar(clientePostPutRequestDto));
+                .body(response);
     }
 
     @PutMapping("/{id}")
+    @Autenticado()
     public ResponseEntity<?> atualizarCliente(
             @PathVariable Long id,
             @RequestParam String codigo,
-            @RequestBody @Valid ClientePostPutRequestDTO clientePostPutRequestDto) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(clienteService.alterar(id, codigo, clientePostPutRequestDto));
+            @RequestUser Usuario usuario,
+            @RequestBody @Valid ClienteUpsertDTO clienteDto) {
+        return ResponseEntity.ok(clienteService.alterar(id, codigo, clienteDto));
     }
 
     @DeleteMapping("/{id}")
+    @Autenticado(TipoAutenticacao.NORMAL)
     public ResponseEntity<?> excluirCliente(
             @PathVariable Long id,
             @RequestParam String codigo) {
+
         clienteService.remover(id, codigo);
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body("");
+        return ResponseEntity.noContent().build();
     }
 }
