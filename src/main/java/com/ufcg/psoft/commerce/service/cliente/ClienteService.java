@@ -1,19 +1,20 @@
 package com.ufcg.psoft.commerce.service.cliente;
 
-import com.ufcg.psoft.commerce.dto.ClientePostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
+import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.model.Usuario;
 
 import java.util.List;
 
 public interface ClienteService {
 
-    ClienteResponseDTO alterar(Long id, String codigoAcesso, ClientePostPutRequestDTO clientePostPutRequestDTO);
+    ClienteResponseDTO alterar(Usuario usuario, long idUsuarioAlterado, ClienteUpsertDTO clientePostPutRequestDTO);
 
     List<ClienteResponseDTO> listar();
 
     ClienteResponseDTO recuperar(Long id);
 
-    ClienteResponseDTO criar(ClientePostPutRequestDTO clientePostPutRequestDTO);
+    ClienteResponseDTO criar(ClienteUpsertDTO clientePostPutRequestDTO);
 
     void remover(Long id, String codigoAcesso);
 
