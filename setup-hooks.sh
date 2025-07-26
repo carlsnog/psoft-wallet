@@ -11,3 +11,4 @@ fi
 echo "✅ código formatado."
 
 " >> ./.git/hooks/pre-commit
+chmod +x ./.git/hooks/pre-commit
