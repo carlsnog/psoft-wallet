@@ -20,7 +20,6 @@
     </rule>
 
     <rule ref="category/java/codestyle.xml/FieldNamingConventions" />
-    <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
     <rule ref="category/java/codestyle.xml/LongVariable">
         <properties>
             <property name="minimum" value="20" />
