@@ -1,5 +1,5 @@
 
-package com.ufcg.psoft.commerce.service.auth;
+package com.ufcg.psoft.commerce.enums;
 
 public enum TipoAutenticacao {
     PUBLICA, NORMAL, PREMIUM, ADMIN,

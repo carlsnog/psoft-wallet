@@ -1,9 +1,11 @@
 
 package com.ufcg.psoft.commerce.service.auth;
 
-import com.ufcg.psoft.commerce.model.Usuario;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+
+import com.ufcg.psoft.commerce.model.Usuario;
 
 @Service
 public interface UsuarioService {

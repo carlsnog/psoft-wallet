@@ -1,7 +1,7 @@
 
 package com.ufcg.psoft.commerce.http.auth;
 
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
