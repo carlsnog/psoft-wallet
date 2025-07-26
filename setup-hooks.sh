@@ -10,4 +10,4 @@ fi
 
 echo "✅ código formatado."
 
-" >> .git/hooks/pre-commit
+" >> ./.git/hooks/pre-commit
