@@ -1,20 +1,39 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Cliente extends Usuario{
+@Getter
+@Setter
+@Entity
+@Table(name = "cliente")
+public class Cliente extends Usuario {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Column(nullable = false)
-    private String plano;
+    private String codigoAcesso;
+
+    @Getter
+    @Column(nullable = false)
+    private String nome;
+
+    @Getter
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PlanoEnum plano;
+
+    @Getter
+    @Column(nullable = false)
+    private String endereco;
+
+    @Override
+    public boolean isAdmin() {
+        return false;
+    }
+
 }

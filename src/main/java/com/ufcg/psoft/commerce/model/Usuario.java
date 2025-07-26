@@ -1,33 +1,20 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@MappedSuperclass
+@Getter
 public abstract class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
 
-    @Column(nullable = false, name = "codigo_acesso")
-    private String codigoAcesso;
+    public abstract boolean isAdmin();
 
-    @Column(nullable = false)
-    private String nome;
+    public boolean validar(String codigoAcesso) {
+        return this.getCodigoAcesso().equals(codigoAcesso); // Aqui podia calcular o hash do código para não salvar em
+                                                            // plain text
+    }
 
-    @Embedded
-    @Column(nullable = false)
-    @JsonIgnore
-    private Endereco endereco;
+    public abstract String getCodigoAcesso();
 
-
+    public abstract long getId();
 }
