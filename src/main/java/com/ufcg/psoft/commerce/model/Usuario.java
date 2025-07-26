@@ -10,10 +10,7 @@ public abstract class Usuario {
   public abstract boolean isAdmin();
 
   public boolean validar(String codigoAcesso) {
-    return this.getCodigoAcesso().equals(codigoAcesso); // Aqui podia calcular o hash
-    // do código para não salvar
-    // em
-    // plain text
+    return this.getCodigoAcesso().equals(codigoAcesso);
   }
 
   public abstract String getCodigoAcesso();
