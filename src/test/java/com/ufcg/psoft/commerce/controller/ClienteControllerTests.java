@@ -35,7 +35,7 @@ import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
 import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
-import com.ufcg.psoft.commerce.model.PlanoEnum;
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 
 @SpringBootTest

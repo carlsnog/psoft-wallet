@@ -5,11 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.ufcg.psoft.commerce.enums.*;
 import java.math.BigDecimal;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class Ativo {

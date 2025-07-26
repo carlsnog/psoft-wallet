@@ -2,7 +2,7 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.model.PlanoEnum;
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
