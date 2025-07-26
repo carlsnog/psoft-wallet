@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.config;
 
 import org.modelmapper.ModelMapper;
@@ -11,5 +12,4 @@ public class ModelMapperConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
 }

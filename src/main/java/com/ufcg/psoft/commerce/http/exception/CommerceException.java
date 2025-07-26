@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.http.exception;
 
 import org.springframework.http.HttpStatus;

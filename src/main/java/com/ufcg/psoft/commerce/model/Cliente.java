@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.model;
 
 import jakarta.persistence.*;
@@ -39,5 +40,4 @@ public class Cliente extends Usuario {
     public boolean isAdmin() {
         return false;
     }
-
 }

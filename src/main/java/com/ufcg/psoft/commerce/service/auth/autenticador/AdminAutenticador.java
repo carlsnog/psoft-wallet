@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.service.auth.autenticador;
 
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
@@ -5,7 +6,6 @@ import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
-
 import java.util.Optional;
 
 public class AdminAutenticador extends Autenticador {

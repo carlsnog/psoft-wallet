@@ -1,4 +1,6 @@
+
 package com.ufcg.psoft.commerce.dto;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ufcg.psoft.commerce.model.Cliente;
 import jakarta.persistence.GeneratedValue;

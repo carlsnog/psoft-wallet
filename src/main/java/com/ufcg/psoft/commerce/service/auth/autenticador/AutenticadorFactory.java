@@ -1,20 +1,17 @@
+
 package com.ufcg.psoft.commerce.service.auth.autenticador;
-
-import java.util.Map;
-import java.util.function.Function;
-
-import org.springframework.stereotype.Component;
 
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import java.util.Map;
+import java.util.function.Function;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AutenticadorFactory {
     private static final Map<TipoAutenticacao, Function<ClienteRepository, Autenticador>> autenticadoresMap = Map.of(
-            TipoAutenticacao.ADMIN, AdminAutenticador::new,
-            TipoAutenticacao.NORMAL, NormalAutenticador::new,
-            TipoAutenticacao.PREMIUM, PremiumAutenticador::new,
-            TipoAutenticacao.PUBLICA, PublicoAutenticador::new);
+            TipoAutenticacao.ADMIN, AdminAutenticador::new, TipoAutenticacao.NORMAL, NormalAutenticador::new,
+            TipoAutenticacao.PREMIUM, PremiumAutenticador::new, TipoAutenticacao.PUBLICA, PublicoAutenticador::new);
 
     private final ClienteRepository clienteRepository;
 

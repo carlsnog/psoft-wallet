@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
@@ -22,51 +23,36 @@ public class ClienteController {
 
     @GetMapping("/{id}")
     @Autenticado(TipoAutenticacao.NORMAL)
-    public ResponseEntity<?> recuperarCliente(
-            @PathVariable Long id,
-            @RequestUser Usuario usuario) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(clienteService.recuperar(usuario, id));
+    public ResponseEntity<?> recuperarCliente(@PathVariable Long id, @RequestUser Usuario usuario) {
+        return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperar(usuario, id));
     }
 
     @GetMapping("")
     @Autenticado(TipoAutenticacao.ADMIN)
-    public ResponseEntity<?> listarClientes(
-            @RequestParam(required = false, defaultValue = "") String nome) {
+    public ResponseEntity<?> listarClientes(@RequestParam(required = false, defaultValue = "") String nome) {
 
         if (nome != null && !nome.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(clienteService.listarPorNome(nome));
+            return ResponseEntity.status(HttpStatus.OK).body(clienteService.listarPorNome(nome));
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(clienteService.listar());
+        return ResponseEntity.status(HttpStatus.OK).body(clienteService.listar());
     }
 
     @PostMapping()
-    public ResponseEntity<?> criarCliente(
-            @RequestBody @Valid ClienteUpsertDTO clienteDto) {
+    public ResponseEntity<?> criarCliente(@RequestBody @Valid ClienteUpsertDTO clienteDto) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(this.clienteService.criar(clienteDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.clienteService.criar(clienteDto));
     }
 
     @PutMapping("/{id}")
     @Autenticado()
-    public ResponseEntity<?> atualizarCliente(
-            @PathVariable Long id,
-            @RequestUser Usuario usuario,
+    public ResponseEntity<?> atualizarCliente(@PathVariable Long id, @RequestUser Usuario usuario,
             @RequestBody @Valid ClienteUpsertDTO clienteDto) {
         return ResponseEntity.ok(clienteService.alterar(usuario, id, clienteDto));
     }
 
     @DeleteMapping("/{id}")
     @Autenticado(TipoAutenticacao.NORMAL)
-    public ResponseEntity<?> excluirCliente(
-            @PathVariable Long id) {
+    public ResponseEntity<?> excluirCliente(@PathVariable Long id) {
 
         clienteService.remover(id);
         return ResponseEntity.noContent().build();

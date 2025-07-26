@@ -1,21 +1,20 @@
+
 package com.ufcg.psoft.commerce.http.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufcg.psoft.commerce.http.exception.CommerceException;
+import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.service.auth.UsuarioService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ufcg.psoft.commerce.http.exception.CommerceException;
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
-import com.ufcg.psoft.commerce.service.auth.UsuarioService;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
@@ -27,9 +26,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper mapper;
     private final UsuarioService userService;
 
-    public AuthenticationFilter(
-            UsuarioService userService,
-            ObjectMapper mapper,
+    public AuthenticationFilter(UsuarioService userService, ObjectMapper mapper,
             RequestMappingHandlerMapping handlerMapping) {
         this.userService = userService;
         this.mapper = mapper;
@@ -37,10 +34,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         var handler = getHandler(request);

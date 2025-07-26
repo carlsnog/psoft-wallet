@@ -1,3 +1,4 @@
+
 package com.ufcg.psoft.commerce.model;
 
 import lombok.Getter;
@@ -34,5 +35,4 @@ public class Admin extends Usuario {
 
         return instance;
     }
-
 }

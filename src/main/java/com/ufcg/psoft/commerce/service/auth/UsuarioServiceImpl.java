@@ -1,11 +1,10 @@
+
 package com.ufcg.psoft.commerce.service.auth;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
-import com.ufcg.psoft.commerce.service.auth.autenticador.AutenticadorFactory;
 import com.ufcg.psoft.commerce.model.Usuario;
+import com.ufcg.psoft.commerce.service.auth.autenticador.AutenticadorFactory;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
