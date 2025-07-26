@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.model;
+package com.ufcg.psoft.commerce.enums;
 
 public enum PlanoEnum {
     NORMAL,

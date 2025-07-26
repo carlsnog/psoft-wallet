@@ -4,17 +4,16 @@ import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/clientes", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/clientes")
 public class ClienteController {
 
     @Autowired

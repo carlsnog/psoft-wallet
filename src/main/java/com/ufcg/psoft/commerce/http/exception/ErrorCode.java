@@ -8,8 +8,13 @@ public enum ErrorCode {
     BAD_REQUEST("Requisicao invalida", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    CLIENTE_NAO_EXISTE("Cliente nao existe", HttpStatus.NOT_FOUND),
-    COD_ACESSO_INVALIDO("O codigo acesso deve ser composto por 6 digitos", HttpStatus.BAD_REQUEST);
+    ATIVO_NAO_ENCONTRADO("Ativo não encontrado", HttpStatus.NOT_FOUND),
+    ALTERACAO_TIPO_NAO_PERMITIDA("Não é permitido alterar o tipo do ativo", HttpStatus.BAD_REQUEST),
+    TIPO_ATIVO_INVALIDO("Tipo de ativo inválido", HttpStatus.BAD_REQUEST),
+
+
+    CLIENTE_NAO_EXISTE("Cliente não existe", HttpStatus.NOT_FOUND),
+    COD_ACESSO_INVALIDO("O código acesso deve ser composto por 6 digítos", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;
