@@ -23,8 +23,8 @@ public class ClienteUpsertDTO {
     @NotBlank(message = "Endereco obrigatorio")
     private String endereco;
 
-    @JsonProperty("codigo")
+    @JsonProperty("codigoAcesso")
     @NotNull(message = "Codigo de acesso obrigatorio")
     @Pattern(regexp = "^\\d{6}$", message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
-    private String codigo;
+    private String codigoAcesso;
 }

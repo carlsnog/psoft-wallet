@@ -1,13 +1,13 @@
-package com.ufcg.psoft.commerce.auth.autenticador;
+package com.ufcg.psoft.commerce.service.auth.autenticador;
 
 import java.util.Optional;
 
-import com.ufcg.psoft.commerce.auth.Usuario;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.PlanoEnum;
-import com.ufcg.psoft.commerce.auth.Admin;
+import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 
 public class PremiumAutenticador extends Autenticador {
@@ -16,8 +16,8 @@ public class PremiumAutenticador extends Autenticador {
     }
 
     @Override
-    public Optional<Usuario> autenticar(String codigoAcesso) {
-        if (validateAdmin(codigoAcesso)) {
+    public Optional<Usuario> autenticar(long id, String codigoAcesso) {
+        if (validateAdmin(id, codigoAcesso)) {
             return Optional.of(Admin.getInstance());
         }
 
@@ -27,6 +27,11 @@ public class PremiumAutenticador extends Autenticador {
         }
 
         var cliente = clienteRes.get();
+
+        if (!cliente.validar(codigoAcesso)) {
+            throw new CommerceException(ErrorCode.UNAUTHORIZED);
+        }
+
         if (cliente.getPlano() != PlanoEnum.PREMIUM) {
             throw new CommerceException(ErrorCode.FORBIDDEN);
         }

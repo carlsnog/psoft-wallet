@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
-import com.ufcg.psoft.commerce.exception.CustomErrorType;
+import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import org.junit.jupiter.api.*;
@@ -49,13 +49,12 @@ public class ClienteControllerTests {
         cliente = clienteRepository.save(Cliente.builder()
                 .nome("Cliente Um da Silva")
                 .endereco("Rua dos Testes, 123")
-                .codigo("123456")
-                .build()
-        );
+                .codigoAcesso("123456")
+                .build());
         clientePostPutRequestDTO = ClienteUpsertDTO.builder()
                 .nome(cliente.getNome())
                 .endereco(cliente.getEndereco())
-                .codigo(cliente.getCodigo())
+                .codigoAcesso(cliente.getCodigoAcesso())
                 .build();
     }
 
@@ -72,8 +71,10 @@ public class ClienteControllerTests {
         @DisplayName("Quando recuperamos um cliente com dados válidos")
         void quandoRecuperamosNomeDoClienteValido() throws Exception {
 
+            var uri = URI_CLIENTES + "/" + cliente.getId() + "?codigoAcesso=" + Admin.getInstance().getCodigoAcesso();
+
             // Act
-            String responseJsonString = driver.perform(get(URI_CLIENTES + "/" + cliente.getId()))
+            String responseJsonString = driver.perform(get(uri))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -92,9 +93,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -113,9 +114,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -125,8 +126,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Nome obrigatorio", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Nome obrigatorio", resultado.getErrors().get(0)));
         }
 
         @Test
@@ -137,9 +137,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -149,8 +149,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Nome obrigatorio", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Nome obrigatorio", resultado.getErrors().get(0)));
         }
     }
 
@@ -166,14 +165,15 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            ClienteResponseDTO resultado = objectMapper.readValue(responseJsonString, ClienteResponseDTO.ClienteResponseDTOBuilder.class).build();
+            ClienteResponseDTO resultado = objectMapper
+                    .readValue(responseJsonString, ClienteResponseDTO.ClienteResponseDTOBuilder.class).build();
 
             // Assert
             assertEquals("Endereco Alterado", resultado.getEndereco());
@@ -187,9 +187,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -199,8 +199,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Endereco obrigatorio", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Endereco obrigatorio", resultado.getErrors().get(0)));
         }
 
         @Test
@@ -211,9 +210,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -223,8 +222,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Endereco obrigatorio", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Endereco obrigatorio", resultado.getErrors().get(0)));
         }
     }
 
@@ -236,13 +234,13 @@ public class ClienteControllerTests {
         @DisplayName("Quando alteramos o código de acesso do cliente nulo")
         void quandoAlteramosCodigoAcessoDoClienteNulo() throws Exception {
             // Arrange
-            clientePostPutRequestDTO.setCodigo(null);
+            clientePostPutRequestDTO.setCodigoAcessoAcesso(null);
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -252,21 +250,20 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Codigo de acesso obrigatorio", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Codigo de acesso obrigatorio", resultado.getErrors().get(0)));
         }
 
         @Test
         @DisplayName("Quando alteramos o código de acesso do cliente mais de 6 digitos")
         void quandoAlteramosCodigoAcessoDoClienteMaisDe6Digitos() throws Exception {
             // Arrange
-            clientePostPutRequestDTO.setCodigo("1234567");
+            clientePostPutRequestDTO.setCodigoAcesso("1234567");
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -276,21 +273,21 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos",
+                            resultado.getErrors().get(0)));
         }
 
         @Test
         @DisplayName("Quando alteramos o código de acesso do cliente menos de 6 digitos")
         void quandoAlteramosCodigoAcessoDoClienteMenosDe6Digitos() throws Exception {
             // Arrange
-            clientePostPutRequestDTO.setCodigo("12345");
+            clientePostPutRequestDTO.setCodigoAcesso("12345");
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -300,21 +297,21 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos",
+                            resultado.getErrors().get(0)));
         }
 
         @Test
         @DisplayName("Quando alteramos o código de acesso do cliente caracteres não numéricos")
         void quandoAlteramosCodigoAcessoDoClienteCaracteresNaoNumericos() throws Exception {
             // Arrange
-            clientePostPutRequestDTO.setCodigo("a*c4e@");
+            clientePostPutRequestDTO.setCodigoAcesso("a*c4e@");
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -324,8 +321,8 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos", resultado.getErrors().get(0))
-            );
+                    () -> assertEquals("Codigo de acesso deve ter exatamente 6 digitos numericos",
+                            resultado.getErrors().get(0)));
         }
     }
 
@@ -352,8 +349,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(get(URI_CLIENTES)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -363,8 +360,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals(3, resultado.size())
-            );
+                    () -> assertEquals(3, resultado.size()));
         }
 
         @Test
@@ -375,19 +371,19 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(get(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            ClienteResponseDTO resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
+            ClienteResponseDTO resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
+            });
 
             // Assert
             assertAll(
                     () -> assertEquals(cliente.getId().longValue(), resultado.getId().longValue()),
-                    () -> assertEquals(cliente.getNome(), resultado.getNome())
-            );
+                    () -> assertEquals(cliente.getNome(), resultado.getNome()));
         }
 
         @Test
@@ -398,8 +394,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(get(URI_CLIENTES + "/" + 999999999)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -408,8 +404,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage())
-            );
+                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage()));
         }
 
         @Test
@@ -420,8 +415,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(post(URI_CLIENTES)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isCreated()) // Codigo 201
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -431,8 +426,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertNotNull(resultado.getId()),
-                    () -> assertEquals(clientePostPutRequestDTO.getNome(), resultado.getNome())
-            );
+                    () -> assertEquals(clientePostPutRequestDTO.getNome(), resultado.getNome()));
 
         }
 
@@ -444,9 +438,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -456,8 +450,7 @@ public class ClienteControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals(resultado.getId().longValue(), clienteId),
-                    () -> assertEquals(clientePostPutRequestDTO.getNome(), resultado.getNome())
-            );
+                    () -> assertEquals(clientePostPutRequestDTO.getNome(), resultado.getNome()));
         }
 
         @Test
@@ -468,9 +461,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + 99999L)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo())
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso())
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -479,8 +472,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage())
-            );
+                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage()));
         }
 
         @Test
@@ -491,9 +483,9 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(put(URI_CLIENTES + "/" + clienteId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", "invalido")
-                            .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", "invalido")
+                    .content(objectMapper.writeValueAsString(clientePostPutRequestDTO)))
                     .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -502,8 +494,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals("Codigo de acesso invalido!", resultado.getMessage())
-            );
+                    () -> assertEquals("Codigo de acesso invalido!", resultado.getMessage()));
         }
 
         @Test
@@ -514,8 +505,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(delete(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo()))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso()))
                     .andExpect(status().isNoContent()) // Codigo 204
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -532,8 +523,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(delete(URI_CLIENTES + "/" + 999999)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", cliente.getCodigo()))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", cliente.getCodigoAcesso()))
                     .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -542,8 +533,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage())
-            );
+                    () -> assertEquals("O cliente consultado nao existe!", resultado.getMessage()));
         }
 
         @Test
@@ -554,8 +544,8 @@ public class ClienteControllerTests {
 
             // Act
             String responseJsonString = driver.perform(delete(URI_CLIENTES + "/" + cliente.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigo", "invalido"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("codigo", "invalido"))
                     .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -564,8 +554,7 @@ public class ClienteControllerTests {
 
             // Assert
             assertAll(
-                    () -> assertEquals("Codigo de acesso invalido!", resultado.getMessage())
-            );
+                    () -> assertEquals("Codigo de acesso invalido!", resultado.getMessage()));
         }
     }
 }

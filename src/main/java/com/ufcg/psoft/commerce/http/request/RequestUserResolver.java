@@ -7,8 +7,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import com.ufcg.psoft.commerce.auth.AuthenticationFilter;
-import com.ufcg.psoft.commerce.auth.Usuario;
+import com.ufcg.psoft.commerce.http.auth.AuthenticationFilter;
+import com.ufcg.psoft.commerce.model.Usuario;
 
 public class RequestUserResolver implements HandlerMethodArgumentResolver {
 
@@ -25,6 +25,6 @@ public class RequestUserResolver implements HandlerMethodArgumentResolver {
             org.springframework.web.bind.support.WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
 
-        return request.getAttribute(AuthenticationFilter.USER_ATTRIBUTE);
+        return request.getAttribute(AuthenticationFilter.ATRIBUTO_USUARIO);
     }
 }

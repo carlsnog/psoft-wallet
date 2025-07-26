@@ -1,33 +1,35 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.ufcg.psoft.commerce.auth.Usuario;
-
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
-@Entity
+@Builder
 @Getter
+@Setter
+@Entity
 @Table(name = "cliente")
 public class Cliente extends Usuario {
-
-    public Cliente(String codigoAcesso, String nome, PlanoEnum plano, Endereco endereco) {
-        super(codigoAcesso);
-        this.plano = plano;
-        this.endereco = endereco;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
+    @Column(nullable = false)
+    private String codigoAcesso;
+
+    @Getter
     @Column(nullable = false)
     private String nome;
 
+    @Getter
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PlanoEnum plano;
 
-    @Embedded
-    private Endereco endereco;
+    @Getter
+    @Column(nullable = false)
+    private String endereco;
 
     @Override
     public boolean isAdmin() {

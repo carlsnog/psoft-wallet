@@ -1,10 +1,10 @@
 package com.ufcg.psoft.commerce.controller;
 
-import com.ufcg.psoft.commerce.auth.Autenticado;
-import com.ufcg.psoft.commerce.auth.TipoAutenticacao;
-import com.ufcg.psoft.commerce.auth.Usuario;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
+import com.ufcg.psoft.commerce.model.Usuario;
+import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ public class ClienteController {
     ClienteService clienteService;
 
     @GetMapping("/{id}")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> recuperarCliente(
             @PathVariable Long id) {
         return ResponseEntity
@@ -47,20 +48,18 @@ public class ClienteController {
     public ResponseEntity<?> criarCliente(
             @RequestBody @Valid ClienteUpsertDTO clienteDto) {
 
-        var response = clienteService.criar(clienteDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(response);
+                .body(this.clienteService.criar(clienteDto));
     }
 
     @PutMapping("/{id}")
     @Autenticado()
     public ResponseEntity<?> atualizarCliente(
             @PathVariable Long id,
-            @RequestParam String codigo,
             @RequestUser Usuario usuario,
             @RequestBody @Valid ClienteUpsertDTO clienteDto) {
-        return ResponseEntity.ok(clienteService.alterar(id, codigo, clienteDto));
+        return ResponseEntity.ok(clienteService.alterar(usuario, id, clienteDto));
     }
 
     @DeleteMapping("/{id}")

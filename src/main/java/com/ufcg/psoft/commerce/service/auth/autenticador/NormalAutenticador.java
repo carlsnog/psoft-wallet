@@ -1,11 +1,11 @@
-package com.ufcg.psoft.commerce.auth.autenticador;
+package com.ufcg.psoft.commerce.service.auth.autenticador;
 
 import java.util.Optional;
 
-import com.ufcg.psoft.commerce.auth.Admin;
-import com.ufcg.psoft.commerce.auth.Usuario;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.model.Admin;
+import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 
 public class NormalAutenticador extends Autenticador {
@@ -14,13 +14,17 @@ public class NormalAutenticador extends Autenticador {
     }
 
     @Override
-    public Optional<Usuario> autenticar(String codigoAcesso) {
-        if (validateAdmin(codigoAcesso)) {
+    public Optional<Usuario> autenticar(long id, String codigoAcesso) {
+        if (validateAdmin(id, codigoAcesso)) {
             return Optional.of(Admin.getInstance());
         }
 
         var usuario = clienteRepository.findByCodigoAcesso(codigoAcesso);
         if (usuario.isEmpty()) {
+            throw new CommerceException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!usuario.get().validar(codigoAcesso)) {
             throw new CommerceException(ErrorCode.UNAUTHORIZED);
         }
 

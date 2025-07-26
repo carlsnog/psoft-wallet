@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.auth;
+package com.ufcg.psoft.commerce.http.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

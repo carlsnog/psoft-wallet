@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.auth;
+package com.ufcg.psoft.commerce.http.auth;
 
 import java.io.IOException;
 
@@ -8,9 +8,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ufcg.psoft.commerce.auth.autenticador.AutenticadorFactory;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
-import com.ufcg.psoft.commerce.http.request.CachedBodyRequest;
+import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,17 +19,20 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
-    public static final String USER_ATTRIBUTE = "usuario";
+    public static final String ATRIBUTO_USUARIO = "usuario";
+    public static final String USUARIO_PARAM = "userId";
+    public static final String COD_ACESSO_PARAM = "codigoAcesso";
+
 
     private final RequestMappingHandlerMapping handlerMapping;
     private final ObjectMapper mapper;
-    private final AutenticadorFactory autenticadorFactory;
+    private final UsuarioService userService;
 
     public AuthenticationFilter(
-            AutenticadorFactory autenticadorFactory,
+            UsuarioService userService,
             ObjectMapper mapper,
             RequestMappingHandlerMapping handlerMapping) {
-        this.autenticadorFactory = autenticadorFactory;
+        this.userService = userService;
         this.mapper = mapper;
         this.handlerMapping = handlerMapping;
     }
@@ -41,25 +44,22 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        var cachedBodyRequest = new CachedBodyRequest(request);
-
         var handler = getHandler(request);
         if (handler == null) {
-            filterChain.doFilter(cachedBodyRequest, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
-        var codigoAcesso = getCodigoAcesso(cachedBodyRequest);
-
+        var id = getUserId(request);
+        var codigoAcesso = getCodigoAcesso(request);
         var tipo = getTipoAutenticacao(handler);
-        var autenticador = autenticadorFactory.getAutenticador(tipo);
 
         try {
-            var usuario = autenticador.autenticar(codigoAcesso);
+            var usuario = userService.getUsuario(id, codigoAcesso, tipo);
 
-            request.setAttribute(USER_ATTRIBUTE, usuario);
+            request.setAttribute(ATRIBUTO_USUARIO, usuario);
 
-            filterChain.doFilter(cachedBodyRequest, response);
+            filterChain.doFilter(request, response);
 
         } catch (CommerceException e) {
             response.setStatus(e.getStatus().value());
@@ -71,13 +71,16 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private String getCodigoAcesso(CachedBodyRequest request) {
+    private long getUserId(HttpServletRequest request) {
         try {
-            var dto = mapper.readValue(request.getInputStream(), CodigoAcessoDto.class);
-            return dto.getCodigoAcesso();
-        } catch (Exception e) {
-            return "";
+            return Long.parseLong(request.getParameter(USUARIO_PARAM));
+        } catch (NumberFormatException e) {
+            return 0;
         }
+    }
+
+    private String getCodigoAcesso(HttpServletRequest request) {
+        return request.getParameter(COD_ACESSO_PARAM);
     }
 
     private HandlerExecutionChain getHandler(HttpServletRequest request) {

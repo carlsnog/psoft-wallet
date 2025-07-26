@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.auth;
+package com.ufcg.psoft.commerce.service.auth;
 
 public enum TipoAutenticacao {
     PUBLICA,

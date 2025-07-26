@@ -8,7 +8,8 @@ public enum ErrorCode {
     BAD_REQUEST("Requisição inválida", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    CLIENTE_NAO_EXISTE("Cliente não existe", HttpStatus.NOT_FOUND);
+    CLIENTE_NAO_EXISTE("Cliente não existe", HttpStatus.NOT_FOUND),
+    COD_ACESSO_INVALIDO("O código acesso deve ser composto por 6 digítos", HttpStatus.BAD_REQUEST);
 
     private final String message;
     private final HttpStatus httpStatus;

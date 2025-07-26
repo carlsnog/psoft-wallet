@@ -1,12 +1,12 @@
-package com.ufcg.psoft.commerce.auth.autenticador;
+package com.ufcg.psoft.commerce.service.auth.autenticador;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
-import com.ufcg.psoft.commerce.auth.TipoAutenticacao;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
 
 @Component
 public class AutenticadorFactory {

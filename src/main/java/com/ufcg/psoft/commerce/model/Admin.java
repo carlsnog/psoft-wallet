@@ -1,13 +1,20 @@
-package com.ufcg.psoft.commerce.auth;
+package com.ufcg.psoft.commerce.model;
 
+import lombok.Getter;
+
+@Getter
 public class Admin extends Usuario {
     private static Admin instance;
 
     private static final String CODIGO_ACESSO_ADMIN_PADRAO = "admin@123";
     private static final String CODIGO_ACESSO_ADMIN_ENV = "CODIGO_ACESSO_ADMIN";
 
-    private Admin(String codigoAcesso) {
-        super(codigoAcesso);
+    private long id;
+    private String codigoAcesso;
+
+    private Admin(long id, String codigoAcesso) {
+        this.id = id;
+        this.codigoAcesso = codigoAcesso;
     }
 
     @Override
@@ -22,7 +29,7 @@ public class Admin extends Usuario {
         }
 
         if (instance == null) {
-            instance = new Admin(codigoAcesso);
+            instance = new Admin(0, codigoAcesso);
         }
 
         return instance;
