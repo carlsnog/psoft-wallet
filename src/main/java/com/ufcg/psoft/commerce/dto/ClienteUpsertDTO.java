@@ -1,8 +1,7 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.model.PlanoEnum;
-
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
@@ -19,21 +18,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClienteUpsertDTO {
 
-    @JsonProperty("nome")
-    @NotBlank(message = "Nome obrigatorio")
-    private String nome;
+  @JsonProperty("nome")
+  @NotBlank(message = "Nome obrigatorio")
+  private String nome;
 
-    @JsonProperty("endereco")
-    @NotBlank(message = "Endereco obrigatorio")
-    private String endereco;
+  @JsonProperty("endereco")
+  @NotBlank(message = "Endereco obrigatorio")
+  private String endereco;
 
-    @JsonProperty("plano")
-    @NotNull(message = "Plano obrigatorio")
-    @Enumerated(EnumType.STRING)
-    private PlanoEnum plano;
+  @JsonProperty("plano")
+  @NotNull(message = "Plano obrigatorio")
+  @Enumerated(EnumType.STRING)
+  private PlanoEnum plano;
 
-    @JsonProperty("codigoAcesso")
-    @NotBlank(message = "Codigo de acesso obrigatorio")
-    @Pattern(regexp = "^\\d{6}$", message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
-    private String codigoAcesso;
+  @JsonProperty("codigoAcesso")
+  @NotBlank(message = "Codigo de acesso obrigatorio")
+  @Pattern(
+      regexp = "^\\d{6}$",
+      message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
+  private String codigoAcesso;
 }

@@ -1,20 +1,17 @@
 package com.ufcg.psoft.commerce.service.ativo;
 
-import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
-
+import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import java.util.List;
 
 public interface AtivoService {
+  AtivoResponseDTO criar(AtivoUpsertDTO dto);
 
-    AtivoResponseDTO criar(AtivoUpsertDTO dto);
+  AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto);
 
-    AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto);
+  void remover(Long id);
 
-    void remover(Long id);
+  AtivoResponseDTO buscarPorId(Long id);
 
-    AtivoResponseDTO buscarPorId(Long id);
-
-    List<AtivoResponseDTO> listarTodos();
-
+  List<AtivoResponseDTO> listarTodos();
 }

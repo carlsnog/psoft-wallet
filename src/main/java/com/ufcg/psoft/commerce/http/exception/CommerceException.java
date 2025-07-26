@@ -3,33 +3,35 @@ package com.ufcg.psoft.commerce.http.exception;
 import org.springframework.http.HttpStatus;
 
 public class CommerceException extends RuntimeException {
-    private final ErrorDTO errorDTO;
-    private final HttpStatus status;
+  private static final long serialVersionUID = 1L;
 
-    public CommerceException(ErrorDTO errorDTO) {
-        super(errorDTO.getMessage());
-        this.errorDTO = errorDTO;
-        this.status = errorDTO.getCode().getHttpStatus();
-    }
+  private final ErrorDTO errorDTO;
+  private final HttpStatus status;
 
-    public CommerceException(ErrorCode errorType) {
-        this(errorType.withData(null));
-    }
+  public CommerceException(ErrorDTO errorDTO) {
+    super(errorDTO.getMessage());
+    this.errorDTO = errorDTO;
+    this.status = errorDTO.getCode().getHttpStatus();
+  }
 
-    public CommerceException(ErrorCode errorType, Object data) {
-        this(errorType.withData(data));
-    }
+  public CommerceException(ErrorCode errorType) {
+    this(errorType.withData(null));
+  }
 
-    @Override
-    public String getMessage() {
-        return errorDTO.getMessage();
-    }
+  public CommerceException(ErrorCode errorType, Object data) {
+    this(errorType.withData(data));
+  }
 
-    public ErrorDTO getErrorDTO() {
-        return errorDTO;
-    }
+  @Override
+  public String getMessage() {
+    return errorDTO.getMessage();
+  }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
+  public ErrorDTO getErrorDTO() {
+    return errorDTO;
+  }
+
+  public HttpStatus getStatus() {
+    return status;
+  }
 }

@@ -2,9 +2,12 @@ package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import jakarta.persistence.Entity;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-
 
 @Entity
 @Data
@@ -14,6 +17,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Acao extends Ativo {
 
-    @Builder.Default
-    private final AtivoTipo tipo = AtivoTipo.ACAO;
+  @Builder.Default private final AtivoTipo tipo = AtivoTipo.ACAO;
 }
