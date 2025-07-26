@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.model;
 
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

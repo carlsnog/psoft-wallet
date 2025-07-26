@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 
 import jakarta.servlet.FilterChain;

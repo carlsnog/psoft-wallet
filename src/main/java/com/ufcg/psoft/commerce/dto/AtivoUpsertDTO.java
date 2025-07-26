@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AtivoPostPutRequestDTO {
+public class AtivoUpsertDTO {
 
     @JsonProperty("nome")
     @NotBlank(message = "Nome do ativo obrigatorio")

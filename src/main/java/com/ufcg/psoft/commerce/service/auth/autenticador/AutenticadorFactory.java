@@ -6,7 +6,7 @@ import java.util.function.Function;
 import org.springframework.stereotype.Component;
 
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 
 @Component
 public class AutenticadorFactory {

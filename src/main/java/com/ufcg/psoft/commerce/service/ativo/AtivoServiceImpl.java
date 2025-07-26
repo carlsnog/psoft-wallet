@@ -1,6 +1,6 @@
 package com.ufcg.psoft.commerce.service.ativo;
 
-import com.ufcg.psoft.commerce.dto.AtivoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
@@ -24,14 +24,14 @@ public class AtivoServiceImpl implements AtivoService{
     ModelMapper modelMapper;
 
     @Override
-    public AtivoResponseDTO criar(AtivoPostPutRequestDTO dto) {
+    public AtivoResponseDTO criar(AtivoUpsertDTO dto) {
         Ativo ativo = ativoFactory.criarAtivo(dto);
         repository.save(ativo);
         return modelMapper.map(ativo, AtivoResponseDTO.class);
     }
 
     @Override
-    public AtivoResponseDTO atualizar(Long id, @org.jetbrains.annotations.NotNull AtivoPostPutRequestDTO dto) {
+    public AtivoResponseDTO atualizar(Long id, @org.jetbrains.annotations.NotNull AtivoUpsertDTO dto) {
         Ativo ativo = repository.findById(id).orElseThrow(() -> new RuntimeException("Ativo não encontrado"));
 
         String tipoAtual = ativo.getTipo().toUpperCase();

@@ -1,8 +1,10 @@
 package com.ufcg.psoft.commerce.controller;
 
 
-import com.ufcg.psoft.commerce.dto.AtivoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,32 +23,34 @@ public class AtivoController {
     AtivoService ativoService;
 
     @PostMapping
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> criarAtivo(
-            @RequestBody @Valid AtivoPostPutRequestDTO ativoDto) {
+            @RequestBody @Valid AtivoUpsertDTO ativoDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ativoService.criar(ativoDto));
     }
 
     @PutMapping("/{id}")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> atualizarAtivo(
             @PathVariable Long id,
-            @RequestBody @Valid AtivoPostPutRequestDTO ativoDto) {
+            @RequestBody @Valid AtivoUpsertDTO ativoDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ativoService.atualizar(id, ativoDto));
     }
 
     @DeleteMapping("/{id}")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> excluirAtivo(
             @PathVariable Long id) {
         ativoService.remover(id);
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body("");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> recuperarAtivo(
             @PathVariable Long id) {
         return ResponseEntity
@@ -55,6 +59,7 @@ public class AtivoController {
     }
 
     @GetMapping("")
+    @Autenticado(TipoAutenticacao.ADMIN)
     public ResponseEntity<?> listarAtivos() {
         return ResponseEntity
                 .status(HttpStatus.OK)

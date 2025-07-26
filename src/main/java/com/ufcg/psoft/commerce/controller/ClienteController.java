@@ -4,7 +4,7 @@ import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.service.auth.TipoAutenticacao;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
