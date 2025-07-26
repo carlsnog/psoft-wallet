@@ -20,12 +20,13 @@ public class ClienteController {
     ClienteService clienteService;
 
     @GetMapping("/{id}")
-    @Autenticado(TipoAutenticacao.ADMIN)
+    @Autenticado(TipoAutenticacao.NORMAL)
     public ResponseEntity<?> recuperarCliente(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @RequestUser Usuario usuario) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(clienteService.recuperar(id));
+                .body(clienteService.recuperar(usuario, id));
     }
 
     @GetMapping("")
@@ -64,10 +65,9 @@ public class ClienteController {
     @DeleteMapping("/{id}")
     @Autenticado(TipoAutenticacao.NORMAL)
     public ResponseEntity<?> excluirCliente(
-            @PathVariable Long id,
-            @RequestParam String codigo) {
+            @PathVariable Long id) {
 
-        clienteService.remover(id, codigo);
+        clienteService.remover(id);
         return ResponseEntity.noContent().build();
     }
 }

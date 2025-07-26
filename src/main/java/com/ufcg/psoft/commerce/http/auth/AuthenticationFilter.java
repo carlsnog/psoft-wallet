@@ -23,7 +23,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     public static final String USUARIO_PARAM = "userId";
     public static final String COD_ACESSO_PARAM = "codigoAcesso";
 
-
     private final RequestMappingHandlerMapping handlerMapping;
     private final ObjectMapper mapper;
     private final UsuarioService userService;
@@ -57,7 +56,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         try {
             var usuario = userService.getUsuario(id, codigoAcesso, tipo);
 
-            request.setAttribute(ATRIBUTO_USUARIO, usuario);
+            request.setAttribute(ATRIBUTO_USUARIO, usuario.orElse(null));
 
             filterChain.doFilter(request, response);
 

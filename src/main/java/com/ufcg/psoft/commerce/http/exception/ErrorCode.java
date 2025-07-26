@@ -3,11 +3,10 @@ package com.ufcg.psoft.commerce.http.exception;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
-    UNAUTHORIZED("Código de acesso inválido", HttpStatus.UNAUTHORIZED),
-    FORBIDDEN("Sem permissão para acessar este recurso", HttpStatus.FORBIDDEN),
-    BAD_REQUEST("Requisição inválida", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED("Codigo de acesso invalido", HttpStatus.UNAUTHORIZED),
+    FORBIDDEN("Acesso negado", HttpStatus.FORBIDDEN),
+    BAD_REQUEST("Requisicao invalida", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
-
 
     ATIVO_NAO_ENCONTRADO("Ativo não encontrado", HttpStatus.NOT_FOUND),
     ALTERACAO_TIPO_NAO_PERMITIDA("Não é permitido alterar o tipo do ativo", HttpStatus.BAD_REQUEST),
