@@ -1,7 +1,6 @@
 package com.ufcg.psoft.commerce.service.cliente;
 
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
-import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
@@ -18,13 +17,10 @@ import java.util.stream.Collectors;
 @Service
 public class ClienteServiceImpl implements ClienteService {
 
-    private final UsuarioService usuarioService;
     private final ClienteRepository clienteRepository;
     private final ModelMapper modelMapper;
 
-    public ClienteServiceImpl(UsuarioService usuarioService, ClienteRepository clienteRepository,
-            ModelMapper modelMapper) {
-        this.usuarioService = usuarioService;
+    public ClienteServiceImpl(ClienteRepository clienteRepository, ModelMapper modelMapper) {
         this.clienteRepository = clienteRepository;
         this.modelMapper = modelMapper;
     }
@@ -48,16 +44,12 @@ public class ClienteServiceImpl implements ClienteService {
     public ClienteResponseDTO criar(ClienteUpsertDTO clientePostPutRequestDTO) {
         Cliente cliente = modelMapper.map(clientePostPutRequestDTO, Cliente.class);
 
-        if (!usuarioService.isCodigoValido(cliente.getCodigoAcesso())) {
-            throw new CommerceException(ErrorCode.COD_ACESSO_INVALIDO);
-        }
-
         clienteRepository.save(cliente);
         return new ClienteResponseDTO(cliente);
     }
 
     @Override
-    public void remover(Long id, String codigoAcesso) {
+    public void remover(Long id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
         clienteRepository.delete(cliente);
@@ -80,7 +72,11 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public ClienteResponseDTO recuperar(Long id) {
+    public ClienteResponseDTO recuperar(Usuario usuario, Long id) {
+        if (!usuario.isAdmin() && usuario.getId() != id) {
+            throw new CommerceException(ErrorCode.FORBIDDEN);
+        }
+
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
         return new ClienteResponseDTO(cliente);

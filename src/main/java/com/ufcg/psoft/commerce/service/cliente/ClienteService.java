@@ -12,11 +12,11 @@ public interface ClienteService {
 
     List<ClienteResponseDTO> listar();
 
-    ClienteResponseDTO recuperar(Long id);
+    ClienteResponseDTO recuperar(Usuario usuario, Long id);
 
     ClienteResponseDTO criar(ClienteUpsertDTO clientePostPutRequestDTO);
 
-    void remover(Long id, String codigoAcesso);
+    void remover(Long id);
 
     List<ClienteResponseDTO> listarPorNome(String nome);
 }
