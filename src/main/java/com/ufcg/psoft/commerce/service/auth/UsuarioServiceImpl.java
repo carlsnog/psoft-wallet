@@ -1,10 +1,10 @@
 package com.ufcg.psoft.commerce.service.auth;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.ufcg.psoft.commerce.service.auth.autenticador.AutenticadorFactory;
-import com.ufcg.psoft.commerce.http.exception.CommerceException;
-import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Usuario;
 
 @Service
@@ -15,15 +15,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.autenticadorFactory = autenticadorFactory;
     }
 
-    public Usuario getUsuario(long id, String codigoAcesso, TipoAutenticacao tipoAutenticacao) {
+    public Optional<Usuario> getUsuario(long id, String codigoAcesso, TipoAutenticacao tipoAutenticacao) {
         var autenticador = autenticadorFactory.getAutenticador(tipoAutenticacao);
         var usuario = autenticador.autenticar(id, codigoAcesso);
 
-        if (usuario.isEmpty()) {
-            throw new CommerceException(ErrorCode.UNAUTHORIZED);
-        }
-
-        return usuario.get();
+        return usuario;
     }
 
     public boolean isCodigoValido(String codigoAcesso) {
