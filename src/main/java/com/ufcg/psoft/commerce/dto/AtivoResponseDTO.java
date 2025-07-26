@@ -1,13 +1,10 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.model.Ativo;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +19,6 @@ import java.math.BigDecimal;
 public class AtivoResponseDTO {
 
     @JsonProperty("id")
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @JsonProperty("nome")
@@ -43,9 +38,7 @@ public class AtivoResponseDTO {
     private BigDecimal valor;
 
     @JsonProperty("tipo")
-    @NotBlank(message = "Tipo de ativo obrigatorio")
-    @Pattern(regexp = "CRIPTO|TESOURO|ACAO", message = "Ativo deve ser CRIPTO, TESOURO ou ACAO")
-    private String tipo;
+    private AtivoTipo tipo;
 
 
     public AtivoResponseDTO(Ativo ativo){

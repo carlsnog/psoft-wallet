@@ -1,9 +1,6 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import com.ufcg.psoft.commerce.enums.*;
 import java.math.BigDecimal;
@@ -14,11 +11,10 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
 public abstract class Ativo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -34,5 +30,5 @@ public abstract class Ativo {
     @Column(nullable = false, scale = 2, precision = 19)
     private BigDecimal valor;
 
-    private String tipo;
+    private AtivoTipo tipo;
 }

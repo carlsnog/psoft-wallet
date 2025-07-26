@@ -18,7 +18,7 @@ public class AtivoServiceImpl implements AtivoService{
     private AtivoRepository repository;
 
     @Autowired
-    private AtivoFactoryService ativoFactory;
+    private AtivoFactory ativoFactory;
 
     @Autowired
     ModelMapper modelMapper;
@@ -34,8 +34,7 @@ public class AtivoServiceImpl implements AtivoService{
     public AtivoResponseDTO atualizar(Long id, @org.jetbrains.annotations.NotNull AtivoUpsertDTO dto) {
         Ativo ativo = repository.findById(id).orElseThrow(() -> new RuntimeException("Ativo não encontrado"));
 
-        String tipoAtual = ativo.getTipo().toUpperCase();
-        if (!tipoAtual.equals(dto.getTipo().toUpperCase())) {
+        if (!ativo.getTipo().equals(dto.getTipo())) {
             throw new IllegalArgumentException("Não é permitido alterar o tipo do ativo.");
         }
 

@@ -1,18 +1,19 @@
 package com.ufcg.psoft.commerce.model;
 
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@DiscriminatorValue("TESOURO")
-public class Tesouro extends Ativo{
+@SuperBuilder
+public class Tesouro extends Ativo {
 
+    @Builder.Default
+    private final AtivoTipo tipo = AtivoTipo.TESOURO;
 }

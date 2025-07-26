@@ -1,11 +1,9 @@
 package com.ufcg.psoft.commerce.model;
 
-import jakarta.persistence.DiscriminatorValue;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import jakarta.persistence.Entity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 
 @Entity
@@ -13,7 +11,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@DiscriminatorValue("ACAO")
-public class Acao extends Ativo{
+@SuperBuilder
+public class Acao extends Ativo {
 
+    @Builder.Default
+    private final AtivoTipo tipo = AtivoTipo.ACAO;
 }
