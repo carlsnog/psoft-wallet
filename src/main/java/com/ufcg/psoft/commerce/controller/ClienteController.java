@@ -1,11 +1,10 @@
-
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,43 +16,42 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/clientes")
 public class ClienteController {
 
-    @Autowired
-    ClienteService clienteService;
+  @Autowired ClienteService clienteService;
 
-    @GetMapping("/{id}")
-    @Autenticado(TipoAutenticacao.NORMAL)
-    public ResponseEntity<?> recuperarCliente(@PathVariable Long id, @RequestUser Usuario usuario) {
-        return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperar(usuario, id));
+  @GetMapping("/{id}")
+  @Autenticado(TipoAutenticacao.NORMAL)
+  public ResponseEntity<?> recuperarCliente(@PathVariable Long id, @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperar(usuario, id));
+  }
+
+  @GetMapping("")
+  @Autenticado(TipoAutenticacao.ADMIN)
+  public ResponseEntity<?> listarClientes(
+      @RequestParam(required = false, defaultValue = "") String nome) {
+    if (nome != null && !nome.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.OK).body(clienteService.listarPorNome(nome));
     }
+    return ResponseEntity.status(HttpStatus.OK).body(clienteService.listar());
+  }
 
-    @GetMapping("")
-    @Autenticado(TipoAutenticacao.ADMIN)
-    public ResponseEntity<?> listarClientes(@RequestParam(required = false, defaultValue = "") String nome) {
+  @PostMapping
+  public ResponseEntity<?> criarCliente(@RequestBody @Valid ClienteUpsertDTO clienteDto) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(this.clienteService.criar(clienteDto));
+  }
 
-        if (nome != null && !nome.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(clienteService.listarPorNome(nome));
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(clienteService.listar());
-    }
+  @PutMapping("/{id}")
+  @Autenticado
+  public ResponseEntity<?> atualizarCliente(
+      @PathVariable Long id,
+      @RequestUser Usuario usuario,
+      @RequestBody @Valid ClienteUpsertDTO clienteDto) {
+    return ResponseEntity.ok(clienteService.alterar(usuario, id, clienteDto));
+  }
 
-    @PostMapping()
-    public ResponseEntity<?> criarCliente(@RequestBody @Valid ClienteUpsertDTO clienteDto) {
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.clienteService.criar(clienteDto));
-    }
-
-    @PutMapping("/{id}")
-    @Autenticado()
-    public ResponseEntity<?> atualizarCliente(@PathVariable Long id, @RequestUser Usuario usuario,
-            @RequestBody @Valid ClienteUpsertDTO clienteDto) {
-        return ResponseEntity.ok(clienteService.alterar(usuario, id, clienteDto));
-    }
-
-    @DeleteMapping("/{id}")
-    @Autenticado(TipoAutenticacao.NORMAL)
-    public ResponseEntity<?> excluirCliente(@PathVariable Long id) {
-
-        clienteService.remover(id);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{id}")
+  @Autenticado(TipoAutenticacao.NORMAL)
+  public ResponseEntity<?> excluirCliente(@PathVariable Long id) {
+    clienteService.remover(id);
+    return ResponseEntity.noContent().build();
+  }
 }

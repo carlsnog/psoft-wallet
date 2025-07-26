@@ -1,4 +1,3 @@
-
 package com.ufcg.psoft.commerce.repository;
 
 import com.ufcg.psoft.commerce.model.Ativo;

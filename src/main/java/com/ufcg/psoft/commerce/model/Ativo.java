@@ -1,10 +1,9 @@
-
 package com.ufcg.psoft.commerce.model;
 
-import jakarta.persistence.*;
-import lombok.*;
 import com.ufcg.psoft.commerce.enums.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -15,24 +14,24 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public abstract class Ativo {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String nome;
+  @Column(nullable = false, unique = true)
+  private String nome;
 
-    @Column(nullable = false, length = 500)
-    private String descricao;
+  @Column(nullable = false, length = 500)
+  private String descricao;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StatusAtivo status;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private StatusAtivo status;
 
-    @Column(nullable = false, scale = 2, precision = 19)
-    private BigDecimal valor;
+  @Column(nullable = false, scale = 2, precision = 19)
+  private BigDecimal valor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AtivoTipo tipo;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private AtivoTipo tipo;
 }

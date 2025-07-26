@@ -1,4 +1,3 @@
-
 package com.ufcg.psoft.commerce.config;
 
 import com.ufcg.psoft.commerce.http.request.RequestUserResolver;
@@ -9,8 +8,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new RequestUserResolver());
-    }
+
+  @Override
+  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+    resolvers.add(new RequestUserResolver());
+  }
 }

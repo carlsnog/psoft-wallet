@@ -1,5 +1,5 @@
-
 package com.ufcg.psoft.commerce.dto;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ufcg.psoft.commerce.model.Cliente;
 import jakarta.validation.constraints.NotBlank;
@@ -14,20 +14,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClienteResponseDTO {
 
-    @JsonProperty("id")
-    private Long id;
+  @JsonProperty("id")
+  private Long id;
 
-    @JsonProperty("nome")
-    @NotBlank(message = "Nome obrigatorio")
-    private String nome;
+  @JsonProperty("nome")
+  @NotBlank(message = "Nome obrigatorio")
+  private String nome;
 
-    @JsonProperty("endereco")
-    @NotBlank(message = "Endereco obrigatorio")
-    private String endereco;
+  @JsonProperty("endereco")
+  @NotBlank(message = "Endereco obrigatorio")
+  private String endereco;
 
-    public ClienteResponseDTO(Cliente cliente) {
-        this.id = cliente.getId();
-        this.nome = cliente.getNome();
-        this.endereco = cliente.getEndereco();
-    }
+  public ClienteResponseDTO(Cliente cliente) {
+    this.id = cliente.getId();
+    this.nome = cliente.getNome();
+    this.endereco = cliente.getEndereco();
+  }
 }

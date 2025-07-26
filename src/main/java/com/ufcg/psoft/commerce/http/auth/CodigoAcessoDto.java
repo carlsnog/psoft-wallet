@@ -1,4 +1,3 @@
-
 package com.ufcg.psoft.commerce.http.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CodigoAcessoDto {
 
-    @NotBlank
-    @JsonProperty("codigoAcesso")
-    private String codigoAcesso;
+  @NotBlank
+  @JsonProperty("codigoAcesso")
+  private String codigoAcesso;
 }

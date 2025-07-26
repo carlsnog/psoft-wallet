@@ -1,4 +1,3 @@
-
 package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.*;
@@ -14,6 +13,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Cripto extends Ativo {
 
-    @Builder.Default
-    private final AtivoTipo tipo = AtivoTipo.CRIPTO;
+  @Builder.Default private final AtivoTipo tipo = AtivoTipo.CRIPTO;
 }

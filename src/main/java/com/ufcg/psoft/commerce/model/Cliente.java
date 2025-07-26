@@ -1,4 +1,3 @@
-
 package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
@@ -17,28 +16,29 @@ import lombok.Setter;
 @Entity
 @Table(name = "cliente")
 public class Cliente extends Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
 
-    @Column(nullable = false)
-    private String codigoAcesso;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private long id;
 
-    @Getter
-    @Column(nullable = false)
-    private String nome;
+  @Column(nullable = false)
+  private String codigoAcesso;
 
-    @Getter
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private PlanoEnum plano;
+  @Getter
+  @Column(nullable = false)
+  private String nome;
 
-    @Getter
-    @Column(nullable = false)
-    private String endereco;
+  @Getter
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private PlanoEnum plano;
 
-    @Override
-    public boolean isAdmin() {
-        return false;
-    }
+  @Getter
+  @Column(nullable = false)
+  private String endereco;
+
+  @Override
+  public boolean isAdmin() {
+    return false;
+  }
 }

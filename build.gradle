@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+    id 'pmd'
     id 'com.diffplug.spotless' version '6.25.0'
 	id 'org.springframework.boot' version '3.0.5'
 	id 'io.spring.dependency-management' version '1.1.0'
@@ -8,11 +9,25 @@ plugins {
 
 spotless {
     java {
-		target 'src/main/**/*.java'
-        eclipse().configFile '.spotless.xml'
+        target 'src/main/**/*.java', 'src/test/**/*.java'
+
+        googleJavaFormat()
         trimTrailingWhitespace()
-		removeUnusedImports()
+        removeUnusedImports()
         endWithNewline()
+    }
+}
+
+pmd {
+    toolVersion = '6.55.0'
+    ruleSets = []
+	ruleSetFiles = files(".pmd.xml")
+}
+
+tasks.withType(Pmd) {
+    source = fileTree('src') {
+        include '**/*.java'
+        exclude '**/test/**'
     }
 }
 
@@ -50,6 +65,8 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
+
+	pmd 'net.sourceforge.pmd:pmd-java:6.55.0'
 }
 
 tasks.named('test') {
