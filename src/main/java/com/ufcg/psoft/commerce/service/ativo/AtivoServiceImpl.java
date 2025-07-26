@@ -2,6 +2,8 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
+import com.ufcg.psoft.commerce.http.exception.CommerceException;
+import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import org.modelmapper.ModelMapper;
@@ -31,11 +33,11 @@ public class AtivoServiceImpl implements AtivoService{
     }
 
     @Override
-    public AtivoResponseDTO atualizar(Long id, @org.jetbrains.annotations.NotNull AtivoUpsertDTO dto) {
-        Ativo ativo = repository.findById(id).orElseThrow(() -> new RuntimeException("Ativo não encontrado"));
+    public AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto) {
+        Ativo ativo = repository.findById(id).orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
         if (!ativo.getTipo().equals(dto.getTipo())) {
-            throw new IllegalArgumentException("Não é permitido alterar o tipo do ativo.");
+            throw new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA);
         }
 
         modelMapper.map(dto, ativo);
@@ -45,13 +47,13 @@ public class AtivoServiceImpl implements AtivoService{
 
     @Override
     public void remover(Long id) {
-        Ativo ativo = repository.findById(id).orElseThrow(() -> new RuntimeException("Ativo não encontrado"));
+        Ativo ativo = repository.findById(id).orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
         repository.delete(ativo);
     }
 
     @Override
     public AtivoResponseDTO buscarPorId(Long id) {
-        Ativo ativo = repository.findById(id).orElseThrow(() -> new RuntimeException("Ativo não encontrado"));
+        Ativo ativo = repository.findById(id).orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
         return modelMapper.map(ativo, AtivoResponseDTO.class);
     }
 

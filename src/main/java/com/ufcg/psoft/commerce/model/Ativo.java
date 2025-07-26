@@ -30,5 +30,7 @@ public abstract class Ativo {
     @Column(nullable = false, scale = 2, precision = 19)
     private BigDecimal valor;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AtivoTipo tipo;
 }

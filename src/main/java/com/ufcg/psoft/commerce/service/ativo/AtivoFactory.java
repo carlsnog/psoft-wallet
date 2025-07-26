@@ -2,6 +2,8 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
+import com.ufcg.psoft.commerce.http.exception.CommerceException;
+import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.*;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +37,7 @@ public class AtivoFactory {
     public Ativo criarAtivo(AtivoUpsertDTO dto) {
         Function<AtivoUpsertDTO, Ativo> builder = builders.get(dto.getTipo());
         if (builder == null) {
-            throw new IllegalArgumentException("Tipo de ativo inválido: " + dto.getTipo());
+            throw new CommerceException(ErrorCode.TIPO_ATIVO_INVALIDO);
         }
         return builder.apply(dto);
     }
