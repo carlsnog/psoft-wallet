@@ -12,7 +12,10 @@ public enum ErrorCode {
   ALTERACAO_TIPO_NAO_PERMITIDA("Nao e permitido alterar o tipo do ativo", HttpStatus.BAD_REQUEST),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
   OPERACAO_INVALIDA_PARA_O_TIPO("O tipo do ativo não permite a operação", HttpStatus.BAD_REQUEST),
-  ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO("O novo valor não respeita a faixa de variação de no mínimo 1% em relação ao valor antigo", HttpStatus.BAD_REQUEST),
+  ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO(
+      "O novo valor não respeita a faixa de variação de no mínimo 1% em relação ao valor antigo",
+      HttpStatus.BAD_REQUEST),
+  ATIVO_JA_EXISTE("Ativo com este nome ja existe", HttpStatus.CONFLICT),
 
   CLIENTE_NAO_EXISTE("Cliente nao existe", HttpStatus.NOT_FOUND),
   COD_ACESSO_INVALIDO("O codigo acesso deve ser composto por 6 digitos", HttpStatus.BAD_REQUEST);
