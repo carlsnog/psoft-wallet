@@ -1522,7 +1522,7 @@ public class AtivoControllerTests {
       Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(10L));
     }
   }
-
+  
   @Nested
   @DisplayName("Alterar status do ativo")
   class AlterarStatusTests {
