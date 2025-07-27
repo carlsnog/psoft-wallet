@@ -23,6 +23,10 @@ public class AtivoServiceImpl implements AtivoService {
 
   @Override
   public AtivoResponseDTO criar(AtivoUpsertDTO dto) {
+    if (repository.existsByNome(dto.getNome())) {
+      throw new CommerceException(ErrorCode.ATIVO_JA_EXISTE);
+    }
+
     Ativo ativo = ativoFactory.criarAtivo(dto);
     repository.save(ativo);
     return modelMapper.map(ativo, AtivoResponseDTO.class);
@@ -37,6 +41,10 @@ public class AtivoServiceImpl implements AtivoService {
 
     if (!ativo.getTipo().equals(dto.getTipo())) {
       throw new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA);
+    }
+
+    if (repository.existsByNomeAndIdNot(dto.getNome(), id)) {
+      throw new CommerceException(ErrorCode.ATIVO_JA_EXISTE);
     }
 
     modelMapper.map(dto, ativo);

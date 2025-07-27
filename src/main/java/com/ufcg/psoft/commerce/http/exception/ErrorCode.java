@@ -11,6 +11,7 @@ public enum ErrorCode {
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
   ALTERACAO_TIPO_NAO_PERMITIDA("Nao e permitido alterar o tipo do ativo", HttpStatus.BAD_REQUEST),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
+  ATIVO_JA_EXISTE("Ativo com este nome ja existe", HttpStatus.CONFLICT),
 
   CLIENTE_NAO_EXISTE("Cliente nao existe", HttpStatus.NOT_FOUND),
   COD_ACESSO_INVALIDO("O codigo acesso deve ser composto por 6 digitos", HttpStatus.BAD_REQUEST);

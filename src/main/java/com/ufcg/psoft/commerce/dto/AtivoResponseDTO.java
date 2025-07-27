@@ -12,7 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class AtivoResponseDTO {
@@ -28,7 +28,7 @@ public class AtivoResponseDTO {
   @NotBlank(message = "Descricao do ativo obrigatoria")
   private String descricao;
 
-  @JsonProperty("Status de disponibilidade")
+  @JsonProperty("status")
   @NotBlank(message = "Status de disponibilidade obrigatorio")
   private StatusAtivo status;
 
