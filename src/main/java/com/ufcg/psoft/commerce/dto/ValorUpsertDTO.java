@@ -16,16 +16,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ValorUpsertDTO {
 
-    @JsonProperty("valor")
-    @Digits(
-            integer = 15,
-            fraction = 2,
-            message = "Valor deve ter no máximo 15 dígitos inteiros e 2 decimais")
-    @DecimalMin(
-            value = "0.01",
-            inclusive = true,
-            message = "Valor deve ser positivo e maior que zero")
-    @NotNull(message = "Valor é obrigatório")
-    private BigDecimal valor;
-
+  @JsonProperty("valor")
+  @Digits(
+      integer = 15,
+      fraction = 2,
+      message = "Valor deve ter no máximo 15 dígitos inteiros e 2 decimais")
+  @DecimalMin(
+      value = "0.01",
+      inclusive = true,
+      message = "Valor deve ser positivo e maior que zero")
+  @NotNull(message = "Valor é obrigatório")
+  private BigDecimal valor;
 }

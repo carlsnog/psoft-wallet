@@ -12,7 +12,6 @@ import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;

@@ -36,7 +36,8 @@ public class AtivoController {
   @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> atualizarCotacao(
       @PathVariable Long id, @RequestBody @Valid ValorUpsertDTO valorUpsertDto) {
-    return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizarCotacao(id, valorUpsertDto));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ativoService.atualizarCotacao(id, valorUpsertDto));
   }
 
   @DeleteMapping("/{id}")

@@ -6,7 +6,6 @@ import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -32,7 +31,7 @@ public abstract class Ativo {
   @Column(nullable = false)
   private StatusAtivo status;
 
-  //TODO mudar para cotação
+  // TODO mudar para cotação
   @Column(nullable = false, scale = 2, precision = 19)
   private BigDecimal valor;
 
@@ -40,13 +39,14 @@ public abstract class Ativo {
   @Column(nullable = false)
   private AtivoTipo tipo;
 
-  public void atualizarValor(BigDecimal novoValor){
+  public void atualizarValor(BigDecimal novoValor) {
     BigDecimal diferenca = novoValor.subtract(valor);
     diferenca = diferenca.abs();
 
-    BigDecimal taxa = diferenca.divide(valor, 16,  RoundingMode.HALF_UP);
+    BigDecimal taxa = diferenca.divide(valor, 16, RoundingMode.HALF_UP);
 
-    if(taxa.compareTo(BigDecimal.valueOf(0.01)) < 0) throw new CommerceException(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO);
+    if (taxa.compareTo(BigDecimal.valueOf(0.01)) < 0)
+      throw new CommerceException(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO);
 
     this.valor = novoValor;
   }
