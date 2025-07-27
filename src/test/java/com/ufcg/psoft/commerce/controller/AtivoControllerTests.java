@@ -12,6 +12,8 @@ import com.ufcg.psoft.commerce.enums.*;
 import com.ufcg.psoft.commerce.http.exception.*;
 import com.ufcg.psoft.commerce.model.Acao;
 import com.ufcg.psoft.commerce.model.Ativo;
+import com.ufcg.psoft.commerce.repository.AtivoRepository;
+import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import java.math.BigDecimal;
 import java.util.*;
@@ -42,6 +44,7 @@ public class AtivoControllerTests {
   ObjectMapper objectMapper = new ObjectMapper();
 
   // DTOs de resposta e requisição para uso nos testes
+  //TODO: escopar ativoDTO em classe especifica
   AtivoResponseDTO ativoResponseDTO;
   AtivoUpsertDTO ativoUpsertDTO;
 
@@ -1672,4 +1675,59 @@ public class AtivoControllerTests {
       Mockito.verify(ativoService).alterarStatus(id, dto.getNovoStatus());
     }
   }
+
+
+
+
+
+
+
+
+
+  @Nested
+  @DisplayName("Testes de Atualização de Ativo (PUT /ativos/{id})")
+  class AtualizarCotacaoAtivoTests {
+
+
+    @Test
+    @DisplayName("Testa se Controller funciona para atualizar cotação")
+    void quandoAtualizarAtivoValidoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+              ValorUpsertDTO.builder()
+                      .valor(BigDecimal.valueOf(100))
+                      .build();
+
+      AtivoResponseDTO ativoResponse =
+              AtivoResponseDTO.builder()
+                      .nome("Dog")
+                      .descricao("Coisa")
+                      .valor(BigDecimal.valueOf(100))
+                      .status(StatusAtivo.DISPONIVEL)
+                      .id(1L)
+                      .tipo(AtivoTipo.CRIPTO)
+                      .build();
+
+
+      Mockito.when(ativoService.atualizarCotacao(Mockito.eq(1L), Mockito.any(ValorUpsertDTO.class)))
+              .thenReturn(ativoResponse);
+
+      driver
+              .perform(
+                      put(URI_ATIVOS + "/1/cotacao")
+                              .param("codigoAcesso", "admin@123")
+                              .contentType(MediaType.APPLICATION_JSON)
+                              .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.valor").value(BigDecimal.valueOf(100)))
+              .andDo(print());
+
+      // Verifica a chamada ao serviço
+      Mockito.verify(ativoService, Mockito.times(1))
+              .atualizarCotacao(Mockito.eq(1L), Mockito.any(ValorUpsertDTO.class));
+    }
+
+
+
+  }
+
 }
