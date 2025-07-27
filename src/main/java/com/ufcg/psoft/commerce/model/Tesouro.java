@@ -1,6 +1,5 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -11,7 +10,4 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @SuperBuilder
-public class Tesouro extends Ativo {
-
-  @Builder.Default private final AtivoTipo tipo = AtivoTipo.TESOURO;
-}
+public class Tesouro extends Ativo {}

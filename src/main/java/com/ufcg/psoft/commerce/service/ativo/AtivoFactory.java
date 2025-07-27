@@ -21,6 +21,7 @@ public class AtivoFactory {
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
                   .valor(dto.getValor())
+                  .tipo(AtivoTipo.CRIPTO)
                   .build(),
           AtivoTipo.TESOURO,
           dto ->
@@ -29,6 +30,7 @@ public class AtivoFactory {
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
                   .valor(dto.getValor())
+                  .tipo(AtivoTipo.TESOURO)
                   .build(),
           AtivoTipo.ACAO,
           dto ->
@@ -37,6 +39,7 @@ public class AtivoFactory {
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
                   .valor(dto.getValor())
+                  .tipo(AtivoTipo.ACAO)
                   .build());
 
   public Ativo criarAtivo(AtivoUpsertDTO dto) {
