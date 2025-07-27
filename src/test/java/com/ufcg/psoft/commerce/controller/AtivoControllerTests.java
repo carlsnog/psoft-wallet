@@ -1602,7 +1602,9 @@ public class AtivoControllerTests {
       assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
 
       assertTrue(
-          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(cripto.getId()).get().getValor()) == 0);
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(cripto.getId()).get().getValor())
+              == 0);
     }
 
     @Test
@@ -1627,7 +1629,9 @@ public class AtivoControllerTests {
       assertEquals(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO, resultado.getCode());
 
       assertTrue(
-          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(tesouro.getId()).get().getValor()) == 0);
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(tesouro.getId()).get().getValor())
+              == 0);
     }
 
     @Test
@@ -1700,7 +1704,9 @@ public class AtivoControllerTests {
       assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
 
       assertTrue(
-          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(acao.getId()).get().getValor()) == 0);
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(acao.getId()).get().getValor())
+              == 0);
     }
   }
 }
