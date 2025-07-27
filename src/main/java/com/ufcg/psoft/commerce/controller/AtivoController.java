@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.AlterarStatusDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
@@ -29,6 +30,14 @@ public class AtivoController {
   public ResponseEntity<?> atualizarAtivo(
       @PathVariable Long id, @RequestBody @Valid AtivoUpsertDTO ativoDto) {
     return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizar(id, ativoDto));
+  }
+
+  @PutMapping("/{id}/cotacao")
+  @Autenticado(TipoAutenticacao.ADMIN)
+  public ResponseEntity<?> atualizarCotacao(
+      @PathVariable Long id, @RequestBody @Valid ValorUpsertDTO valorUpsertDto) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ativoService.atualizarCotacao(id, valorUpsertDto));
   }
 
   @DeleteMapping("/{id}")

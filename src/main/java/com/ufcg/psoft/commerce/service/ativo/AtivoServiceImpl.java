@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
@@ -53,6 +54,18 @@ public class AtivoServiceImpl implements AtivoService {
     }
 
     modelMapper.map(dto, ativo);
+    repository.save(ativo);
+    return modelMapper.map(ativo, AtivoResponseDTO.class);
+  }
+
+  @Override
+  public AtivoResponseDTO atualizarCotacao(Long id, ValorUpsertDTO dto) {
+    Ativo ativo =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+
+    ativo.atualizarValor(dto.getValor());
     repository.save(ativo);
     return modelMapper.map(ativo, AtivoResponseDTO.class);
   }
