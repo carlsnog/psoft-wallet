@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import java.util.List;
 
 public interface AtivoService {
@@ -14,4 +15,6 @@ public interface AtivoService {
   AtivoResponseDTO buscarPorId(Long id);
 
   List<AtivoResponseDTO> listarTodos();
+
+  AtivoResponseDTO alterarStatus(Long id, StatusAtivo novoStatus);
 }
