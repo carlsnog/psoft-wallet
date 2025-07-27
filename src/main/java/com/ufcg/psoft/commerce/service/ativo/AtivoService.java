@@ -9,6 +9,8 @@ public interface AtivoService {
 
   AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto);
 
+  AtivoResponseDTO atualizarCotacao(Long id, AtivoUpsertDTO dto);
+
   void remover(Long id);
 
   AtivoResponseDTO buscarPorId(Long id);

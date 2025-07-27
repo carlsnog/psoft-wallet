@@ -2,10 +2,15 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
+import com.ufcg.psoft.commerce.model.Tesouro;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -37,6 +42,33 @@ public class AtivoServiceImpl implements AtivoService {
 
     if (!ativo.getTipo().equals(dto.getTipo())) {
       throw new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA);
+    }
+
+    modelMapper.map(dto, ativo);
+    repository.save(ativo);
+    return modelMapper.map(ativo, AtivoResponseDTO.class);
+  }
+
+  @Override
+  public AtivoResponseDTO atualizarCotacao(Long id, AtivoUpsertDTO dto) {
+    Ativo ativo =
+            repository
+                    .findById(id)
+                    .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+
+    if (!ativo.getTipo().equals(dto.getTipo())) {
+      throw new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA);
+    }
+
+    if(ativo.getTipo().equals(AtivoTipo.TESOURO)) {
+      throw new CommerceException(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO);
+    }
+
+    BigDecimal variacao = ativo.getValor().divide(dto.getValor(), 8, RoundingMode.HALF_UP);
+
+    if(variacao.compareTo(BigDecimal.valueOf(1.01)) < 0 &&
+            variacao.compareTo(BigDecimal.valueOf(0.99)) > 0){
+      throw new CommerceException(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO);
     }
 
     modelMapper.map(dto, ativo);

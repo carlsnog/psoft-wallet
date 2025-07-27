@@ -29,6 +29,14 @@ public class AtivoController {
     return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizar(id, ativoDto));
   }
 
+  //TODO(nivea): criar novo DTO que só tem o atributo cotação
+  @PutMapping("/{id}/cotacao")
+  @Autenticado(TipoAutenticacao.ADMIN)
+  public ResponseEntity<?> atualizarCotacao(
+          @PathVariable Long id, @RequestBody @Valid AtivoUpsertDTO ativoDto) {
+    return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizarCotacao(id, ativoDto));
+  }
+
   @DeleteMapping("/{id}")
   @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> excluirAtivo(@PathVariable Long id) {
