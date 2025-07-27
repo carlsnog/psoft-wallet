@@ -10,7 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.*;
 import com.ufcg.psoft.commerce.enums.*;
+import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
+import com.ufcg.psoft.commerce.model.Acao;
+import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
+import com.ufcg.psoft.commerce.model.Cripto;
+import com.ufcg.psoft.commerce.model.Tesouro;
+import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import java.math.BigDecimal;
@@ -46,6 +53,7 @@ public class AtivoControllerTests {
   ObjectMapper objectMapper = new ObjectMapper();
 
   // DTOs de resposta e requisição para uso nos testes
+  // TODO: escopar ativoDTO em classe especifica
   AtivoResponseDTO ativoResponseDTO;
   AtivoUpsertDTO ativoUpsertDTO;
 
@@ -1480,6 +1488,219 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.id").value(id))
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
           .andDo(print());
+    }
+  }
+
+  @Nested
+  @DisplayName("Testes de Atualização de Ativo (PUT /ativos/{id})")
+  class AtualizarCotacaoAtivoTests {
+    @Autowired private AtivoRepository ativoRepository;
+
+    Cripto cripto;
+    Acao acao;
+    Tesouro tesouro;
+
+    @BeforeEach
+    void setup() {
+      cripto =
+          ativoRepository.save(
+              Cripto.builder()
+                  .nome("Doge")
+                  .descricao("Moeda dogecoin")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.CRIPTO)
+                  .build());
+
+      acao =
+          ativoRepository.save(
+              Acao.builder()
+                  .nome("PETR4")
+                  .descricao("Acao petrobras")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.ACAO)
+                  .build());
+      tesouro =
+          ativoRepository.save(
+              Tesouro.builder()
+                  .nome("Selic")
+                  .descricao("tesouro selic")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.TESOURO)
+                  .build());
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de cripto com cotacao valida")
+    void quandoAtualizarCotacaoCriptoValidoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de cripto com sucesso")
+    void quandoAtualizarCotacaoCriptoExatamenteUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de cripto com sucesso")
+    void quandoAtualizarCotacaoCriptoMenosUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(cripto.getId()).get().getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de tesouro retorna erro")
+    void quandoTentaAtualizarTesouro() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + tesouro.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(tesouro.getId()).get().getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao valido")
+    void quandoAtualizarCotacaoAcaoValidoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao exatamente 1% retorna sucesso")
+    void quandoAtualizarCotacaoAcaoExatamenteUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao menor que 1% retorna erro")
+    void quandoAtualizarCotacaoAcaoMenosUmPorcentoRetornaErro() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00).compareTo(ativoRepository.findById(acao.getId()).get().getValor()) == 0);
     }
   }
 }
