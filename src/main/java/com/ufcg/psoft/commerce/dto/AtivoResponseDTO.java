@@ -44,6 +44,7 @@ public class AtivoResponseDTO {
     this.nome = ativo.getNome();
     this.descricao = ativo.getDescricao();
     this.valor = ativo.getValor();
+    this.status = ativo.getStatus();
     this.tipo = ativo.getTipo();
   }
 }

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.*;
 import com.ufcg.psoft.commerce.enums.*;
 import com.ufcg.psoft.commerce.http.exception.*;
+import com.ufcg.psoft.commerce.model.Acao;
+import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import java.math.BigDecimal;
 import java.util.*;
@@ -1518,6 +1520,156 @@ public class AtivoControllerTests {
       Mockito.verify(ativoService, Mockito.times(2))
           .listarTodos(); // Uma vez para a lista com o ativo, outra para a lista vazia
       Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(10L));
+    }
+  }
+
+  @Nested
+  @DisplayName("Alterar status do ativo")
+  class AlterarStatusTests {
+
+    private static final String URI_STATUS = "/ativos/{id}/status";
+
+    @Test
+    @DisplayName("Altera status com sucesso e retorna 200 OK")
+    void alterarStatusComSucesso() throws Exception {
+      Long id = 1L;
+
+      AlterarStatusDTO dto = new AlterarStatusDTO();
+      dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
+
+      Ativo ativoMock =
+          Acao.builder()
+              .id(id)
+              .nome("Ativo Teste")
+              .descricao("Descrição Teste")
+              .status(StatusAtivo.INDISPONIVEL)
+              .valor(new BigDecimal("100.00"))
+              .build();
+
+      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativoMock);
+
+      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus())).thenReturn(responseDTO);
+
+      driver
+          .perform(
+              put(URI_STATUS, id)
+                  .param("codigoAcesso", "admin@123")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(dto)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(id))
+          .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
+          .andDo(print());
+
+      Mockito.verify(ativoService, Mockito.times(1)).alterarStatus(id, dto.getNovoStatus());
+    }
+
+    @Test
+    @DisplayName("Tenta alterar status de ativo inexistente, retorna 404")
+    void alterarStatusAtivoNaoEncontrado() throws Exception {
+      Long id = 999L;
+      AlterarStatusDTO dto = new AlterarStatusDTO();
+      dto.setNovoStatus(StatusAtivo.DISPONIVEL);
+
+      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus()))
+          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+
+      driver
+          .perform(
+              put(URI_STATUS, id)
+                  .param("codigoAcesso", "admin@123")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(dto)))
+          .andExpect(status().isNotFound())
+          .andDo(print());
+
+      Mockito.verify(ativoService, Mockito.times(1)).alterarStatus(id, dto.getNovoStatus());
+    }
+
+    @Test
+    @DisplayName("Tenta alterar status sem autenticação, retorna 401 Unauthorized")
+    void alterarStatusSemAutenticacao() throws Exception {
+      Long id = 1L;
+      AlterarStatusDTO dto = new AlterarStatusDTO();
+      dto.setNovoStatus(StatusAtivo.DISPONIVEL);
+
+      driver
+          .perform(
+              put(URI_STATUS, id)
+                  // sem param "codigoAcesso"
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(dto)))
+          .andExpect(status().isUnauthorized())
+          .andDo(print());
+
+      Mockito.verify(ativoService, Mockito.never()).alterarStatus(Mockito.anyLong(), Mockito.any());
+    }
+
+    @Test
+    @DisplayName("Tenta alterar status com dto inválido, retorna 400 Bad Request")
+    void alterarStatusComDtoInvalido() throws Exception {
+      Long id = 1L;
+
+      // DTO com novoStatus null - violação @NotNull
+      AlterarStatusDTO dto = new AlterarStatusDTO();
+      dto.setNovoStatus(null);
+
+      driver
+          .perform(
+              put(URI_STATUS, id)
+                  .param("codigoAcesso", "admin@123")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(dto)))
+          .andExpect(status().isBadRequest())
+          .andDo(print());
+
+      Mockito.verify(ativoService, Mockito.never()).alterarStatus(Mockito.anyLong(), Mockito.any());
+    }
+
+    @Test
+    @DisplayName("Muda de DISPONIVEL para INDISPONIVEL com sucesso")
+    void mudaDeDisponivelParaIndisponivel() throws Exception {
+      Long id = 1L;
+
+      // DTO com novo status
+      AlterarStatusDTO dto = new AlterarStatusDTO();
+      dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
+
+      // Simula que antes era DISPONIVEL e depois virou INDISPONIVEL
+      Ativo ativoAntes =
+          Acao.builder()
+              .id(id)
+              .nome("Teste Ativo")
+              .descricao("Teste descrição")
+              .status(StatusAtivo.DISPONIVEL) // status original
+              .valor(new BigDecimal("200.00"))
+              .build();
+
+      Ativo ativoDepois =
+          Acao.builder()
+              .id(id)
+              .nome("Teste Ativo")
+              .descricao("Teste descrição")
+              .status(StatusAtivo.INDISPONIVEL)
+              .valor(new BigDecimal("200.00"))
+              .build();
+
+      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativoDepois);
+
+      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus())).thenReturn(responseDTO);
+
+      driver
+          .perform(
+              put(URI_STATUS, id)
+                  .param("codigoAcesso", "admin@123")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(dto)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(id))
+          .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
+          .andDo(print());
+
+      Mockito.verify(ativoService).alterarStatus(id, dto.getNovoStatus());
     }
   }
 }

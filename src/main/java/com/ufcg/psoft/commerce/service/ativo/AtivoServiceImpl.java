@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.ativo;
 
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
@@ -74,5 +75,16 @@ public class AtivoServiceImpl implements AtivoService {
   public List<AtivoResponseDTO> listarTodos() {
     List<Ativo> ativos = repository.findAll();
     return ativos.stream().map(AtivoResponseDTO::new).collect(Collectors.toList());
+  }
+
+  @Override
+  public AtivoResponseDTO alterarStatus(Long id, StatusAtivo novoStatus) {
+    Ativo ativo =
+        repository
+            .findById(id)
+            .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+    ativo.setStatus(novoStatus);
+    repository.save(ativo);
+    return new AtivoResponseDTO(ativo);
   }
 }
