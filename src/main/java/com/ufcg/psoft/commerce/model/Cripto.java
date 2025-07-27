@@ -13,6 +13,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Cripto extends Ativo {
 
-    @Builder.Default
-    private final AtivoTipo tipo = AtivoTipo.CRIPTO;
+  @Builder.Default private final AtivoTipo tipo = AtivoTipo.CRIPTO;
 }

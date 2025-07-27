@@ -1,9 +1,8 @@
 package com.ufcg.psoft.commerce.http.exception;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,27 +12,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class ErrorDTO {
-    @JsonProperty("code")
-    private ErrorCode code;
+public class ErrorDTO implements Serializable {
+  private static final long serialVersionUID = 1L;
 
-    @JsonProperty("message")
-    private String message;
+  @JsonProperty("code")
+  private ErrorCode code;
 
-    @JsonProperty("data")
-    private Object data;
+  @JsonProperty("message")
+  private String message;
 
-    @JsonProperty("timestamp")
-    private LocalDateTime timestamp;
+  @JsonProperty("data")
+  private Object data;
 
-    public ErrorDTO(ErrorCode code, String message) {
-        this(code, message, null);
-    }
+  @JsonProperty("timestamp")
+  private LocalDateTime timestamp;
 
-    public ErrorDTO(ErrorCode code, String message, Object data) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-        this.timestamp = LocalDateTime.now();
-    }
+  public ErrorDTO(ErrorCode code, String message) {
+    this(code, message, null);
+  }
+
+  public ErrorDTO(ErrorCode code, String message, Object data) {
+    this.code = code;
+    this.message = message;
+    this.data = data;
+    this.timestamp = LocalDateTime.now();
+  }
 }

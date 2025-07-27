@@ -4,35 +4,35 @@ import lombok.Getter;
 
 @Getter
 public class Admin extends Usuario {
-    private static Admin instance;
 
-    private static final String CODIGO_ACESSO_ADMIN_PADRAO = "admin@123";
-    private static final String CODIGO_ACESSO_ADMIN_ENV = "CODIGO_ACESSO_ADMIN";
+  private static Admin instance;
 
-    private long id;
-    private String codigoAcesso;
+  private static final String COD_ADMIN_PADRAO = "admin@123";
+  private static final String COD_ADMIN_ENV = "CODIGO_ACESSO_ADMIN";
 
-    private Admin(long id, String codigoAcesso) {
-        this.id = id;
-        this.codigoAcesso = codigoAcesso;
+  private long id;
+  private String codigoAcesso;
+
+  private Admin(long id, String codigoAcesso) {
+    this.id = id;
+    this.codigoAcesso = codigoAcesso;
+  }
+
+  @Override
+  public boolean isAdmin() {
+    return true;
+  }
+
+  public static Admin getInstance() {
+    String codigoAcesso = System.getenv(COD_ADMIN_ENV);
+    if (codigoAcesso == null) {
+      codigoAcesso = COD_ADMIN_PADRAO;
     }
 
-    @Override
-    public boolean isAdmin() {
-        return true;
+    if (instance == null) {
+      instance = new Admin(0, codigoAcesso);
     }
 
-    public static Admin getInstance() {
-        String codigoAcesso = System.getenv(CODIGO_ACESSO_ADMIN_ENV);
-        if (codigoAcesso == null) {
-            codigoAcesso = CODIGO_ACESSO_ADMIN_PADRAO;
-        }
-
-        if (instance == null) {
-            instance = new Admin(0, codigoAcesso);
-        }
-
-        return instance;
-    }
-
+    return instance;
+  }
 }
