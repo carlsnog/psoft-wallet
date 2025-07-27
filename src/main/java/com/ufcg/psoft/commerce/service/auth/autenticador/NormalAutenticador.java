@@ -19,7 +19,7 @@ public class NormalAutenticador extends Autenticador {
       return Optional.of(Admin.getInstance());
     }
 
-    var usuario = clienteRepository.findByCodigoAcesso(codigoAcesso);
+    var usuario = clienteRepository.findById(id);
     if (usuario.isEmpty()) {
       throw new CommerceException(ErrorCode.UNAUTHORIZED);
     }

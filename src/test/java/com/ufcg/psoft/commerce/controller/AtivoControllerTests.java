@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -9,28 +10,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.*;
 import com.ufcg.psoft.commerce.enums.*;
-import com.ufcg.psoft.commerce.http.exception.*;
+import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
 import com.ufcg.psoft.commerce.model.Acao;
-import com.ufcg.psoft.commerce.model.Ativo;
+import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
-import com.ufcg.psoft.commerce.model.Usuario;
+import com.ufcg.psoft.commerce.model.Cripto;
+import com.ufcg.psoft.commerce.model.Tesouro;
+import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import java.math.BigDecimal;
 import java.util.*;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Testes do controlador de Ativos")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AtivoControllerTests {
 
   // URI base para os endpoints do AtivoController
@@ -42,8 +46,8 @@ public class AtivoControllerTests {
   // Repositório de clientes
   @Autowired ClienteRepository clienteRepository;
 
-  // Mock do AtivoService para controlar o comportamento da camada de serviço
-  @MockBean AtivoService ativoService;
+  // Service real para interagir com o banco
+  @Autowired AtivoService ativoService;
 
   // Objeto para serializar e desserializar JSON
   ObjectMapper objectMapper = new ObjectMapper();
@@ -82,13 +86,10 @@ public class AtivoControllerTests {
             .build();
   }
 
-  /**
-   * Limpeza após cada teste. Reseta o mock do {@link AtivoService} para garantir que cada teste
-   * comece com um mock limpo e sem interações anteriores.
-   */
+  /** Limpeza após cada teste. O banco é resetado automaticamente pela anotação @DirtiesContext. */
   @AfterEach
   void tearDown() {
-    Mockito.reset(ativoService);
+    // O banco é resetado automaticamente após cada teste
   }
 
   /**
@@ -108,12 +109,6 @@ public class AtivoControllerTests {
     @DisplayName(
         "1. Sucesso: Criar um ativo válido (Ação) com todos os campos preenchidos corretamente")
     void quandoCriarAtivoValidoAcaoRetornaSucesso() throws Exception {
-      // Configura o mock do serviço para retornar um DTO de resposta quando o método
-      // 'criar' for
-      // chamado
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(ativoResponseDTO);
-
       // Executa a requisição POST para /ativos com o DTO de criação e o código de
       // acesso de admin
       driver
@@ -123,11 +118,12 @@ public class AtivoControllerTests {
                       "codigoAcesso",
                       "admin@123") // Supondo um código de acesso de admin para autenticação
                   .contentType(
-                      MediaType
-                          .APPLICATION_JSON) // Define o tipo de conteúdo da requisição como JSON
+                      MediaType.APPLICATION_JSON) // Define o tipo de conteúdo da requisição como
+                  // JSON
                   .content(
                       objectMapper.writeValueAsString(
-                          ativoUpsertDTO))) // Converte o DTO para JSON e o define como corpo da
+                          ativoUpsertDTO))) // Converte o DTO para JSON e o define como corpo
+          // da
           // requisição
           .andExpect(status().isCreated()) // Espera um status HTTP 201 Created
           .andExpect(
@@ -138,11 +134,6 @@ public class AtivoControllerTests {
                   .value("ACAO")) // Verifica se o campo 'tipo' no JSON de resposta é 'ACAO'
           .andDo(print()); // Imprime os detalhes da requisição e resposta no console (útil para
       // depuração)
-
-      // Verifica se o método 'criar' do serviço foi chamado exatamente uma vez com
-      // qualquer DTO de
-      // criação
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -160,16 +151,6 @@ public class AtivoControllerTests {
               .nome("BTC")
               .descricao("Bitcoin")
               .build();
-      AtivoResponseDTO criptoResponseDTO =
-          ativoResponseDTO.toBuilder()
-              .tipo(AtivoTipo.CRIPTO)
-              .nome("BTC")
-              .descricao("Bitcoin")
-              .build();
-
-      // Configura o mock do serviço para retornar o DTO de resposta de Cripto
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(criptoResponseDTO);
 
       // Executa a requisição e verifica o status e os campos do JSON de resposta
       driver
@@ -182,9 +163,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.nome").value("BTC"))
           .andExpect(jsonPath("$.tipo").value("CRIPTO"))
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -202,16 +180,6 @@ public class AtivoControllerTests {
               .nome("Tesouro Selic")
               .descricao("Tesouro Direto Selic")
               .build();
-      AtivoResponseDTO tesouroResponseDTO =
-          ativoResponseDTO.toBuilder()
-              .tipo(AtivoTipo.TESOURO)
-              .nome("Tesouro Selic")
-              .descricao("Tesouro Direto Selic")
-              .build();
-
-      // Configura o mock do serviço para retornar o DTO de resposta de Tesouro
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(tesouroResponseDTO);
 
       // Executa a requisição e verifica o status e os campos do JSON de resposta
       driver
@@ -224,9 +192,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.nome").value("Tesouro Selic"))
           .andExpect(jsonPath("$.tipo").value("TESOURO"))
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -247,11 +212,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      // Verifica que o método 'criar' do serviço NUNCA foi chamado, pois a validação
-      // deve ocorrer
-      // antes
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -271,8 +231,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -292,8 +250,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -313,8 +269,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -334,8 +288,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -355,8 +307,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -376,8 +326,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
   }
 
@@ -397,24 +345,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Sucesso: Atualizar todos os campos de um ativo existente com dados válidos")
     void quandoAtualizarAtivoValidoRetornaSucesso() throws Exception {
-      // Configura o mock do serviço para retornar o DTO de resposta atualizado
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(ativoResponseDTO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Executa a requisição PUT e verifica o status e o nome no JSON de resposta
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4"))
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -424,113 +368,113 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("2. Sucesso: Atualizar apenas o nome de um ativo")
     void quandoAtualizarApenasNomeAtivoRetornaSucesso() throws Exception {
-      // Prepara o DTO com o novo nome e outros campos inalterados
-      ativoUpsertDTO.setDescricao("Nova Descrição");
-      ativoUpsertDTO.setStatus(StatusAtivo.INDISPONIVEL);
-      ativoUpsertDTO.setValor(BigDecimal.valueOf(40.00));
-      ativoUpsertDTO.setTipo(AtivoTipo.ACAO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      AtivoResponseDTO updatedResponseDTO =
-          ativoResponseDTO.toBuilder().nome("PETR4_UPDATED").build();
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(updatedResponseDTO);
+      // Prepara o DTO com o novo nome e outros campos inalterados
+      AtivoUpsertDTO ativoParaAtualizar =
+          ativoUpsertDTO.toBuilder()
+              .nome("PETR4_UPDATED")
+              .descricao("Nova Descrição")
+              .status(StatusAtivo.INDISPONIVEL)
+              .valor(BigDecimal.valueOf(40.00))
+              .tipo(AtivoTipo.ACAO)
+              .build();
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4_UPDATED"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /** Testa a atualização apenas da descrição de um ativo. */
     @Test
     @DisplayName("3. Sucesso: Atualizar apenas a descrição de um ativo")
     void quandoAtualizarApenasDescricaoAtivoRetornaSucesso() throws Exception {
-      ativoUpsertDTO.setNome("PETR4");
-      ativoUpsertDTO.setStatus(StatusAtivo.INDISPONIVEL);
-      ativoUpsertDTO.setValor(BigDecimal.valueOf(40.00));
-      ativoUpsertDTO.setTipo(AtivoTipo.ACAO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      AtivoResponseDTO updatedResponseDTO =
-          ativoResponseDTO.toBuilder().descricao("Nova Descrição").build();
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(updatedResponseDTO);
+      AtivoUpsertDTO ativoParaAtualizar =
+          ativoUpsertDTO.toBuilder()
+              .nome("PETR4")
+              .descricao("Nova Descrição")
+              .status(StatusAtivo.INDISPONIVEL)
+              .valor(BigDecimal.valueOf(40.00))
+              .tipo(AtivoTipo.ACAO)
+              .build();
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.descricao").value("Nova Descrição"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /** Testa a atualização apenas do status de um ativo. */
     @Test
     @DisplayName("4. Sucesso: Atualizar apenas o status de um ativo")
     void quandoAtualizarApenasStatusAtivoRetornaSucesso() throws Exception {
-      ativoUpsertDTO.setNome("PETR4");
-      ativoUpsertDTO.setDescricao("Petrobras PN");
-      ativoUpsertDTO.setValor(BigDecimal.valueOf(40.00));
-      ativoUpsertDTO.setTipo(AtivoTipo.ACAO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      AtivoResponseDTO updatedResponseDTO =
-          ativoResponseDTO.toBuilder().status(StatusAtivo.INDISPONIVEL).build();
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(updatedResponseDTO);
+      AtivoUpsertDTO ativoParaAtualizar =
+          ativoUpsertDTO.toBuilder()
+              .nome("PETR4")
+              .descricao("Petrobras PN")
+              .status(StatusAtivo.INDISPONIVEL)
+              .valor(BigDecimal.valueOf(40.00))
+              .tipo(AtivoTipo.ACAO)
+              .build();
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /** Testa a atualização apenas do valor de um ativo. */
     @Test
     @DisplayName("5. Sucesso: Atualizar apenas o valor de um ativo")
     void quandoAtualizarApenasValorAtivoRetornaSucesso() throws Exception {
-      ativoUpsertDTO.setNome("PETR4");
-      ativoUpsertDTO.setDescricao("Petrobras PN");
-      ativoUpsertDTO.setStatus(StatusAtivo.DISPONIVEL);
-      ativoUpsertDTO.setTipo(AtivoTipo.ACAO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      AtivoResponseDTO updatedResponseDTO =
-          ativoResponseDTO.toBuilder().valor(BigDecimal.valueOf(50.00)).build();
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(updatedResponseDTO);
+      AtivoUpsertDTO ativoParaAtualizar =
+          ativoUpsertDTO.toBuilder()
+              .nome("PETR4")
+              .descricao("Petrobras PN")
+              .status(StatusAtivo.DISPONIVEL)
+              .valor(BigDecimal.valueOf(50.00))
+              .tipo(AtivoTipo.ACAO)
+              .build();
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.valor").value(50.00))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -540,10 +484,6 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("6. Falha: Tentar atualizar um ativo que não existe (ID inválido)")
     void quandoAtualizarAtivoInexistenteRetornaNotFound() throws Exception {
-      // Configura o mock para lançar uma exceção de ativo não encontrado
-      Mockito.when(ativoService.atualizar(Mockito.eq(99L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
-
       driver
           .perform(
               put(URI_ATIVOS + "/99")
@@ -552,9 +492,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(99L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -564,19 +501,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("7. Falha: Tentar atualizar um ativo com nome nulo")
     void quandoAtualizarAtivoComNomeNuloRetornaBadRequest() throws Exception {
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
+
       ativoUpsertDTO.setNome(null);
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -586,19 +524,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("8. Falha: Tentar atualizar um ativo com descrição vazia")
     void quandoAtualizarAtivoComDescricaoVaziaRetornaBadRequest() throws Exception {
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
+
       ativoUpsertDTO.setDescricao("");
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -609,22 +548,20 @@ public class AtivoControllerTests {
     @DisplayName(
         "9. Falha: Tentar alterar o tipo do ativo (regra de negócio ALTERACAO_TIPO_NAO_PERMITIDA)")
     void quandoAtualizarAtivoAlterandoTipoRetornaBadRequest() throws Exception {
-      ativoUpsertDTO.setTipo(AtivoTipo.CRIPTO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenThrow(new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA));
+      ativoUpsertDTO.setTipo(AtivoTipo.CRIPTO);
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -634,19 +571,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("10. Falha: Tentar atualizar um ativo com valor negativo")
     void quandoAtualizarAtivoComValorNegativoRetornaBadRequest() throws Exception {
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
+
       ativoUpsertDTO.setValor(BigDecimal.valueOf(-10.00));
 
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
     }
   }
 
@@ -664,17 +602,15 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Sucesso: Excluir um ativo existente com sucesso")
     void quandoExcluirAtivoExistenteRetornaNoContent() throws Exception {
-      // Configura o mock do serviço para não fazer nada quando 'remover' for chamado
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(1L));
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Executa a requisição DELETE e verifica o status
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent())
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(1L));
     }
 
     /**
@@ -683,17 +619,10 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("2. Falha: Tentar excluir um ativo que não existe (ID inválido)")
     void quandoExcluirAtivoInexistenteRetornaNotFound() throws Exception {
-      // Configura o mock para lançar exceção de ativo não encontrado
-      Mockito.doThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO))
-          .when(ativoService)
-          .remover(Mockito.eq(99L));
-
       driver
           .perform(delete(URI_ATIVOS + "/99").param("codigoAcesso", "admin@123"))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(99L));
     }
 
     /**
@@ -703,40 +632,41 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("3. Sucesso: Excluir um ativo e verificar que ele não pode mais ser buscado")
     void quandoExcluirAtivoVerificaQueNaoPodeSerBuscado() throws Exception {
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(1L));
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(1L)))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
+      // Exclui o ativo
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent())
           .andDo(print());
 
+      // Tenta buscar o ativo excluído
       driver
-          .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(1L));
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(1L));
     }
 
     /** Testa a exclusão sequencial de múltiplos ativos. */
     @Test
     @DisplayName("4. Sucesso: Excluir múltiplos ativos sequencialmente")
     void quandoExcluirMultiplosAtivosSequencialmenteRetornaNoContent() throws Exception {
-      Mockito.doNothing().when(ativoService).remover(Mockito.anyLong());
+      // Cria dois ativos
+      AtivoResponseDTO ativo1 = ativoService.criar(ativoUpsertDTO);
+      AtivoResponseDTO ativo2 =
+          ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
 
+      // Exclui o primeiro ativo
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativo1.getId()).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
 
+      // Exclui o segundo ativo
       driver
-          .perform(delete(URI_ATIVOS + "/2").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativo2.getId()).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(1L));
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(2L));
     }
 
     /**
@@ -746,37 +676,34 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("5. Falha: Tentar excluir um ativo que já foi excluído")
     void quandoExcluirAtivoJaExcluidoRetornaNotFound() throws Exception {
-      Mockito.doNothing()
-          .doThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO))
-          .when(ativoService)
-          .remover(Mockito.eq(1L));
+      // Cria um ativo
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Primeira exclusão com sucesso
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
 
       // Segunda exclusão do mesmo ID, agora já excluído
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(2)).remover(Mockito.eq(1L));
     }
 
     /** Testa se a exclusão de um ativo retorna o status HTTP 204 No Content. */
     @Test
     @DisplayName("6. Sucesso: Excluir um ativo e verificar o status HTTP 204 No Content")
     void quandoExcluirAtivoVerificaStatus204() throws Exception {
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(1L));
+      // Cria um ativo
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(1L));
     }
 
     /**
@@ -787,8 +714,6 @@ public class AtivoControllerTests {
     @DisplayName("7. Falha: Tentar excluir um ativo sem autenticação")
     void quandoExcluirAtivoSemAutenticacaoRetornaUnauthorized() throws Exception {
       driver.perform(delete(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
     }
 
     /**
@@ -802,8 +727,6 @@ public class AtivoControllerTests {
           .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
     }
   }
 
@@ -822,21 +745,17 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Sucesso: Recuperar um ativo existente por ID")
     void quandoRecuperarAtivoExistentePorIdRetornaSucesso() throws Exception {
-      // Configura o mock do serviço para retornar o DTO de resposta quando
-      // 'buscarPorId' for
-      // chamado
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(1L))).thenReturn(ativoResponseDTO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Executa a requisição GET e verifica o status e os campos do JSON de resposta
       driver
-          .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(1L))
+          .andExpect(jsonPath("$.id").value(ativoId))
           .andExpect(jsonPath("$.nome").value("PETR4"))
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(1L));
     }
 
     /**
@@ -847,11 +766,13 @@ public class AtivoControllerTests {
     @DisplayName(
         "2. Sucesso: Verificar se os dados do ativo recuperado correspondem aos dados esperados")
     void quandoRecuperarAtivoExistentePorIdVerificaDados() throws Exception {
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(1L))).thenReturn(ativoResponseDTO);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       String responseJsonString =
           driver
-              .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+              .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
@@ -861,14 +782,14 @@ public class AtivoControllerTests {
           objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
       // Compara cada campo do DTO esperado com o DTO retornado
-      assertEquals(ativoResponseDTO.getId(), resultado.getId());
-      assertEquals(ativoResponseDTO.getNome(), resultado.getNome());
-      assertEquals(ativoResponseDTO.getDescricao(), resultado.getDescricao());
-      assertEquals(ativoResponseDTO.getStatus(), resultado.getStatus());
-      assertEquals(ativoResponseDTO.getValor(), resultado.getValor());
-      assertEquals(ativoResponseDTO.getTipo(), resultado.getTipo());
-
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(1L));
+      assertEquals(ativoCriado.getId(), resultado.getId());
+      assertEquals(ativoCriado.getNome(), resultado.getNome());
+      assertEquals(ativoCriado.getDescricao(), resultado.getDescricao());
+      assertEquals(ativoCriado.getStatus(), resultado.getStatus());
+      assertEquals(ativoCriado.getTipo(), resultado.getTipo());
+      assertTrue(
+          BigDecimal.valueOf(ativoCriado.getValor().doubleValue()).compareTo(resultado.getValor())
+              == 0);
     }
 
     /**
@@ -877,15 +798,10 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("3. Falha: Tentar recuperar um ativo que não existe (ID inválido)")
     void quandoRecuperarAtivoInexistenteRetornaNotFound() throws Exception {
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(99L)))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
-
       driver
           .perform(get(URI_ATIVOS + "/99").param("codigoAcesso", "admin@123"))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(99L));
     }
 
     /**
@@ -894,30 +810,16 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("4. Sucesso: Recuperar um ativo recém-criado")
     void quandoRecuperarAtivoRecemCriadoRetornaSucesso() throws Exception {
-      AtivoResponseDTO novoAtivo = ativoResponseDTO.toBuilder().id(2L).nome("NOVO_ATIVO").build();
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class))).thenReturn(novoAtivo);
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(2L))).thenReturn(novoAtivo);
-
-      // Simula a criação do ativo
-      driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO").build())))
-          .andExpect(status().isCreated());
+      // Cria um novo ativo
+      AtivoUpsertDTO novoAtivoDTO = ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO").build();
+      AtivoResponseDTO novoAtivo = ativoService.criar(novoAtivoDTO);
 
       // Simula a busca pelo ativo recém-criado
       driver
-          .perform(get(URI_ATIVOS + "/2").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + novoAtivo.getId()).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("NOVO_ATIVO"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(2L));
     }
 
     /**
@@ -927,32 +829,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("5. Sucesso: Recuperar um ativo após sua atualização")
     void quandoRecuperarAtivoAposAtualizacaoRetornaSucesso() throws Exception {
-      AtivoResponseDTO ativoAtualizado = ativoResponseDTO.toBuilder().nome("PETR4_UPDATED").build();
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(ativoAtualizado);
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(1L))).thenReturn(ativoAtualizado);
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
-      // Simula a atualização do ativo
-      driver
-          .perform(
-              put(URI_ATIVOS + "/1")
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("PETR4_UPDATED").build())))
-          .andExpect(status().isOk());
+      // Atualiza o ativo
+      AtivoUpsertDTO ativoParaAtualizar = ativoUpsertDTO.toBuilder().nome("PETR4_UPDATED").build();
+      ativoService.atualizar(ativoId, ativoParaAtualizar);
 
       // Simula a busca pelo ativo atualizado
       driver
-          .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4_UPDATED"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(1L));
     }
 
     /**
@@ -962,23 +852,20 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("6. Falha: Tentar recuperar um ativo excluído")
     void quandoRecuperarAtivoExcluidoRetornaNotFound() throws Exception {
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(1L));
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(1L)))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+      // Cria um ativo
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Simula a exclusão do ativo
       driver
-          .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
 
       // Simula a busca pelo ativo excluído
       driver
-          .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(1L));
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(1L));
     }
 
     /**
@@ -989,8 +876,6 @@ public class AtivoControllerTests {
     @DisplayName("7. Falha: Tentar recuperar um ativo sem autenticação")
     void quandoRecuperarAtivoSemAutenticacaoRetornaUnauthorized() throws Exception {
       driver.perform(get(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
     }
 
     /**
@@ -1004,8 +889,6 @@ public class AtivoControllerTests {
           .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
     }
   }
 
@@ -1025,18 +908,11 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Sucesso: Listar ativos quando há múltiplos ativos cadastrados")
     void quandoListarMultiplosAtivosRetornaSucesso() throws Exception {
-      // Prepara uma lista de DTOs de resposta mockados
-      AtivoResponseDTO ativo2 =
-          ativoResponseDTO.toBuilder().id(2L).nome("VALE3").tipo(AtivoTipo.ACAO).build();
-      AtivoResponseDTO ativo3 =
-          ativoResponseDTO.toBuilder().id(3L).nome("GOOGL34").tipo(AtivoTipo.ACAO).build();
-      List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2, ativo3);
+      // Insere ativos reais no banco
+      ativoService.criar(ativoUpsertDTO);
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("GOOGL34").build());
 
-      // Configura o mock do serviço para retornar a lista de ativos
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
-
-      // Executa a requisição GET e verifica o status, tamanho da lista e nomes dos
-      // ativos
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
@@ -1045,9 +921,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$[1].nome").value("VALE3"))
           .andExpect(jsonPath("$[2].nome").value("GOOGL34"))
           .andDo(print());
-
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1057,35 +930,26 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("2. Sucesso: Listar ativos quando não há nenhum ativo cadastrado (lista vazia)")
     void quandoListarAtivosSemAtivosCadastradosRetornaListaVazia() throws Exception {
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
-          .thenReturn(Collections.emptyList());
-
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /** Testa se o número de ativos retornados na lista está correto. */
     @Test
     @DisplayName("3. Sucesso: Verificar o número correto de ativos retornados na lista")
     void quandoListarAtivosVerificaNumeroCorreto() throws Exception {
-      AtivoResponseDTO ativo2 =
-          ativoResponseDTO.toBuilder().id(2L).nome("VALE3").tipo(AtivoTipo.ACAO).build();
-      List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2);
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
+      // Insere dois ativos reais no banco
+      ativoService.criar(ativoUpsertDTO);
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
 
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(2))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1095,18 +959,16 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("4. Sucesso: Verificar se os dados dos ativos na lista estão corretos")
     void quandoListarAtivosVerificaDadosCorretos() throws Exception {
-      AtivoResponseDTO ativo2 =
-          ativoResponseDTO.toBuilder()
-              .id(2L)
+      // Insere dois ativos reais no banco
+      ativoService.criar(ativoUpsertDTO);
+      ativoService.criar(
+          ativoUpsertDTO.toBuilder()
               .nome("VALE3")
               .descricao("Vale S.A.")
               .status(StatusAtivo.DISPONIVEL)
               .valor(BigDecimal.valueOf(70.00))
               .tipo(AtivoTipo.ACAO)
-              .build();
-      List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2);
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
+              .build());
 
       String responseJsonString =
           driver
@@ -1125,10 +987,8 @@ public class AtivoControllerTests {
                   .constructCollectionType(List.class, AtivoResponseDTO.class));
 
       assertEquals(2, resultados.size());
-      assertEquals(ativoResponseDTO.getNome(), resultados.get(0).getNome());
-      assertEquals(ativo2.getNome(), resultados.get(1).getNome());
-
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
+      assertEquals("PETR4", resultados.get(0).getNome());
+      assertEquals("VALE3", resultados.get(1).getNome());
     }
 
     /**
@@ -1138,17 +998,10 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("5. Sucesso: Listar ativos após a criação de um novo ativo")
     void quandoListarAtivosAposCriacaoRetornaSucesso() throws Exception {
-      AtivoResponseDTO novoAtivo =
-          ativoResponseDTO.toBuilder().id(4L).nome("NOVO_ATIVO_LIST").build();
+      // Cria um ativo inicial
+      ativoService.criar(ativoUpsertDTO);
 
-      List<AtivoResponseDTO> ativosDepois = Arrays.asList(ativoResponseDTO, novoAtivo);
-
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class))).thenReturn(novoAtivo);
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
-          .thenReturn(ativosDepois); // sempre retorna a lista atualizada
-
-      // Criação do ativo
+      // Criação do novo ativo via API
       driver
           .perform(
               post(URI_ATIVOS)
@@ -1166,9 +1019,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.length()").value(2))
           .andExpect(jsonPath("$[1].nome").value("NOVO_ATIVO_LIST"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1178,16 +1028,13 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("6. Sucesso: Listar ativos após a exclusão de um ativo")
     void quandoListarAtivosAposExclusaoRetornaSucesso() throws Exception {
-      List<AtivoResponseDTO> ativosDepois = Collections.singletonList(ativoResponseDTO);
-
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(2L));
-
-      // Após a exclusão, a lista já está "atualizada"
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativosDepois);
+      // Cria dois ativos
+      AtivoResponseDTO ativo1 = ativoService.criar(ativoUpsertDTO);
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
 
       // Simula a exclusão de um ativo
       driver
-          .perform(delete(URI_ATIVOS + "/2").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativo1.getId()).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
 
       // Listagem após exclusão
@@ -1195,11 +1042,8 @@ public class AtivoControllerTests {
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(1))
-          .andExpect(jsonPath("$[0].nome").value("PETR4"))
+          .andExpect(jsonPath("$[0].nome").value("VALE3"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(2L));
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1209,21 +1053,14 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("7. Sucesso: Listar ativos após a atualização de um ativo")
     void quandoListarAtivosAposAtualizacaoRetornaSucesso() throws Exception {
-      AtivoResponseDTO ativoAtualizado =
-          ativoResponseDTO.toBuilder().nome("PETR4_UPDATED_LIST").build();
-
-      List<AtivoResponseDTO> ativosDepois = Collections.singletonList(ativoAtualizado);
-
-      Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(ativoAtualizado);
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
-          .thenReturn(ativosDepois); // sempre retorna a versão atualizada
+      // Cria um ativo
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
 
       // Simula a atualização de um ativo
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -1238,10 +1075,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.length()").value(1))
           .andExpect(jsonPath("$[0].nome").value("PETR4_UPDATED_LIST"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1251,8 +1084,6 @@ public class AtivoControllerTests {
     @DisplayName("8. Falha: Tentar listar ativos sem autenticação")
     void quandoListarAtivosSemAutenticacaoRetornaUnauthorized() throws Exception {
       driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1266,8 +1097,6 @@ public class AtivoControllerTests {
           .perform(get(URI_ATIVOS).param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1278,13 +1107,10 @@ public class AtivoControllerTests {
     @DisplayName(
         "10. Sucesso: Verificar a ordem dos ativos retornados (se houver uma ordem definida)")
     void quandoListarAtivosVerificaOrdemDefinida() throws Exception {
-      AtivoResponseDTO ativo2 =
-          ativoResponseDTO.toBuilder().id(2L).nome("AAPL34").tipo(AtivoTipo.ACAO).build();
-      AtivoResponseDTO ativo3 =
-          ativoResponseDTO.toBuilder().id(3L).nome("MSFT34").tipo(AtivoTipo.ACAO).build();
-      List<AtivoResponseDTO> ativosOrdenados = Arrays.asList(ativoResponseDTO, ativo2, ativo3);
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativosOrdenados);
+      // Insere três ativos em ordem específica
+      ativoService.criar(ativoUpsertDTO);
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("AAPL34").build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("MSFT34").build());
 
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
@@ -1293,25 +1119,30 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$[1].nome").value("AAPL34"))
           .andExpect(jsonPath("$[2].nome").value("MSFT34"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /** Testa a visualização de ativos por plano mockada para este teste. */
     @Test
     @DisplayName("11. Sucesso: Verificar a visualização de ativos por plano")
     void quandoListarAtivosVerificaVisualizacaoPorPlano() throws Exception {
-      var ativos =
-          Arrays.asList(
-              ativoResponseDTO.toBuilder().id(1L).nome("CDB").tipo(AtivoTipo.TESOURO).build());
-
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
+      // Cria um ativo do tipo Tesouro
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("CDB").tipo(AtivoTipo.TESOURO).build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("BTC").tipo(AtivoTipo.CRIPTO).build());
 
       var cliente =
           clienteRepository.save(
               Cliente.builder()
                   .nome("Cliente Um da Silva")
                   .plano(PlanoEnum.NORMAL)
+                  .endereco("Rua dos Testes, 123")
+                  .codigoAcesso("123456")
+                  .build());
+
+      var clientePremium =
+          clienteRepository.save(
+              Cliente.builder()
+                  .nome("Cliente Premium da Silva")
+                  .plano(PlanoEnum.PREMIUM)
                   .endereco("Rua dos Testes, 123")
                   .codigoAcesso("123456")
                   .build());
@@ -1325,7 +1156,15 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$[0].nome").value("CDB"))
           .andDo(print());
 
-      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
+      driver
+          .perform(
+              get(URI_ATIVOS)
+                  .param("userId", String.valueOf(clientePremium.getId()))
+                  .param("codigoAcesso", clientePremium.getCodigoAcesso()))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].nome").value("CDB"))
+          .andExpect(jsonPath("$[0].nome").value("CDB"))
+          .andDo(print());
     }
   }
 
@@ -1344,9 +1183,10 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Criação: Tentar criar um ativo com um nome que já existe")
     void quandoCriarAtivoComNomeExistenteRetornaBadRequest() throws Exception {
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class)))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_JA_EXISTE));
+      // Cria um ativo primeiro
+      ativoService.criar(ativoUpsertDTO);
 
+      // Tenta criar outro ativo com o mesmo nome
       driver
           .perform(
               post(URI_ATIVOS)
@@ -1355,8 +1195,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isConflict())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -1367,6 +1205,10 @@ public class AtivoControllerTests {
     @DisplayName(
         "2. Atualização: Tentar atualizar um ativo com um valor que excede o limite de precisão/escala")
     void quandoAtualizarAtivoComValorExcedenteRetornaBadRequest() throws Exception {
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long ativoId = ativoCriado.getId();
+
       // Define um valor muito grande que excederia a precisão/escala do BigDecimal no
       // banco de
       // dados ou validação
@@ -1375,15 +1217,12 @@ public class AtivoControllerTests {
       // A validação deve ocorrer antes de chamar o serviço
       driver
           .perform(
-              put(URI_ATIVOS + "/1")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.anyLong(), Mockito.any(AtivoUpsertDTO.class));
     }
 
     /**
@@ -1420,15 +1259,6 @@ public class AtivoControllerTests {
 
       // Teste para GET listar todos sem código de acesso
       driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
-
-      // Verifica que nenhum método do serviço foi chamado, pois a autenticação falhou
-      // antes
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.anyLong(), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1476,14 +1306,6 @@ public class AtivoControllerTests {
           .perform(get(URI_ATIVOS).param("codigoAcesso", "invalid_admin_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
-
-      // Verifica que nenhum método do serviço foi chamado
-      Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.never())
-          .atualizar(Mockito.anyLong(), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1494,25 +1316,6 @@ public class AtivoControllerTests {
     @DisplayName(
         "5. Integração: Criar um ativo, atualizá-lo, recuperá-lo, listar todos e depois excluí-lo, verificando o fluxo completo")
     void quandoExecutarFluxoCompletoCRUDRetornaSucesso() throws Exception {
-      // DTOs mockados para simular o retorno do serviço em cada etapa
-      AtivoResponseDTO createdAtivo =
-          ativoResponseDTO.toBuilder().id(10L).nome("ATIVO_FLUXO").build();
-      AtivoResponseDTO updatedAtivo = createdAtivo.toBuilder().nome("ATIVO_FLUXO_UPDATED").build();
-      List<AtivoResponseDTO> ativosList = Collections.singletonList(updatedAtivo);
-
-      // Configura os mocks para cada operação do serviço
-      Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class))).thenReturn(createdAtivo);
-      Mockito.when(ativoService.atualizar(Mockito.eq(10L), Mockito.any(AtivoUpsertDTO.class)))
-          .thenReturn(updatedAtivo);
-      Mockito.when(ativoService.buscarPorId(Mockito.eq(10L))).thenReturn(updatedAtivo);
-      // Configura listarTodos para retornar a lista com o ativo e depois uma lista
-      // vazia após a
-      // exclusão
-      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
-          .thenReturn(ativosList)
-          .thenReturn(Collections.emptyList());
-      Mockito.doNothing().when(ativoService).remover(Mockito.eq(10L));
-
       // 1. Criar o ativo
       driver
           .perform(
@@ -1525,10 +1328,28 @@ public class AtivoControllerTests {
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.nome").value("ATIVO_FLUXO"));
 
+      // Busca o ID do ativo criado
+      String responseJsonString =
+          driver
+              .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      List<AtivoResponseDTO> ativos =
+          objectMapper.readValue(
+              responseJsonString,
+              objectMapper
+                  .getTypeFactory()
+                  .constructCollectionType(List.class, AtivoResponseDTO.class));
+
+      Long ativoId = ativos.get(0).getId();
+
       // 2. Atualizar o ativo
       driver
           .perform(
-              put(URI_ATIVOS + "/10")
+              put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -1539,7 +1360,7 @@ public class AtivoControllerTests {
 
       // 3. Recuperar o ativo atualizado
       driver
-          .perform(get(URI_ATIVOS + "/10").param("codigoAcesso", "admin@123"))
+          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("ATIVO_FLUXO_UPDATED"));
 
@@ -1552,7 +1373,7 @@ public class AtivoControllerTests {
 
       // 5. Excluir o ativo
       driver
-          .perform(delete(URI_ATIVOS + "/10").param("codigoAcesso", "admin@123"))
+          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
           .andExpect(status().isNoContent());
 
       // 6. Listar todos os ativos novamente (deve estar vazio após a exclusão)
@@ -1560,18 +1381,6 @@ public class AtivoControllerTests {
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0));
-
-      // Verifica se todos os métodos do serviço foram chamados o número esperado de
-      // vezes
-      Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizar(Mockito.eq(10L), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(10L));
-      Mockito.verify(ativoService, Mockito.times(2))
-          .listar(
-              Mockito.any(
-                  Usuario.class)); // Uma vez para a lista com o ativo, outra para a lista vazia
-      Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(10L));
     }
   }
 
@@ -1584,23 +1393,12 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("Altera status com sucesso e retorna 200 OK")
     void alterarStatusComSucesso() throws Exception {
-      Long id = 1L;
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long id = ativoCriado.getId();
 
       AlterarStatusDTO dto = new AlterarStatusDTO();
       dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
-
-      Ativo ativoMock =
-          Acao.builder()
-              .id(id)
-              .nome("Ativo Teste")
-              .descricao("Descrição Teste")
-              .status(StatusAtivo.INDISPONIVEL)
-              .valor(new BigDecimal("100.00"))
-              .build();
-
-      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativoMock);
-
-      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus())).thenReturn(responseDTO);
 
       driver
           .perform(
@@ -1612,8 +1410,6 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.id").value(id))
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).alterarStatus(id, dto.getNovoStatus());
     }
 
     @Test
@@ -1623,9 +1419,6 @@ public class AtivoControllerTests {
       AlterarStatusDTO dto = new AlterarStatusDTO();
       dto.setNovoStatus(StatusAtivo.DISPONIVEL);
 
-      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus()))
-          .thenThrow(new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
-
       driver
           .perform(
               put(URI_STATUS, id)
@@ -1634,8 +1427,6 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(dto)))
           .andExpect(status().isNotFound())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.times(1)).alterarStatus(id, dto.getNovoStatus());
     }
 
     @Test
@@ -1653,14 +1444,14 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(dto)))
           .andExpect(status().isUnauthorized())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).alterarStatus(Mockito.anyLong(), Mockito.any());
     }
 
     @Test
     @DisplayName("Tenta alterar status com dto inválido, retorna 400 Bad Request")
     void alterarStatusComDtoInvalido() throws Exception {
-      Long id = 1L;
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long id = ativoCriado.getId();
 
       // DTO com novoStatus null - violação @NotNull
       AlterarStatusDTO dto = new AlterarStatusDTO();
@@ -1674,31 +1465,18 @@ public class AtivoControllerTests {
                   .content(objectMapper.writeValueAsString(dto)))
           .andExpect(status().isBadRequest())
           .andDo(print());
-
-      Mockito.verify(ativoService, Mockito.never()).alterarStatus(Mockito.anyLong(), Mockito.any());
     }
 
     @Test
     @DisplayName("Muda de DISPONIVEL para INDISPONIVEL com sucesso")
     void mudaDeDisponivelParaIndisponivel() throws Exception {
-      Long id = 1L;
+      // Cria um ativo primeiro
+      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
+      Long id = ativoCriado.getId();
 
       // DTO com novo status
       AlterarStatusDTO dto = new AlterarStatusDTO();
       dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
-
-      Ativo ativo =
-          Acao.builder()
-              .id(id)
-              .nome("Teste Ativo")
-              .descricao("Teste descrição")
-              .status(StatusAtivo.INDISPONIVEL)
-              .valor(new BigDecimal("200.00"))
-              .build();
-
-      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativo);
-
-      Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus())).thenReturn(responseDTO);
 
       driver
           .perform(
@@ -1710,47 +1488,225 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.id").value(id))
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
           .andDo(print());
-
-      Mockito.verify(ativoService).alterarStatus(id, dto.getNovoStatus());
     }
   }
 
   @Nested
   @DisplayName("Testes de Atualização de Ativo (PUT /ativos/{id})")
   class AtualizarCotacaoAtivoTests {
+    @Autowired private AtivoRepository ativoRepository;
+
+    Cripto cripto;
+    Acao acao;
+    Tesouro tesouro;
+
+    @BeforeEach
+    void setup() {
+      cripto =
+          ativoRepository.save(
+              Cripto.builder()
+                  .nome("Doge")
+                  .descricao("Moeda dogecoin")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.CRIPTO)
+                  .build());
+
+      acao =
+          ativoRepository.save(
+              Acao.builder()
+                  .nome("PETR4")
+                  .descricao("Acao petrobras")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.ACAO)
+                  .build());
+      tesouro =
+          ativoRepository.save(
+              Tesouro.builder()
+                  .nome("Selic")
+                  .descricao("tesouro selic")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.TESOURO)
+                  .build());
+    }
 
     @Test
-    @DisplayName("Testa se Controller funciona para atualizar cotação")
-    void quandoAtualizarAtivoValidoRetornaSucesso() throws Exception {
+    @DisplayName("Atualiza cotação de cripto com cotacao valida")
+    void quandoAtualizarCotacaoCriptoValidoRetornaSucesso() throws Exception {
       ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100)).build();
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
 
-      AtivoResponseDTO ativoResponse =
-          AtivoResponseDTO.builder()
-              .nome("Dog")
-              .descricao("Coisa")
-              .valor(BigDecimal.valueOf(100))
-              .status(StatusAtivo.DISPONIVEL)
-              .id(1L)
-              .tipo(AtivoTipo.CRIPTO)
-              .build();
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
-      Mockito.when(ativoService.atualizarCotacao(Mockito.eq(1L), Mockito.any(ValorUpsertDTO.class)))
-          .thenReturn(ativoResponse);
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+    }
 
-      driver
-          .perform(
-              put(URI_ATIVOS + "/1/cotacao")
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(valorUpsertDTO)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.valor").value(BigDecimal.valueOf(100)))
-          .andDo(print());
+    @Test
+    @DisplayName("Atualiza cotação de cripto com sucesso")
+    void quandoAtualizarCotacaoCriptoExatamenteUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
 
-      // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1))
-          .atualizarCotacao(Mockito.eq(1L), Mockito.any(ValorUpsertDTO.class));
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de cripto com sucesso")
+    void quandoAtualizarCotacaoCriptoMenosUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(cripto.getId()).get().getValor())
+              == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de tesouro retorna erro")
+    void quandoTentaAtualizarTesouro() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + tesouro.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(tesouro.getId()).get().getValor())
+              == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao valido")
+    void quandoAtualizarCotacaoAcaoValidoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao exatamente 1% retorna sucesso")
+    void quandoAtualizarCotacaoAcaoExatamenteUmPorcentoRetornaSucesso() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      AtivoResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
+
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+    }
+
+    @Test
+    @DisplayName("Atualiza cotação de acao com cotacao menor que 1% retorna erro")
+    void quandoAtualizarCotacaoAcaoMenosUmPorcentoRetornaErro() throws Exception {
+      ValorUpsertDTO valorUpsertDTO =
+          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      String responseJsonString =
+          driver
+              .perform(
+                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
+                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO, resultado.getCode());
+
+      assertTrue(
+          BigDecimal.valueOf(100.00)
+                  .compareTo(ativoRepository.findById(acao.getId()).get().getValor())
+              == 0);
     }
   }
 }

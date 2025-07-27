@@ -21,7 +21,7 @@ public class PremiumAutenticador extends Autenticador {
       return Optional.of(Admin.getInstance());
     }
 
-    Optional<Cliente> clienteRes = clienteRepository.findByCodigoAcesso(codigoAcesso);
+    Optional<Cliente> clienteRes = clienteRepository.findById(id);
     if (clienteRes == null) {
       throw new CommerceException(ErrorCode.UNAUTHORIZED);
     }
