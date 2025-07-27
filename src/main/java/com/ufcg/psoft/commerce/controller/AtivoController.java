@@ -45,9 +45,7 @@ public class AtivoController {
   @GetMapping("")
   @Autenticado(TipoAutenticacao.NORMAL)
   public ResponseEntity<?> listarAtivos(@RequestUser Usuario usuario) {
-    var resp = ativoService.listar(usuario);
-
-    return ResponseEntity.status(HttpStatus.OK).body(resp);
+    return ResponseEntity.status(HttpStatus.OK).body(ativoService.listar(usuario));
   }
 
   @PutMapping("/{id}/status")
