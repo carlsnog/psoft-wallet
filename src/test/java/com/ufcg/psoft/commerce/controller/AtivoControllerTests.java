@@ -1129,8 +1129,8 @@ public class AtivoControllerTests {
                   .endereco("Rua dos Testes, 123")
                   .codigoAcesso("123456")
                   .build());
-    
-      var clientePremium = 
+
+      var clientePremium =
           clienteRepository.save(
               Cliente.builder()
                   .nome("Cliente Premium da Silva")
@@ -1147,7 +1147,7 @@ public class AtivoControllerTests {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$[0].nome").value("CDB"))
           .andDo(print());
-      
+
       driver
           .perform(
               get(URI_ATIVOS)
