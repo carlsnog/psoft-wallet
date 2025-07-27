@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "cliente")
-public class Cliente extends Usuario {
+public class Cliente implements Usuario {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)

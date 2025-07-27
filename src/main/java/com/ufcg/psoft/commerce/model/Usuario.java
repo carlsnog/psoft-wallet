@@ -1,15 +1,10 @@
 package com.ufcg.psoft.commerce.model;
 
-import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-
-@MappedSuperclass
-@Getter
-public abstract class Usuario {
+public interface Usuario {
 
   public abstract boolean isAdmin();
 
-  public boolean validar(String codigoAcesso) {
+  public default boolean validar(String codigoAcesso) {
     return this.getCodigoAcesso().equals(codigoAcesso);
   }
 
