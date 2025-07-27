@@ -13,6 +13,8 @@ import com.ufcg.psoft.commerce.http.exception.*;
 import com.ufcg.psoft.commerce.model.Acao;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
+import com.ufcg.psoft.commerce.model.Cliente;
+import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,6 +39,9 @@ public class AtivoControllerTests {
 
   // Objeto para simular requisições HTTP para o controller
   @Autowired MockMvc driver;
+
+  // Repositório de clientes
+  @Autowired ClienteRepository clienteRepository;
 
   // Mock do AtivoService para controlar o comportamento da camada de serviço
   @MockBean AtivoService ativoService;
@@ -103,12 +109,14 @@ public class AtivoControllerTests {
     @DisplayName(
         "1. Sucesso: Criar um ativo válido (Ação) com todos os campos preenchidos corretamente")
     void quandoCriarAtivoValidoAcaoRetornaSucesso() throws Exception {
-      // Configura o mock do serviço para retornar um DTO de resposta quando o método 'criar' for
+      // Configura o mock do serviço para retornar um DTO de resposta quando o método
+      // 'criar' for
       // chamado
       Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class)))
           .thenReturn(ativoResponseDTO);
 
-      // Executa a requisição POST para /ativos com o DTO de criação e o código de acesso de admin
+      // Executa a requisição POST para /ativos com o DTO de criação e o código de
+      // acesso de admin
       driver
           .perform(
               post(URI_ATIVOS)
@@ -132,7 +140,8 @@ public class AtivoControllerTests {
           .andDo(print()); // Imprime os detalhes da requisição e resposta no console (útil para
       // depuração)
 
-      // Verifica se o método 'criar' do serviço foi chamado exatamente uma vez com qualquer DTO de
+      // Verifica se o método 'criar' do serviço foi chamado exatamente uma vez com
+      // qualquer DTO de
       // criação
       Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
     }
@@ -240,7 +249,8 @@ public class AtivoControllerTests {
           .andExpect(status().isBadRequest())
           .andDo(print());
 
-      // Verifica que o método 'criar' do serviço NUNCA foi chamado, pois a validação deve ocorrer
+      // Verifica que o método 'criar' do serviço NUNCA foi chamado, pois a validação
+      // deve ocorrer
       // antes
       Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
     }
@@ -813,7 +823,8 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("1. Sucesso: Recuperar um ativo existente por ID")
     void quandoRecuperarAtivoExistentePorIdRetornaSucesso() throws Exception {
-      // Configura o mock do serviço para retornar o DTO de resposta quando 'buscarPorId' for
+      // Configura o mock do serviço para retornar o DTO de resposta quando
+      // 'buscarPorId' for
       // chamado
       Mockito.when(ativoService.buscarPorId(Mockito.eq(1L))).thenReturn(ativoResponseDTO);
 
@@ -1005,6 +1016,7 @@ public class AtivoControllerTests {
    */
   @Nested
   @DisplayName("Testes de Listagem de Ativos (GET /ativos)")
+  @Transactional
   class ListarAtivosTests {
 
     /**
@@ -1022,9 +1034,10 @@ public class AtivoControllerTests {
       List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2, ativo3);
 
       // Configura o mock do serviço para retornar a lista de ativos
-      Mockito.when(ativoService.listarTodos()).thenReturn(ativos);
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
 
-      // Executa a requisição GET e verifica o status, tamanho da lista e nomes dos ativos
+      // Executa a requisição GET e verifica o status, tamanho da lista e nomes dos
+      // ativos
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
           .andExpect(status().isOk())
@@ -1035,7 +1048,7 @@ public class AtivoControllerTests {
           .andDo(print());
 
       // Verifica a chamada ao serviço
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1045,7 +1058,8 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("2. Sucesso: Listar ativos quando não há nenhum ativo cadastrado (lista vazia)")
     void quandoListarAtivosSemAtivosCadastradosRetornaListaVazia() throws Exception {
-      Mockito.when(ativoService.listarTodos()).thenReturn(Collections.emptyList());
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
+          .thenReturn(Collections.emptyList());
 
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
@@ -1053,7 +1067,7 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.length()").value(0))
           .andDo(print());
 
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /** Testa se o número de ativos retornados na lista está correto. */
@@ -1064,7 +1078,7 @@ public class AtivoControllerTests {
           ativoResponseDTO.toBuilder().id(2L).nome("VALE3").tipo(AtivoTipo.ACAO).build();
       List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2);
 
-      Mockito.when(ativoService.listarTodos()).thenReturn(ativos);
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
 
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
@@ -1072,7 +1086,7 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$.length()").value(2))
           .andDo(print());
 
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1093,7 +1107,7 @@ public class AtivoControllerTests {
               .build();
       List<AtivoResponseDTO> ativos = Arrays.asList(ativoResponseDTO, ativo2);
 
-      Mockito.when(ativoService.listarTodos()).thenReturn(ativos);
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
 
       String responseJsonString =
           driver
@@ -1115,7 +1129,7 @@ public class AtivoControllerTests {
       assertEquals(ativoResponseDTO.getNome(), resultados.get(0).getNome());
       assertEquals(ativo2.getNome(), resultados.get(1).getNome());
 
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1132,7 +1146,7 @@ public class AtivoControllerTests {
 
       Mockito.when(ativoService.criar(Mockito.any(AtivoUpsertDTO.class))).thenReturn(novoAtivo);
 
-      Mockito.when(ativoService.listarTodos())
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
           .thenReturn(ativosDepois); // sempre retorna a lista atualizada
 
       // Criação do ativo
@@ -1155,7 +1169,7 @@ public class AtivoControllerTests {
           .andDo(print());
 
       Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1165,13 +1179,12 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("6. Sucesso: Listar ativos após a exclusão de um ativo")
     void quandoListarAtivosAposExclusaoRetornaSucesso() throws Exception {
-      AtivoResponseDTO ativo2 = ativoResponseDTO.toBuilder().id(2L).nome("ATIVO_A_EXCLUIR").build();
       List<AtivoResponseDTO> ativosDepois = Collections.singletonList(ativoResponseDTO);
 
       Mockito.doNothing().when(ativoService).remover(Mockito.eq(2L));
 
       // Após a exclusão, a lista já está "atualizada"
-      Mockito.when(ativoService.listarTodos()).thenReturn(ativosDepois);
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativosDepois);
 
       // Simula a exclusão de um ativo
       driver
@@ -1187,7 +1200,7 @@ public class AtivoControllerTests {
           .andDo(print());
 
       Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(2L));
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1205,7 +1218,7 @@ public class AtivoControllerTests {
       Mockito.when(ativoService.atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class)))
           .thenReturn(ativoAtualizado);
 
-      Mockito.when(ativoService.listarTodos())
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
           .thenReturn(ativosDepois); // sempre retorna a versão atualizada
 
       // Simula a atualização de um ativo
@@ -1229,7 +1242,7 @@ public class AtivoControllerTests {
 
       Mockito.verify(ativoService, Mockito.times(1))
           .atualizar(Mockito.eq(1L), Mockito.any(AtivoUpsertDTO.class));
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1240,7 +1253,7 @@ public class AtivoControllerTests {
     void quandoListarAtivosSemAutenticacaoRetornaUnauthorized() throws Exception {
       driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
 
-      Mockito.verify(ativoService, Mockito.never()).listarTodos();
+      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1255,7 +1268,7 @@ public class AtivoControllerTests {
           .andExpect(status().isUnauthorized())
           .andDo(print());
 
-      Mockito.verify(ativoService, Mockito.never()).listarTodos();
+      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1272,7 +1285,7 @@ public class AtivoControllerTests {
           ativoResponseDTO.toBuilder().id(3L).nome("MSFT34").tipo(AtivoTipo.ACAO).build();
       List<AtivoResponseDTO> ativosOrdenados = Arrays.asList(ativoResponseDTO, ativo2, ativo3);
 
-      Mockito.when(ativoService.listarTodos()).thenReturn(ativosOrdenados);
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativosOrdenados);
 
       driver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
@@ -1282,7 +1295,38 @@ public class AtivoControllerTests {
           .andExpect(jsonPath("$[2].nome").value("MSFT34"))
           .andDo(print());
 
-      Mockito.verify(ativoService, Mockito.times(1)).listarTodos();
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
+    }
+
+    /** Testa a visualização de ativos por plano mockada para este teste. */
+    @Test
+    @DisplayName("11. Sucesso: Verificar a visualização de ativos por plano")
+    void quandoListarAtivosVerificaVisualizacaoPorPlano() throws Exception {
+      var ativos =
+          Arrays.asList(
+              ativoResponseDTO.toBuilder().id(1L).nome("CDB").tipo(AtivoTipo.TESOURO).build());
+
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class))).thenReturn(ativos);
+
+      var cliente =
+          clienteRepository.save(
+              Cliente.builder()
+                  .nome("Cliente Um da Silva")
+                  .plano(PlanoEnum.NORMAL)
+                  .endereco("Rua dos Testes, 123")
+                  .codigoAcesso("123456")
+                  .build());
+
+      driver
+          .perform(
+              get(URI_ATIVOS)
+                  .param("userId", String.valueOf(cliente.getId()))
+                  .param("codigoAcesso", cliente.getCodigoAcesso()))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].nome").value("CDB"))
+          .andDo(print());
+
+      Mockito.verify(ativoService, Mockito.times(1)).listar(Mockito.any(Usuario.class));
     }
   }
 
@@ -1324,7 +1368,8 @@ public class AtivoControllerTests {
     @DisplayName(
         "2. Atualização: Tentar atualizar um ativo com um valor que excede o limite de precisão/escala")
     void quandoAtualizarAtivoComValorExcedenteRetornaBadRequest() throws Exception {
-      // Define um valor muito grande que excederia a precisão/escala do BigDecimal no banco de
+      // Define um valor muito grande que excederia a precisão/escala do BigDecimal no
+      // banco de
       // dados ou validação
       ativoUpsertDTO.setValor(new BigDecimal("12345678901234567890.12345"));
 
@@ -1377,13 +1422,14 @@ public class AtivoControllerTests {
       // Teste para GET listar todos sem código de acesso
       driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
 
-      // Verifica que nenhum método do serviço foi chamado, pois a autenticação falhou antes
+      // Verifica que nenhum método do serviço foi chamado, pois a autenticação falhou
+      // antes
       Mockito.verify(ativoService, Mockito.never()).criar(Mockito.any(AtivoUpsertDTO.class));
       Mockito.verify(ativoService, Mockito.never())
           .atualizar(Mockito.anyLong(), Mockito.any(AtivoUpsertDTO.class));
       Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
       Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).listarTodos();
+      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1438,7 +1484,7 @@ public class AtivoControllerTests {
           .atualizar(Mockito.anyLong(), Mockito.any(AtivoUpsertDTO.class));
       Mockito.verify(ativoService, Mockito.never()).remover(Mockito.anyLong());
       Mockito.verify(ativoService, Mockito.never()).buscarPorId(Mockito.anyLong());
-      Mockito.verify(ativoService, Mockito.never()).listarTodos();
+      Mockito.verify(ativoService, Mockito.never()).listar(Mockito.any(Usuario.class));
     }
 
     /**
@@ -1460,9 +1506,10 @@ public class AtivoControllerTests {
       Mockito.when(ativoService.atualizar(Mockito.eq(10L), Mockito.any(AtivoUpsertDTO.class)))
           .thenReturn(updatedAtivo);
       Mockito.when(ativoService.buscarPorId(Mockito.eq(10L))).thenReturn(updatedAtivo);
-      // Configura listarTodos para retornar a lista com o ativo e depois uma lista vazia após a
+      // Configura listarTodos para retornar a lista com o ativo e depois uma lista
+      // vazia após a
       // exclusão
-      Mockito.when(ativoService.listarTodos())
+      Mockito.when(ativoService.listar(Mockito.any(Usuario.class)))
           .thenReturn(ativosList)
           .thenReturn(Collections.emptyList());
       Mockito.doNothing().when(ativoService).remover(Mockito.eq(10L));
@@ -1515,13 +1562,16 @@ public class AtivoControllerTests {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0));
 
-      // Verifica se todos os métodos do serviço foram chamados o número esperado de vezes
+      // Verifica se todos os métodos do serviço foram chamados o número esperado de
+      // vezes
       Mockito.verify(ativoService, Mockito.times(1)).criar(Mockito.any(AtivoUpsertDTO.class));
       Mockito.verify(ativoService, Mockito.times(1))
           .atualizar(Mockito.eq(10L), Mockito.any(AtivoUpsertDTO.class));
       Mockito.verify(ativoService, Mockito.times(1)).buscarPorId(Mockito.eq(10L));
       Mockito.verify(ativoService, Mockito.times(2))
-          .listarTodos(); // Uma vez para a lista com o ativo, outra para a lista vazia
+          .listar(
+              Mockito.any(
+                  Usuario.class)); // Uma vez para a lista com o ativo, outra para a lista vazia
       Mockito.verify(ativoService, Mockito.times(1)).remover(Mockito.eq(10L));
     }
   }
@@ -1638,17 +1688,7 @@ public class AtivoControllerTests {
       AlterarStatusDTO dto = new AlterarStatusDTO();
       dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
 
-      // Simula que antes era DISPONIVEL e depois virou INDISPONIVEL
-      Ativo ativoAntes =
-          Acao.builder()
-              .id(id)
-              .nome("Teste Ativo")
-              .descricao("Teste descrição")
-              .status(StatusAtivo.DISPONIVEL) // status original
-              .valor(new BigDecimal("200.00"))
-              .build();
-
-      Ativo ativoDepois =
+      Ativo ativo =
           Acao.builder()
               .id(id)
               .nome("Teste Ativo")
@@ -1657,7 +1697,7 @@ public class AtivoControllerTests {
               .valor(new BigDecimal("200.00"))
               .build();
 
-      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativoDepois);
+      AtivoResponseDTO responseDTO = new AtivoResponseDTO(ativo);
 
       Mockito.when(ativoService.alterarStatus(id, dto.getNovoStatus())).thenReturn(responseDTO);
 

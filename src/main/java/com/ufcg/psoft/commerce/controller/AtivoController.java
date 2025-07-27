@@ -5,6 +5,8 @@ import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
+import com.ufcg.psoft.commerce.http.request.RequestUser;
+import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +16,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/ativos")
+@Autenticado(TipoAutenticacao.ADMIN)
 public class AtivoController {
 
   @Autowired AtivoService ativoService;
 
   @PostMapping
-  @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> criarAtivo(@RequestBody @Valid AtivoUpsertDTO ativoDto) {
     return ResponseEntity.status(HttpStatus.CREATED).body(ativoService.criar(ativoDto));
   }
 
   @PutMapping("/{id}")
-  @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> atualizarAtivo(
       @PathVariable Long id, @RequestBody @Valid AtivoUpsertDTO ativoDto) {
     return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizar(id, ativoDto));
@@ -39,26 +40,23 @@ public class AtivoController {
   }
 
   @DeleteMapping("/{id}")
-  @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> excluirAtivo(@PathVariable Long id) {
     ativoService.remover(id);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{id}")
-  @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> recuperarAtivo(@PathVariable Long id) {
     return ResponseEntity.status(HttpStatus.OK).body(ativoService.buscarPorId(id));
   }
 
   @GetMapping("")
-  @Autenticado(TipoAutenticacao.ADMIN)
-  public ResponseEntity<?> listarAtivos() {
-    return ResponseEntity.status(HttpStatus.OK).body(ativoService.listarTodos());
+  @Autenticado(TipoAutenticacao.NORMAL)
+  public ResponseEntity<?> listarAtivos(@RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK).body(ativoService.listar(usuario));
   }
 
   @PutMapping("/{id}/status")
-  @Autenticado(TipoAutenticacao.ADMIN)
   public ResponseEntity<?> atualizarStatus(
       @PathVariable Long id, @RequestBody @Valid AlterarStatusDTO dto) {
     return ResponseEntity.ok(ativoService.alterarStatus(id, dto.getNovoStatus()));

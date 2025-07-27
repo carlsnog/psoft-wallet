@@ -4,6 +4,7 @@ import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
 import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
+import com.ufcg.psoft.commerce.model.Usuario;
 import java.util.List;
 
 public interface AtivoService {
@@ -17,7 +18,7 @@ public interface AtivoService {
 
   AtivoResponseDTO buscarPorId(Long id);
 
-  List<AtivoResponseDTO> listarTodos();
+  List<AtivoResponseDTO> listar(Usuario usuario);
 
   AtivoResponseDTO alterarStatus(Long id, StatusAtivo novoStatus);
 }
