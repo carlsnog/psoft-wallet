@@ -1,7 +1,8 @@
 package com.ufcg.psoft.commerce.service.ativo;
 
+import com.ufcg.psoft.commerce.dto.AtivoCreateDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
-import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.AtivoUpdateDTO;
 import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
@@ -28,7 +29,7 @@ public class AtivoServiceImpl implements AtivoService {
   @Autowired ModelMapper modelMapper;
 
   @Override
-  public AtivoResponseDTO criar(AtivoUpsertDTO dto) {
+  public AtivoResponseDTO criar(AtivoCreateDTO dto) {
     if (repository.existsByNome(dto.getNome())) {
       throw new CommerceException(ErrorCode.ATIVO_JA_EXISTE);
     }
@@ -39,15 +40,11 @@ public class AtivoServiceImpl implements AtivoService {
   }
 
   @Override
-  public AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto) {
+  public AtivoResponseDTO atualizar(Long id, AtivoUpdateDTO dto) {
     Ativo ativo =
         repository
             .findById(id)
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
-
-    if (!ativo.getTipo().equals(dto.getTipo())) {
-      throw new CommerceException(ErrorCode.ALTERACAO_TIPO_NAO_PERMITIDA);
-    }
 
     if (repository.existsByNomeAndIdNot(dto.getNome(), id)) {
       throw new CommerceException(ErrorCode.ATIVO_JA_EXISTE);

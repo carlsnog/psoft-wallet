@@ -1,16 +1,17 @@
 package com.ufcg.psoft.commerce.service.ativo;
 
+import com.ufcg.psoft.commerce.dto.AtivoCreateDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
-import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.AtivoUpdateDTO;
 import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.model.Usuario;
 import java.util.List;
 
 public interface AtivoService {
-  AtivoResponseDTO criar(AtivoUpsertDTO dto);
+  AtivoResponseDTO criar(AtivoCreateDTO dto);
 
-  AtivoResponseDTO atualizar(Long id, AtivoUpsertDTO dto);
+  AtivoResponseDTO atualizar(Long id, AtivoUpdateDTO dto);
 
   AtivoResponseDTO atualizarCotacao(Long id, ValorUpsertDTO dto);
 

@@ -9,7 +9,6 @@ public enum ErrorCode {
   INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
 
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
-  ALTERACAO_TIPO_NAO_PERMITIDA("Nao e permitido alterar o tipo do ativo", HttpStatus.BAD_REQUEST),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
   OPERACAO_INVALIDA_PARA_O_TIPO("O tipo do ativo não permite a operação", HttpStatus.BAD_REQUEST),
   ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO(

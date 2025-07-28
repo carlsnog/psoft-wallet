@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class AtivoUpsertDTO {
+public class AtivoCreateDTO {
 
   @JsonProperty("nome")
   @NotBlank(message = "Nome do ativo obrigatorio")

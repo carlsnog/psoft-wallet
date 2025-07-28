@@ -55,11 +55,12 @@ public class AtivoControllerTests {
   // DTOs de resposta e requisição para uso nos testes
   // TODO: escopar ativoDTO em classe especifica
   AtivoResponseDTO ativoResponseDTO;
-  AtivoUpsertDTO ativoUpsertDTO;
+  AtivoCreateDTO ativoUpsertDTO;
+  AtivoUpdateDTO ativoUpdateDTO;
 
   /**
    * Configuração inicial para cada teste. Inicializa o {@link ObjectMapper} para suportar tipos de
-   * data/hora do Java 8. Prepara instâncias de {@link AtivoResponseDTO} e {@link AtivoUpsertDTO}
+   * data/hora do Java 8. Prepara instâncias de {@link AtivoResponseDTO} e {@link AtivoCreateDTO}
    * com dados padrão para serem usados nos testes.
    */
   @BeforeEach
@@ -77,13 +78,15 @@ public class AtivoControllerTests {
             .build();
 
     ativoUpsertDTO =
-        AtivoUpsertDTO.builder()
+        AtivoCreateDTO.builder()
             .nome("PETR4")
             .descricao("Petrobras PN")
             .status(StatusAtivo.DISPONIVEL)
             .valor(BigDecimal.valueOf(30.50))
             .tipo(AtivoTipo.ACAO)
             .build();
+
+    ativoUpdateDTO = AtivoUpdateDTO.builder().nome("PETR4").descricao("Petrobras PN").build();
   }
 
   /** Limpeza após cada teste. O banco é resetado automaticamente pela anotação @DirtiesContext. */
@@ -145,7 +148,7 @@ public class AtivoControllerTests {
         "2. Sucesso: Criar um ativo válido (Cripto) com todos os campos preenchidos corretamente")
     void quandoCriarAtivoValidoCriptoRetornaSucesso() throws Exception {
       // Cria DTOs específicos para o tipo Cripto
-      AtivoUpsertDTO criptoUpsertDTO =
+      AtivoCreateDTO criptoUpsertDTO =
           ativoUpsertDTO.toBuilder()
               .tipo(AtivoTipo.CRIPTO)
               .nome("BTC")
@@ -174,7 +177,7 @@ public class AtivoControllerTests {
         "3. Sucesso: Criar um ativo válido (Tesouro) com todos os campos preenchidos corretamente")
     void quandoCriarAtivoValidoTesouroRetornaSucesso() throws Exception {
       // Cria DTOs específicos para o tipo Tesouro
-      AtivoUpsertDTO tesouroUpsertDTO =
+      AtivoCreateDTO tesouroUpsertDTO =
           ativoUpsertDTO.toBuilder()
               .tipo(AtivoTipo.TESOURO)
               .nome("Tesouro Selic")
@@ -355,7 +358,7 @@ public class AtivoControllerTests {
               put(URI_ATIVOS + "/" + ativoId)
                   .param("codigoAcesso", "admin@123")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+                  .content(objectMapper.writeValueAsString(ativoUpdateDTO)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4"))
           .andDo(print());
@@ -373,14 +376,8 @@ public class AtivoControllerTests {
       Long ativoId = ativoCriado.getId();
 
       // Prepara o DTO com o novo nome e outros campos inalterados
-      AtivoUpsertDTO ativoParaAtualizar =
-          ativoUpsertDTO.toBuilder()
-              .nome("PETR4_UPDATED")
-              .descricao("Nova Descrição")
-              .status(StatusAtivo.INDISPONIVEL)
-              .valor(BigDecimal.valueOf(40.00))
-              .tipo(AtivoTipo.ACAO)
-              .build();
+      AtivoUpdateDTO ativoParaAtualizar =
+          ativoUpdateDTO.toBuilder().nome("PETR4_UPDATED").descricao("Nova Descrição").build();
 
       driver
           .perform(
@@ -401,14 +398,8 @@ public class AtivoControllerTests {
       AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
       Long ativoId = ativoCriado.getId();
 
-      AtivoUpsertDTO ativoParaAtualizar =
-          ativoUpsertDTO.toBuilder()
-              .nome("PETR4")
-              .descricao("Nova Descrição")
-              .status(StatusAtivo.INDISPONIVEL)
-              .valor(BigDecimal.valueOf(40.00))
-              .tipo(AtivoTipo.ACAO)
-              .build();
+      AtivoUpdateDTO ativoParaAtualizar =
+          ativoUpdateDTO.toBuilder().nome("PETR4").descricao("Nova Descrição").build();
 
       driver
           .perform(
@@ -421,68 +412,12 @@ public class AtivoControllerTests {
           .andDo(print());
     }
 
-    /** Testa a atualização apenas do status de um ativo. */
-    @Test
-    @DisplayName("4. Sucesso: Atualizar apenas o status de um ativo")
-    void quandoAtualizarApenasStatusAtivoRetornaSucesso() throws Exception {
-      // Cria um ativo primeiro
-      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
-      Long ativoId = ativoCriado.getId();
-
-      AtivoUpsertDTO ativoParaAtualizar =
-          ativoUpsertDTO.toBuilder()
-              .nome("PETR4")
-              .descricao("Petrobras PN")
-              .status(StatusAtivo.INDISPONIVEL)
-              .valor(BigDecimal.valueOf(40.00))
-              .tipo(AtivoTipo.ACAO)
-              .build();
-
-      driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
-          .andDo(print());
-    }
-
-    /** Testa a atualização apenas do valor de um ativo. */
-    @Test
-    @DisplayName("5. Sucesso: Atualizar apenas o valor de um ativo")
-    void quandoAtualizarApenasValorAtivoRetornaSucesso() throws Exception {
-      // Cria um ativo primeiro
-      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
-      Long ativoId = ativoCriado.getId();
-
-      AtivoUpsertDTO ativoParaAtualizar =
-          ativoUpsertDTO.toBuilder()
-              .nome("PETR4")
-              .descricao("Petrobras PN")
-              .status(StatusAtivo.DISPONIVEL)
-              .valor(BigDecimal.valueOf(50.00))
-              .tipo(AtivoTipo.ACAO)
-              .build();
-
-      driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.valor").value(50.00))
-          .andDo(print());
-    }
-
     /**
      * Testa a falha na atualização de um ativo que não existe. Espera um status HTTP 404 Not Found,
      * simulando a exceção {@code ATIVO_NAO_ENCONTRADO}.
      */
     @Test
-    @DisplayName("6. Falha: Tentar atualizar um ativo que não existe (ID inválido)")
+    @DisplayName("4. Falha: Tentar atualizar um ativo que não existe (ID inválido)")
     void quandoAtualizarAtivoInexistenteRetornaNotFound() throws Exception {
       driver
           .perform(
@@ -499,7 +434,7 @@ public class AtivoControllerTests {
      * Request.
      */
     @Test
-    @DisplayName("7. Falha: Tentar atualizar um ativo com nome nulo")
+    @DisplayName("5. Falha: Tentar atualizar um ativo com nome nulo")
     void quandoAtualizarAtivoComNomeNuloRetornaBadRequest() throws Exception {
       // Cria um ativo primeiro
       AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
@@ -522,60 +457,13 @@ public class AtivoControllerTests {
      * 400 Bad Request.
      */
     @Test
-    @DisplayName("8. Falha: Tentar atualizar um ativo com descrição vazia")
+    @DisplayName("6. Falha: Tentar atualizar um ativo com descrição vazia")
     void quandoAtualizarAtivoComDescricaoVaziaRetornaBadRequest() throws Exception {
       // Cria um ativo primeiro
       AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
       Long ativoId = ativoCriado.getId();
 
       ativoUpsertDTO.setDescricao("");
-
-      driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
-          .andExpect(status().isBadRequest())
-          .andDo(print());
-    }
-
-    /**
-     * Testa a falha na atualização de um ativo quando há tentativa de alterar seu tipo. Espera um
-     * status HTTP 400 Bad Request, simulando a exceção {@code ALTERACAO_TIPO_NAO_PERMITIDA}.
-     */
-    @Test
-    @DisplayName(
-        "9. Falha: Tentar alterar o tipo do ativo (regra de negócio ALTERACAO_TIPO_NAO_PERMITIDA)")
-    void quandoAtualizarAtivoAlterandoTipoRetornaBadRequest() throws Exception {
-      // Cria um ativo primeiro
-      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
-      Long ativoId = ativoCriado.getId();
-
-      ativoUpsertDTO.setTipo(AtivoTipo.CRIPTO);
-
-      driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
-          .andExpect(status().isBadRequest())
-          .andDo(print());
-    }
-
-    /**
-     * Testa a falha na atualização de um ativo quando o valor é negativo. Espera um status HTTP 400
-     * Bad Request (assumindo validação no DTO ou controller).
-     */
-    @Test
-    @DisplayName("10. Falha: Tentar atualizar um ativo com valor negativo")
-    void quandoAtualizarAtivoComValorNegativoRetornaBadRequest() throws Exception {
-      // Cria um ativo primeiro
-      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
-      Long ativoId = ativoCriado.getId();
-
-      ativoUpsertDTO.setValor(BigDecimal.valueOf(-10.00));
 
       driver
           .perform(
@@ -811,7 +699,7 @@ public class AtivoControllerTests {
     @DisplayName("4. Sucesso: Recuperar um ativo recém-criado")
     void quandoRecuperarAtivoRecemCriadoRetornaSucesso() throws Exception {
       // Cria um novo ativo
-      AtivoUpsertDTO novoAtivoDTO = ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO").build();
+      AtivoCreateDTO novoAtivoDTO = ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO").build();
       AtivoResponseDTO novoAtivo = ativoService.criar(novoAtivoDTO);
 
       // Simula a busca pelo ativo recém-criado
@@ -834,7 +722,7 @@ public class AtivoControllerTests {
       Long ativoId = ativoCriado.getId();
 
       // Atualiza o ativo
-      AtivoUpsertDTO ativoParaAtualizar = ativoUpsertDTO.toBuilder().nome("PETR4_UPDATED").build();
+      AtivoUpdateDTO ativoParaAtualizar = ativoUpdateDTO.toBuilder().nome("PETR4_UPDATED").build();
       ativoService.atualizar(ativoId, ativoParaAtualizar);
 
       // Simula a busca pelo ativo atualizado
@@ -1198,40 +1086,12 @@ public class AtivoControllerTests {
     }
 
     /**
-     * Testa a falha na atualização de um ativo com um valor que excede o limite de precisão/escala.
-     * Espera um status HTTP 400 Bad Request, assumindo que a validação ocorre no DTO ou controller.
-     */
-    @Test
-    @DisplayName(
-        "2. Atualização: Tentar atualizar um ativo com um valor que excede o limite de precisão/escala")
-    void quandoAtualizarAtivoComValorExcedenteRetornaBadRequest() throws Exception {
-      // Cria um ativo primeiro
-      AtivoResponseDTO ativoCriado = ativoService.criar(ativoUpsertDTO);
-      Long ativoId = ativoCriado.getId();
-
-      // Define um valor muito grande que excederia a precisão/escala do BigDecimal no
-      // banco de
-      // dados ou validação
-      ativoUpsertDTO.setValor(new BigDecimal("12345678901234567890.12345"));
-
-      // A validação deve ocorrer antes de chamar o serviço
-      driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
-          .andExpect(status().isBadRequest())
-          .andDo(print());
-    }
-
-    /**
      * Testa o acesso não autorizado a todas as operações CRUD sem fornecer o parâmetro de
      * autenticação. Espera um status HTTP 401 Unauthorized para cada operação.
      */
     @Test
     @DisplayName(
-        "3. Autenticação: Testar o acesso a todas as operações CRUD sem a anotação @Autenticado(TipoAutenticacao.ADMIN)")
+        "2. Autenticação: Testar o acesso a todas as operações CRUD sem a anotação @Autenticado(TipoAutenticacao.ADMIN)")
     void quandoAcessarOperacoesSemAutenticacaoRetornaUnauthorized() throws Exception {
       // Teste para POST sem código de acesso
       driver
@@ -1267,7 +1127,7 @@ public class AtivoControllerTests {
      */
     @Test
     @DisplayName(
-        "4. Autenticação: Testar o acesso a todas as operações CRUD com um codigoAcesso inválido para o Admin")
+        "3. Autenticação: Testar o acesso a todas as operações CRUD com um codigoAcesso inválido para o Admin")
     void quandoAcessarOperacoesComAutenticacaoInvalidaRetornaUnauthorized() throws Exception {
       // Teste para POST com código de acesso inválido
       driver
@@ -1314,7 +1174,7 @@ public class AtivoControllerTests {
      */
     @Test
     @DisplayName(
-        "5. Integração: Criar um ativo, atualizá-lo, recuperá-lo, listar todos e depois excluí-lo, verificando o fluxo completo")
+        "4. Integração: Criar um ativo, atualizá-lo, recuperá-lo, listar todos e depois excluí-lo, verificando o fluxo completo")
     void quandoExecutarFluxoCompletoCRUDRetornaSucesso() throws Exception {
       // 1. Criar o ativo
       driver
