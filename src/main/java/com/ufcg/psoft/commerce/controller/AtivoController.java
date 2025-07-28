@@ -1,7 +1,8 @@
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.AlterarStatusDTO;
-import com.ufcg.psoft.commerce.dto.AtivoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.AtivoCreateDTO;
+import com.ufcg.psoft.commerce.dto.AtivoUpdateDTO;
 import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
@@ -22,13 +23,13 @@ public class AtivoController {
   @Autowired AtivoService ativoService;
 
   @PostMapping
-  public ResponseEntity<?> criarAtivo(@RequestBody @Valid AtivoUpsertDTO ativoDto) {
+  public ResponseEntity<?> criarAtivo(@RequestBody @Valid AtivoCreateDTO ativoDto) {
     return ResponseEntity.status(HttpStatus.CREATED).body(ativoService.criar(ativoDto));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<?> atualizarAtivo(
-      @PathVariable Long id, @RequestBody @Valid AtivoUpsertDTO ativoDto) {
+      @PathVariable Long id, @RequestBody @Valid AtivoUpdateDTO ativoDto) {
     return ResponseEntity.status(HttpStatus.OK).body(ativoService.atualizar(id, ativoDto));
   }
 
