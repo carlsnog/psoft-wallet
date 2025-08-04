@@ -11,7 +11,7 @@ public class PublicoAutenticador extends Autenticador {
   }
 
   @Override
-  public Optional<Usuario> autenticar(long id, String codigoAcesso) {
+  public Optional<Usuario> autenticar(String userId, String codigoAcesso) {
     return Optional.empty();
   }
 }

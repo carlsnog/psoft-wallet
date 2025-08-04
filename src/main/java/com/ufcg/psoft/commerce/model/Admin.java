@@ -7,14 +7,14 @@ public class Admin implements Usuario {
 
   private static Admin instance;
 
+  private static final String ID_ADMIN_PADRAO = "admin";
   private static final String COD_ADMIN_PADRAO = "admin@123";
-  private static final String COD_ADMIN_ENV = "CODIGO_ACESSO_ADMIN";
 
-  private long id;
+  private String userId;
   private String codigoAcesso;
 
-  private Admin(long id, String codigoAcesso) {
-    this.id = id;
+  private Admin(String id, String codigoAcesso) {
+    this.userId = id;
     this.codigoAcesso = codigoAcesso;
   }
 
@@ -24,13 +24,8 @@ public class Admin implements Usuario {
   }
 
   public static Admin getInstance() {
-    String codigoAcesso = System.getenv(COD_ADMIN_ENV);
-    if (codigoAcesso == null) {
-      codigoAcesso = COD_ADMIN_PADRAO;
-    }
-
     if (instance == null) {
-      instance = new Admin(0, codigoAcesso);
+      instance = new Admin(ID_ADMIN_PADRAO, COD_ADMIN_PADRAO);
     }
 
     return instance;

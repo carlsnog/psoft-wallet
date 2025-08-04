@@ -67,7 +67,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
 
   private void notificar(
       TipoInteresseEnum tipo, Ativo ativo, String msg, boolean deletarAposNotificar) {
-    var interesses = interesseRepository.findByTipoAndAtivoId(tipo, ativo.getId());
+    var interesses = interesseRepository.findByTipoAndAtivo_Id(tipo, ativo.getId());
 
     for (Interesse interesse : interesses) {
       var msgFormatada = formatarMensagem(interesse.getCliente(), msg);

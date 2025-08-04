@@ -26,7 +26,7 @@ public class ClienteServiceImpl implements ClienteService {
   @Override
   public ClienteResponseDTO alterar(
       Usuario usuario, long idUsuarioAlterado, ClienteUpsertDTO upsertDto) {
-    if (usuario.getId() != idUsuarioAlterado) {
+    if (!usuario.getUserId().equals(String.valueOf(idUsuarioAlterado))) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
     }
 
@@ -71,7 +71,7 @@ public class ClienteServiceImpl implements ClienteService {
 
   @Override
   public ClienteResponseDTO recuperar(Usuario usuario, Long id) {
-    if (!usuario.isAdmin() && usuario.getId() != id) {
+    if (!usuario.isAdmin() && !usuario.getUserId().equals(String.valueOf(id))) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
     }
 

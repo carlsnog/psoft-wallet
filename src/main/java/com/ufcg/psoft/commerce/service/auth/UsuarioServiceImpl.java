@@ -17,9 +17,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
   @Override
   public Optional<Usuario> getUsuario(
-      long id, String codigoAcesso, TipoAutenticacao tipoAutenticacao) {
+      String userId, String codigoAcesso, TipoAutenticacao tipoAutenticacao) {
     var autenticador = autenticadorFactory.getAutenticador(tipoAutenticacao);
-    var usuario = autenticador.autenticar(id, codigoAcesso);
+    var usuario = autenticador.autenticar(userId, codigoAcesso);
 
     return usuario;
   }

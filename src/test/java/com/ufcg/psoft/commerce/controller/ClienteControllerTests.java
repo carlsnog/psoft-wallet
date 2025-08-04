@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +20,7 @@ import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
 import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.utils.CustomDriver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +42,8 @@ public class ClienteControllerTests {
 
   final String URI_CLIENTES = "/clientes";
 
-  @Autowired MockMvc driver;
+  @Autowired MockMvc mvcDriver;
+  CustomDriver driver;
 
   @Autowired ClienteRepository clienteRepository;
 
@@ -57,6 +57,8 @@ public class ClienteControllerTests {
   void setup() {
     // Object Mapper suporte para LocalDateTime
     objectMapper.registerModule(new JavaTimeModule());
+    driver = new CustomDriver(mvcDriver, objectMapper);
+
     cliente =
         clienteRepository.save(
             Cliente.builder()
@@ -79,14 +81,6 @@ public class ClienteControllerTests {
     clienteRepository.deleteAll();
   }
 
-  String getUrlCliente(String path, Cliente cliente) {
-    return (path + "?userId=" + cliente.getId() + "&codigoAcesso=" + cliente.getCodigoAcesso());
-  }
-
-  String getUrlAdmin(String path) {
-    return path + "?codigoAcesso=" + Admin.getInstance().getCodigoAcesso();
-  }
-
   @Nested
   @DisplayName("Conjunto de casos de verificação de nome")
   class ClienteVerificacaoNome {
@@ -97,9 +91,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  get(URI_CLIENTES + "/" + cliente.getId())
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso()))
+              .get(URI_CLIENTES + "/" + cliente.getId(), cliente)
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -122,12 +114,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -150,12 +137,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -183,12 +165,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -221,12 +198,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -249,12 +221,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -282,12 +249,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -320,12 +282,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -353,12 +310,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -388,12 +340,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -423,12 +370,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -478,11 +420,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  get(URI_CLIENTES)
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .get(URI_CLIENTES, Admin.getInstance())
               .andExpect(status().isOk()) // Codigo 200
               .andDo(print())
               .andReturn()
@@ -504,11 +442,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  get(URI_CLIENTES + "/" + cliente.getId())
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .get(URI_CLIENTES + "/" + cliente.getId(), Admin.getInstance())
               .andExpect(status().isOk()) // Codigo 200
               .andDo(print())
               .andReturn()
@@ -532,11 +466,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  get(URI_CLIENTES + "/" + 999999999)
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .get(URI_CLIENTES + "/" + 999999999, Admin.getInstance())
               .andExpect(status().isNotFound())
               .andDo(print())
               .andReturn()
@@ -558,10 +488,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  post(url)
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .post(url, upsertDto)
               .andExpect(status().isCreated()) // Codigo 201
               .andDo(print())
               .andReturn()
@@ -586,12 +513,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + cliente.getId())
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + cliente.getId(), upsertDto, cliente)
               .andExpect(status().isOk()) // Codigo 200
               .andDo(print())
               .andReturn()
@@ -615,12 +537,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_CLIENTES + "/" + 99999L)
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(upsertDto)))
+              .put(URI_CLIENTES + "/" + 99999L, upsertDto, cliente)
               .andExpect(status().isForbidden())
               .andDo(print())
               .andReturn()
@@ -641,11 +558,12 @@ public class ClienteControllerTests {
 
       // Act
       String responseJsonString =
-          driver
+          mvcDriver
               .perform(
                   put(URI_CLIENTES + "/" + clienteId)
-                      .param("userId", String.valueOf(clienteId))
-                      .param("codigoAcesso", "invalido")
+                      .header(
+                          "Authorization",
+                          driver.createBasicAuthHeader(clienteId.toString(), "invalido"))
                       .contentType(MediaType.APPLICATION_JSON)
                       .content(objectMapper.writeValueAsString(upsertDto)))
               .andExpect(status().isUnauthorized())
@@ -667,11 +585,7 @@ public class ClienteControllerTests {
 
       // Act
       driver
-          .perform(
-              delete(URI_CLIENTES + "/" + cliente.getId())
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .param("userId", String.valueOf(cliente.getId()))
-                  .param("codigoAcesso", cliente.getCodigoAcesso()))
+          .delete(URI_CLIENTES + "/" + cliente.getId(), cliente)
           .andExpect(status().isNoContent());
     }
 
@@ -683,11 +597,7 @@ public class ClienteControllerTests {
       // Act
       String responseJsonString =
           driver
-              .perform(
-                  delete(URI_CLIENTES + "/" + 999999)
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .param("userId", String.valueOf(cliente.getId()))
-                      .param("codigoAcesso", cliente.getCodigoAcesso()))
+              .delete(URI_CLIENTES + "/" + 999999, cliente)
               .andExpect(status().isNotFound())
               .andDo(print())
               .andReturn()
@@ -708,11 +618,13 @@ public class ClienteControllerTests {
 
       // Act
       String responseJsonString =
-          driver
+          mvcDriver
               .perform(
                   delete(URI_CLIENTES + "/" + cliente.getId())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .param("codigoAcesso", "invalido"))
+                      .header(
+                          "Authorization",
+                          driver.createBasicAuthHeader(
+                              String.valueOf(cliente.getId()), "invalido")))
               .andExpect(status().isUnauthorized()) // Codigo 401
               .andDo(print())
               .andReturn()

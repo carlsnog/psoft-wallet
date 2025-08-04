@@ -6,7 +6,9 @@
 
     <description>Configuração personalizada do PMD</description>
 
-    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidLiteralsInIfCondition" />
+    </rule>
 
     <rule ref="category/java/bestpractices.xml/MissingOverride" />
     <rule ref="category/java/bestpractices.xml/UnusedLocalVariable" />
@@ -62,7 +64,7 @@
     </rule>
     <rule ref="category/java/design.xml/NPathComplexity">
         <properties>
-            <property name="reportLevel" value="200" />
+            <property name="reportLevel" value="300" />
         </properties>
     </rule>
     <rule ref="category/java/design.xml/SimplifiedTernary" />

@@ -2,13 +2,13 @@ package com.ufcg.psoft.commerce.model;
 
 public interface Usuario {
 
-  public abstract boolean isAdmin();
-
-  public default boolean validar(String codigoAcesso) {
-    return this.getCodigoAcesso().equals(codigoAcesso);
+  public default boolean validar(String userId, String codigoAcesso) {
+    return this.getUserId().equals(userId) && this.getCodigoAcesso().equals(codigoAcesso);
   }
+
+  public abstract String getUserId();
 
   public abstract String getCodigoAcesso();
 
-  public abstract long getId();
+  public abstract boolean isAdmin();
 }

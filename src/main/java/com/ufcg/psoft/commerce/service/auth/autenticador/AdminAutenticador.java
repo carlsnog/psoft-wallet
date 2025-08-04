@@ -14,8 +14,8 @@ public class AdminAutenticador extends Autenticador {
   }
 
   @Override
-  public Optional<Usuario> autenticar(long id, String codigoAcesso) {
-    if (validateAdmin(id, codigoAcesso)) {
+  public Optional<Usuario> autenticar(String userId, String codigoAcesso) {
+    if (validateAdmin(userId, codigoAcesso)) {
       return Optional.of(Admin.getInstance());
     }
 

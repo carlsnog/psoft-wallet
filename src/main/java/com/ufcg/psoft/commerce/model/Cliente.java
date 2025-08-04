@@ -42,6 +42,11 @@ public class Cliente implements Usuario {
   private List<Interesse> interesses;
 
   @Override
+  public String getUserId() {
+    return String.valueOf(id);
+  }
+
+  @Override
   public boolean isAdmin() {
     return false;
   }

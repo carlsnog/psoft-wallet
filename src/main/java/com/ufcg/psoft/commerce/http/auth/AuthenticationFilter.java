@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Base64;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
@@ -45,12 +46,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    var id = getUserId(request);
-    var codigoAcesso = getCodigoAcesso(request);
+    var auth = getAuthorization(request);
     var tipo = getTipoAutenticacao(handler);
 
     try {
-      var usuario = userService.getUsuario(id, codigoAcesso, tipo);
+      System.out.println("Authorization: " + auth.getUserId() + " " + auth.getCodigoAcesso());
+      var usuario = userService.getUsuario(auth.getUserId(), auth.getCodigoAcesso(), tipo);
 
       request.setAttribute(ATRIBUTO_USUARIO, usuario.orElse(null));
 
@@ -65,16 +66,21 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     }
   }
 
-  private long getUserId(HttpServletRequest request) {
+  private AuthorizationDTO getAuthorization(HttpServletRequest request) {
     try {
-      return Long.parseLong(request.getParameter(USUARIO_PARAM));
-    } catch (NumberFormatException e) {
-      return 0;
-    }
-  }
+      var authorization = request.getHeader("Authorization");
+      if (authorization == null || !authorization.startsWith("Basic ")) {
+        return new AuthorizationDTO();
+      }
 
-  private String getCodigoAcesso(HttpServletRequest request) {
-    return request.getParameter(COD_ACESSO_PARAM);
+      var authorizationString = authorization.substring(6);
+      byte[] decodedBytes = Base64.getDecoder().decode(authorizationString);
+      String decodedString = new String(decodedBytes);
+
+      return AuthorizationDTO.from(decodedString);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private HandlerExecutionChain getHandler(HttpServletRequest request) {
