@@ -67,8 +67,6 @@ public class InteresseServiceImpl implements InteresseService {
   public List<InteresseResponseDTO> listar(Usuario usuario) {
     List<Interesse> interesses = interesseRepository.findAll();
 
-    return interesses.stream()
-        .map(InteresseResponseDTO::new)
-        .collect(Collectors.toList());
+    return interesses.stream().map(InteresseResponseDTO::new).collect(Collectors.toList());
   }
 }
