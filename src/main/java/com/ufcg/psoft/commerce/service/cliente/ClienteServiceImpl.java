@@ -26,14 +26,14 @@ public class ClienteServiceImpl implements ClienteService {
   @Override
   public ClienteResponseDTO alterar(
       Usuario usuario, long idUsuarioAlterado, ClienteUpsertDTO upsertDto) {
-    if (usuario.getId() != idUsuarioAlterado) {
+    if (!usuario.getUserId().equals(String.valueOf(idUsuarioAlterado))) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
     }
 
     Cliente cliente =
         clienteRepository
             .findById(idUsuarioAlterado)
-            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
+            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
 
     modelMapper.map(upsertDto, cliente);
     clienteRepository.save(cliente);
@@ -53,7 +53,7 @@ public class ClienteServiceImpl implements ClienteService {
     Cliente cliente =
         clienteRepository
             .findById(id)
-            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
+            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
     clienteRepository.delete(cliente);
   }
 
@@ -71,14 +71,14 @@ public class ClienteServiceImpl implements ClienteService {
 
   @Override
   public ClienteResponseDTO recuperar(Usuario usuario, Long id) {
-    if (!usuario.isAdmin() && usuario.getId() != id) {
+    if (!usuario.isAdmin() && !usuario.getUserId().equals(String.valueOf(id))) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
     }
 
     Cliente cliente =
         clienteRepository
             .findById(id)
-            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
+            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
     return new ClienteResponseDTO(cliente);
   }
 }

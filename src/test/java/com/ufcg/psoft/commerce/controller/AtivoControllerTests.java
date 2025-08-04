@@ -20,6 +20,7 @@ import com.ufcg.psoft.commerce.model.Tesouro;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
+import com.ufcg.psoft.commerce.utils.CustomDriver;
 import java.math.BigDecimal;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -41,7 +42,8 @@ public class AtivoControllerTests {
   final String URI_ATIVOS = "/ativos";
 
   // Objeto para simular requisições HTTP para o controller
-  @Autowired MockMvc driver;
+  @Autowired MockMvc mvcDriver;
+  CustomDriver driver;
 
   // Repositório de clientes
   @Autowired ClienteRepository clienteRepository;
@@ -66,6 +68,7 @@ public class AtivoControllerTests {
   @BeforeEach
   void setup() {
     objectMapper.registerModule(new JavaTimeModule());
+    driver = new CustomDriver(mvcDriver, objectMapper);
 
     ativoResponseDTO =
         AtivoResponseDTO.builder()
@@ -115,19 +118,7 @@ public class AtivoControllerTests {
       // Executa a requisição POST para /ativos com o DTO de criação e o código de
       // acesso de admin
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param(
-                      "codigoAcesso",
-                      "admin@123") // Supondo um código de acesso de admin para autenticação
-                  .contentType(
-                      MediaType.APPLICATION_JSON) // Define o tipo de conteúdo da requisição como
-                  // JSON
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO))) // Converte o DTO para JSON e o define como corpo
-          // da
-          // requisição
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isCreated()) // Espera um status HTTP 201 Created
           .andExpect(
               jsonPath("$.nome")
@@ -157,11 +148,7 @@ public class AtivoControllerTests {
 
       // Executa a requisição e verifica o status e os campos do JSON de resposta
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(criptoUpsertDTO)))
+          .post(URI_ATIVOS, criptoUpsertDTO, Admin.getInstance())
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.nome").value("BTC"))
           .andExpect(jsonPath("$.tipo").value("CRIPTO"))
@@ -186,11 +173,7 @@ public class AtivoControllerTests {
 
       // Executa a requisição e verifica o status e os campos do JSON de resposta
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(tesouroUpsertDTO)))
+          .post(URI_ATIVOS, tesouroUpsertDTO, Admin.getInstance())
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.nome").value("Tesouro Selic"))
           .andExpect(jsonPath("$.tipo").value("TESOURO"))
@@ -208,11 +191,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setNome(null);
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -227,11 +206,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setNome("");
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -246,11 +221,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setDescricao(null);
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -265,11 +236,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setDescricao("");
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -284,11 +251,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setStatus(null);
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -303,11 +266,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setValor(null);
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -322,11 +281,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setTipo(null);
 
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -354,11 +309,7 @@ public class AtivoControllerTests {
 
       // Executa a requisição PUT e verifica o status e o nome no JSON de resposta
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpdateDTO)))
+          .put(URI_ATIVOS + "/" + ativoId, ativoUpdateDTO, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4"))
           .andDo(print());
@@ -380,11 +331,7 @@ public class AtivoControllerTests {
           ativoUpdateDTO.toBuilder().nome("PETR4_UPDATED").descricao("Nova Descrição").build();
 
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
+          .put(URI_ATIVOS + "/" + ativoId, ativoParaAtualizar, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4_UPDATED"))
           .andDo(print());
@@ -402,11 +349,7 @@ public class AtivoControllerTests {
           ativoUpdateDTO.toBuilder().nome("PETR4").descricao("Nova Descrição").build();
 
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoParaAtualizar)))
+          .put(URI_ATIVOS + "/" + ativoId, ativoParaAtualizar, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.descricao").value("Nova Descrição"))
           .andDo(print());
@@ -420,11 +363,7 @@ public class AtivoControllerTests {
     @DisplayName("4. Falha: Tentar atualizar um ativo que não existe (ID inválido)")
     void quandoAtualizarAtivoInexistenteRetornaNotFound() throws Exception {
       driver
-          .perform(
-              put(URI_ATIVOS + "/99")
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .put(URI_ATIVOS + "/99", ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -443,11 +382,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setNome(null);
 
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .put(URI_ATIVOS + "/" + ativoId, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -466,11 +401,7 @@ public class AtivoControllerTests {
       ativoUpsertDTO.setDescricao("");
 
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .put(URI_ATIVOS + "/" + ativoId, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -496,7 +427,7 @@ public class AtivoControllerTests {
 
       // Executa a requisição DELETE e verifica o status
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent())
           .andDo(print());
     }
@@ -508,7 +439,7 @@ public class AtivoControllerTests {
     @DisplayName("2. Falha: Tentar excluir um ativo que não existe (ID inválido)")
     void quandoExcluirAtivoInexistenteRetornaNotFound() throws Exception {
       driver
-          .perform(delete(URI_ATIVOS + "/99").param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/99", Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -526,13 +457,13 @@ public class AtivoControllerTests {
 
       // Exclui o ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent())
           .andDo(print());
 
       // Tenta buscar o ativo excluído
       driver
-          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -548,12 +479,12 @@ public class AtivoControllerTests {
 
       // Exclui o primeiro ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativo1.getId()).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativo1.getId(), Admin.getInstance())
           .andExpect(status().isNoContent());
 
       // Exclui o segundo ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativo2.getId()).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativo2.getId(), Admin.getInstance())
           .andExpect(status().isNoContent());
     }
 
@@ -570,12 +501,12 @@ public class AtivoControllerTests {
 
       // Primeira exclusão com sucesso
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent());
 
       // Segunda exclusão do mesmo ID, agora já excluído
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -589,7 +520,7 @@ public class AtivoControllerTests {
       Long ativoId = ativoCriado.getId();
 
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent())
           .andDo(print());
     }
@@ -601,7 +532,10 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("7. Falha: Tentar excluir um ativo sem autenticação")
     void quandoExcluirAtivoSemAutenticacaoRetornaUnauthorized() throws Exception {
-      driver.perform(delete(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver
+          .perform(delete(URI_ATIVOS + "/1"))
+          .andExpect(status().isUnauthorized())
+          .andDo(print());
     }
 
     /**
@@ -611,7 +545,7 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("8. Falha: Tentar excluir um ativo com autenticação inválida")
     void quandoExcluirAtivoComAutenticacaoInvalidaRetornaUnauthorized() throws Exception {
-      driver
+      mvcDriver
           .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
@@ -639,7 +573,7 @@ public class AtivoControllerTests {
 
       // Executa a requisição GET e verifica o status e os campos do JSON de resposta
       driver
-          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(ativoId))
           .andExpect(jsonPath("$.nome").value("PETR4"))
@@ -660,7 +594,7 @@ public class AtivoControllerTests {
 
       String responseJsonString =
           driver
-              .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+              .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
@@ -687,7 +621,7 @@ public class AtivoControllerTests {
     @DisplayName("3. Falha: Tentar recuperar um ativo que não existe (ID inválido)")
     void quandoRecuperarAtivoInexistenteRetornaNotFound() throws Exception {
       driver
-          .perform(get(URI_ATIVOS + "/99").param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/99", Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -704,7 +638,7 @@ public class AtivoControllerTests {
 
       // Simula a busca pelo ativo recém-criado
       driver
-          .perform(get(URI_ATIVOS + "/" + novoAtivo.getId()).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + novoAtivo.getId(), Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("NOVO_ATIVO"))
           .andDo(print());
@@ -727,7 +661,7 @@ public class AtivoControllerTests {
 
       // Simula a busca pelo ativo atualizado
       driver
-          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("PETR4_UPDATED"))
           .andDo(print());
@@ -746,12 +680,12 @@ public class AtivoControllerTests {
 
       // Simula a exclusão do ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent());
 
       // Simula a busca pelo ativo excluído
       driver
-          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -763,7 +697,7 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("7. Falha: Tentar recuperar um ativo sem autenticação")
     void quandoRecuperarAtivoSemAutenticacaoRetornaUnauthorized() throws Exception {
-      driver.perform(get(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver.perform(get(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
     }
 
     /**
@@ -773,7 +707,7 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("8. Falha: Tentar recuperar um ativo com autenticação inválida")
     void quandoRecuperarAtivoComAutenticacaoInvalidaRetornaUnauthorized() throws Exception {
-      driver
+      mvcDriver
           .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
@@ -802,7 +736,7 @@ public class AtivoControllerTests {
       ativoService.criar(ativoUpsertDTO.toBuilder().nome("GOOGL34").build());
 
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(3))
           .andExpect(jsonPath("$[0].nome").value("PETR4"))
@@ -819,7 +753,7 @@ public class AtivoControllerTests {
     @DisplayName("2. Sucesso: Listar ativos quando não há nenhum ativo cadastrado (lista vazia)")
     void quandoListarAtivosSemAtivosCadastradosRetornaListaVazia() throws Exception {
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0))
           .andDo(print());
@@ -834,7 +768,7 @@ public class AtivoControllerTests {
       ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
 
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(2))
           .andDo(print());
@@ -860,7 +794,7 @@ public class AtivoControllerTests {
 
       String responseJsonString =
           driver
-              .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+              .get(URI_ATIVOS, Admin.getInstance())
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
@@ -891,18 +825,15 @@ public class AtivoControllerTests {
 
       // Criação do novo ativo via API
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO_LIST").build())))
+          .post(
+              URI_ATIVOS,
+              ativoUpsertDTO.toBuilder().nome("NOVO_ATIVO_LIST").build(),
+              Admin.getInstance())
           .andExpect(status().isCreated());
 
       // Listagem após criação
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(2))
           .andExpect(jsonPath("$[1].nome").value("NOVO_ATIVO_LIST"))
@@ -922,12 +853,12 @@ public class AtivoControllerTests {
 
       // Simula a exclusão de um ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativo1.getId()).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativo1.getId(), Admin.getInstance())
           .andExpect(status().isNoContent());
 
       // Listagem após exclusão
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(1))
           .andExpect(jsonPath("$[0].nome").value("VALE3"))
@@ -947,18 +878,15 @@ public class AtivoControllerTests {
 
       // Simula a atualização de um ativo
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("PETR4_UPDATED_LIST").build())))
+          .put(
+              URI_ATIVOS + "/" + ativoId,
+              ativoUpsertDTO.toBuilder().nome("PETR4_UPDATED_LIST").build(),
+              Admin.getInstance())
           .andExpect(status().isOk());
 
       // Listagem após atualização
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(1))
           .andExpect(jsonPath("$[0].nome").value("PETR4_UPDATED_LIST"))
@@ -971,7 +899,7 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("8. Falha: Tentar listar ativos sem autenticação")
     void quandoListarAtivosSemAutenticacaoRetornaUnauthorized() throws Exception {
-      driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
     }
 
     /**
@@ -981,7 +909,7 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("9. Falha: Tentar listar ativos com autenticação inválida")
     void quandoListarAtivosComAutenticacaoInvalidaRetornaUnauthorized() throws Exception {
-      driver
+      mvcDriver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "invalid_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
@@ -1001,7 +929,7 @@ public class AtivoControllerTests {
       ativoService.criar(ativoUpsertDTO.toBuilder().nome("MSFT34").build());
 
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$[0].nome").value("PETR4"))
           .andExpect(jsonPath("$[1].nome").value("AAPL34"))
@@ -1036,19 +964,13 @@ public class AtivoControllerTests {
                   .build());
 
       driver
-          .perform(
-              get(URI_ATIVOS)
-                  .param("userId", String.valueOf(cliente.getId()))
-                  .param("codigoAcesso", cliente.getCodigoAcesso()))
+          .get(URI_ATIVOS, cliente)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$[0].nome").value("CDB"))
           .andDo(print());
 
       driver
-          .perform(
-              get(URI_ATIVOS)
-                  .param("userId", String.valueOf(clientePremium.getId()))
-                  .param("codigoAcesso", clientePremium.getCodigoAcesso()))
+          .get(URI_ATIVOS, clientePremium)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$[0].nome").value("CDB"))
           .andExpect(jsonPath("$[0].nome").value("CDB"))
@@ -1076,11 +998,7 @@ public class AtivoControllerTests {
 
       // Tenta criar outro ativo com o mesmo nome
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
+          .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
           .andExpect(status().isConflict())
           .andDo(print());
     }
@@ -1094,16 +1012,10 @@ public class AtivoControllerTests {
         "2. Autenticação: Testar o acesso a todas as operações CRUD sem a anotação @Autenticado(TipoAutenticacao.ADMIN)")
     void quandoAcessarOperacoesSemAutenticacaoRetornaUnauthorized() throws Exception {
       // Teste para POST sem código de acesso
-      driver
-          .perform(
-              post(URI_ATIVOS)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(ativoUpsertDTO)))
-          .andExpect(status().isUnauthorized())
-          .andDo(print());
+      driver.post(URI_ATIVOS, ativoUpsertDTO).andExpect(status().isUnauthorized()).andDo(print());
 
       // Teste para PUT sem código de acesso
-      driver
+      mvcDriver
           .perform(
               put(URI_ATIVOS + "/1")
                   .contentType(MediaType.APPLICATION_JSON)
@@ -1112,13 +1024,16 @@ public class AtivoControllerTests {
           .andDo(print());
 
       // Teste para DELETE sem código de acesso
-      driver.perform(delete(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver
+          .perform(delete(URI_ATIVOS + "/1"))
+          .andExpect(status().isUnauthorized())
+          .andDo(print());
 
       // Teste para GET por ID sem código de acesso
-      driver.perform(get(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver.perform(get(URI_ATIVOS + "/1")).andExpect(status().isUnauthorized()).andDo(print());
 
       // Teste para GET listar todos sem código de acesso
-      driver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
+      mvcDriver.perform(get(URI_ATIVOS)).andExpect(status().isUnauthorized()).andDo(print());
     }
 
     /**
@@ -1130,7 +1045,7 @@ public class AtivoControllerTests {
         "3. Autenticação: Testar o acesso a todas as operações CRUD com um codigoAcesso inválido para o Admin")
     void quandoAcessarOperacoesComAutenticacaoInvalidaRetornaUnauthorized() throws Exception {
       // Teste para POST com código de acesso inválido
-      driver
+      mvcDriver
           .perform(
               post(URI_ATIVOS)
                   .param("codigoAcesso", "invalid_admin_code")
@@ -1140,7 +1055,7 @@ public class AtivoControllerTests {
           .andDo(print());
 
       // Teste para PUT com código de acesso inválido
-      driver
+      mvcDriver
           .perform(
               put(URI_ATIVOS + "/1")
                   .param("codigoAcesso", "invalid_admin_code")
@@ -1150,19 +1065,19 @@ public class AtivoControllerTests {
           .andDo(print());
 
       // Teste para DELETE com código de acesso inválido
-      driver
+      mvcDriver
           .perform(delete(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_admin_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
 
       // Teste para GET por ID com código de acesso inválido
-      driver
+      mvcDriver
           .perform(get(URI_ATIVOS + "/1").param("codigoAcesso", "invalid_admin_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
 
       // Teste para GET listar todos com código de acesso inválido
-      driver
+      mvcDriver
           .perform(get(URI_ATIVOS).param("codigoAcesso", "invalid_admin_code"))
           .andExpect(status().isUnauthorized())
           .andDo(print());
@@ -1178,20 +1093,17 @@ public class AtivoControllerTests {
     void quandoExecutarFluxoCompletoCRUDRetornaSucesso() throws Exception {
       // 1. Criar o ativo
       driver
-          .perform(
-              post(URI_ATIVOS)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("ATIVO_FLUXO").build())))
+          .post(
+              URI_ATIVOS,
+              ativoUpsertDTO.toBuilder().nome("ATIVO_FLUXO").build(),
+              Admin.getInstance())
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.nome").value("ATIVO_FLUXO"));
 
       // Busca o ID do ativo criado
       String responseJsonString =
           driver
-              .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+              .get(URI_ATIVOS, Admin.getInstance())
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
@@ -1208,37 +1120,34 @@ public class AtivoControllerTests {
 
       // 2. Atualizar o ativo
       driver
-          .perform(
-              put(URI_ATIVOS + "/" + ativoId)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(
-                      objectMapper.writeValueAsString(
-                          ativoUpsertDTO.toBuilder().nome("ATIVO_FLUXO_UPDATED").build())))
+          .put(
+              URI_ATIVOS + "/" + ativoId,
+              ativoUpsertDTO.toBuilder().nome("ATIVO_FLUXO_UPDATED").build(),
+              Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("ATIVO_FLUXO_UPDATED"));
 
       // 3. Recuperar o ativo atualizado
       driver
-          .perform(get(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nome").value("ATIVO_FLUXO_UPDATED"));
 
       // 4. Listar todos os ativos (deve conter o ativo atualizado)
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(1))
           .andExpect(jsonPath("$[0].nome").value("ATIVO_FLUXO_UPDATED"));
 
       // 5. Excluir o ativo
       driver
-          .perform(delete(URI_ATIVOS + "/" + ativoId).param("codigoAcesso", "admin@123"))
+          .delete(URI_ATIVOS + "/" + ativoId, Admin.getInstance())
           .andExpect(status().isNoContent());
 
       // 6. Listar todos os ativos novamente (deve estar vazio após a exclusão)
       driver
-          .perform(get(URI_ATIVOS).param("codigoAcesso", "admin@123"))
+          .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0));
     }
@@ -1248,7 +1157,7 @@ public class AtivoControllerTests {
   @DisplayName("Alterar status do ativo")
   class AlterarStatusTests {
 
-    private static final String URI_STATUS = "/ativos/{id}/status";
+    private static final String URI_STATUS = "/ativos/%d/status";
 
     @Test
     @DisplayName("Altera status com sucesso e retorna 200 OK")
@@ -1261,11 +1170,7 @@ public class AtivoControllerTests {
       dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
 
       driver
-          .perform(
-              put(URI_STATUS, id)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(dto)))
+          .put(URI_STATUS.formatted(id), dto, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(id))
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
@@ -1280,11 +1185,7 @@ public class AtivoControllerTests {
       dto.setNovoStatus(StatusAtivo.DISPONIVEL);
 
       driver
-          .perform(
-              put(URI_STATUS, id)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(dto)))
+          .put(URI_STATUS.formatted(id), dto, Admin.getInstance())
           .andExpect(status().isNotFound())
           .andDo(print());
     }
@@ -1296,14 +1197,7 @@ public class AtivoControllerTests {
       AlterarStatusDTO dto = new AlterarStatusDTO();
       dto.setNovoStatus(StatusAtivo.DISPONIVEL);
 
-      driver
-          .perform(
-              put(URI_STATUS, id)
-                  // sem param "codigoAcesso"
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(dto)))
-          .andExpect(status().isUnauthorized())
-          .andDo(print());
+      driver.put(URI_STATUS.formatted(id), dto).andExpect(status().isUnauthorized()).andDo(print());
     }
 
     @Test
@@ -1318,11 +1212,7 @@ public class AtivoControllerTests {
       dto.setNovoStatus(null);
 
       driver
-          .perform(
-              put(URI_STATUS, id)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(dto)))
+          .put(URI_STATUS.formatted(id), dto, Admin.getInstance())
           .andExpect(status().isBadRequest())
           .andDo(print());
     }
@@ -1339,11 +1229,7 @@ public class AtivoControllerTests {
       dto.setNovoStatus(StatusAtivo.INDISPONIVEL);
 
       driver
-          .perform(
-              put(URI_STATUS, id)
-                  .param("codigoAcesso", "admin@123")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(dto)))
+          .put(URI_STATUS.formatted(id), dto, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(id))
           .andExpect(jsonPath("$.status").value("INDISPONIVEL"))
@@ -1399,11 +1285,10 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
+                  valorUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1423,11 +1308,10 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
+                  valorUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1447,11 +1331,10 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + cripto.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
+                  valorUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -1474,11 +1357,10 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + tesouro.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + tesouro.getId() + "/cotacao",
+                  valorUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -1501,11 +1383,8 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1525,11 +1404,8 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1549,11 +1425,8 @@ public class AtivoControllerTests {
           ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
       String responseJsonString =
           driver
-              .perform(
-                  put(URI_ATIVOS + "/" + acao.getId() + "/cotacao")
-                      .param("codigoAcesso", Admin.getInstance().getCodigoAcesso())
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(valorUpsertDTO)))
+              .put(
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()

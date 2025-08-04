@@ -4,7 +4,6 @@ import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Admin;
-import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import java.util.Optional;
@@ -16,19 +15,14 @@ public class PremiumAutenticador extends Autenticador {
   }
 
   @Override
-  public Optional<Usuario> autenticar(long id, String codigoAcesso) {
-    if (validateAdmin(id, codigoAcesso)) {
+  public Optional<Usuario> autenticar(String userId, String codigoAcesso) {
+    if (validateAdmin(userId, codigoAcesso)) {
       return Optional.of(Admin.getInstance());
     }
 
-    Optional<Cliente> clienteRes = clienteRepository.findById(id);
-    if (clienteRes == null) {
-      throw new CommerceException(ErrorCode.UNAUTHORIZED);
-    }
+    var cliente = getClientePorId(userId);
 
-    var cliente = clienteRes.get();
-
-    if (!cliente.validar(codigoAcesso)) {
+    if (!cliente.validar(userId, codigoAcesso)) {
       throw new CommerceException(ErrorCode.UNAUTHORIZED);
     }
 

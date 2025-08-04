@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UsuarioService {
   public Optional<Usuario> getUsuario(
-      long id, String codigoAcesso, TipoAutenticacao tipoAutenticacao);
+      String userId, String codigoAcesso, TipoAutenticacao tipoAutenticacao);
 }

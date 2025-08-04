@@ -14,20 +14,16 @@ public class NormalAutenticador extends Autenticador {
   }
 
   @Override
-  public Optional<Usuario> autenticar(long id, String codigoAcesso) {
-    if (validateAdmin(id, codigoAcesso)) {
+  public Optional<Usuario> autenticar(String userId, String codigoAcesso) {
+    if (validateAdmin(userId, codigoAcesso)) {
       return Optional.of(Admin.getInstance());
     }
 
-    var usuario = clienteRepository.findById(id);
-    if (usuario.isEmpty()) {
+    var usuario = getClientePorId(userId);
+    if (!usuario.validar(userId, codigoAcesso)) {
       throw new CommerceException(ErrorCode.UNAUTHORIZED);
     }
 
-    if (!usuario.get().validar(codigoAcesso)) {
-      throw new CommerceException(ErrorCode.UNAUTHORIZED);
-    }
-
-    return Optional.of(usuario.get());
+    return Optional.of(usuario);
   }
 }

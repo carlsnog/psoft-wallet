@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "cliente")
-public class Cliente implements Usuario {
+public class Cliente extends Usuario {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,6 +37,14 @@ public class Cliente implements Usuario {
   @Getter
   @Column(nullable = false)
   private String endereco;
+
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Interesse> interesses;
+
+  @Override
+  public String getUserId() {
+    return String.valueOf(id);
+  }
 
   @Override
   public boolean isAdmin() {
