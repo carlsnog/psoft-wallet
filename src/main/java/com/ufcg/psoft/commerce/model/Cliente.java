@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,9 @@ public class Cliente implements Usuario {
   @Getter
   @Column(nullable = false)
   private String endereco;
+
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Interesse> interesses;
 
   @Override
   public boolean isAdmin() {
