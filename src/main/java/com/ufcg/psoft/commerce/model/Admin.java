@@ -3,7 +3,7 @@ package com.ufcg.psoft.commerce.model;
 import lombok.Getter;
 
 @Getter
-public class Admin implements Usuario {
+public class Admin extends Usuario {
 
   private static Admin instance;
 

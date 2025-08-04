@@ -1,8 +1,8 @@
 package com.ufcg.psoft.commerce.model;
 
-public interface Usuario {
+public abstract class Usuario {
 
-  public default boolean validar(String userId, String codigoAcesso) {
+  public boolean validar(String userId, String codigoAcesso) {
     return this.getUserId().equals(userId) && this.getCodigoAcesso().equals(codigoAcesso);
   }
 
