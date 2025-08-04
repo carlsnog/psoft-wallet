@@ -50,7 +50,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     var tipo = getTipoAutenticacao(handler);
 
     try {
-      System.out.println("Authorization: " + auth.getUserId() + " " + auth.getCodigoAcesso());
       var usuario = userService.getUsuario(auth.getUserId(), auth.getCodigoAcesso(), tipo);
 
       request.setAttribute(ATRIBUTO_USUARIO, usuario.orElse(null));
