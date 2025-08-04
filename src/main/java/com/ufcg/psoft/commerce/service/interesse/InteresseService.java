@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface InteresseService {
 
-  InteresseResponseDTO criar(InteresseCreateDTO interesseDto);
+  InteresseResponseDTO criar(InteresseCreateDTO interesseDto, Usuario usuario);
 
-  void remover(Long id);
+  void remover(Long id, Usuario usuario);
 
-  InteresseResponseDTO buscarPorId(Long id);
+  InteresseResponseDTO buscarPorId(Long id, Usuario usuario);
 
-  List<InteresseResponseDTO> listar(Usuario usuario);
+  List<InteresseResponseDTO> listar();
 }

@@ -14,30 +14,32 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/interesses")
-@Autenticado(TipoAutenticacao.ADMIN)
+@Autenticado(TipoAutenticacao.PREMIUM)
 public class InteresseController {
 
   @Autowired InteresseService interesseService;
 
   @PostMapping
-  public ResponseEntity<?> criarInteresse(@RequestBody @Valid InteresseCreateDTO interesseDto) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(interesseService.criar(interesseDto));
+  public ResponseEntity<?> criarInteresse(
+      @RequestBody @Valid InteresseCreateDTO interesseDto, @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(interesseService.criar(interesseDto, usuario));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> excluirInteresse(@PathVariable Long id) {
-    interesseService.remover(id);
+  public ResponseEntity<?> excluirInteresse(@PathVariable Long id, @RequestUser Usuario usuario) {
+    interesseService.remover(id, usuario);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> recuperarInteresse(@PathVariable Long id) {
-    return ResponseEntity.status(HttpStatus.OK).body(interesseService.buscarPorId(id));
+  public ResponseEntity<?> recuperarInteresse(@PathVariable Long id, @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK).body(interesseService.buscarPorId(id, usuario));
   }
 
   @GetMapping("")
-  @Autenticado(TipoAutenticacao.NORMAL)
-  public ResponseEntity<?> listarInteresses(@RequestUser Usuario usuario) {
-    return ResponseEntity.status(HttpStatus.OK).body(interesseService.listar(usuario));
+  @Autenticado(TipoAutenticacao.ADMIN)
+  public ResponseEntity<?> listarInteresses() {
+    return ResponseEntity.status(HttpStatus.OK).body(interesseService.listar());
   }
 }

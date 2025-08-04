@@ -8,8 +8,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class AuthorizationDTO {
-  private static final int PARTS_LENGTH = 2;
-
   private String userId;
   private String codigoAcesso;
 
@@ -23,7 +21,7 @@ public class AuthorizationDTO {
 
     String userId;
     String codigoAcesso;
-    if (parts.length != PARTS_LENGTH) {
+    if (parts.length != 2) {
       throw new IllegalArgumentException("Formato inválido");
     }
 

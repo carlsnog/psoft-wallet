@@ -474,7 +474,7 @@ public class ClienteControllerTests {
               .getContentAsString();
 
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.CLIENTE_NAO_EXISTE, resultado.getCode());
+      assertEquals(ErrorCode.CLIENTE_NAO_ENCONTRADO, resultado.getCode());
 
       assertEquals("Cliente nao existe", resultado.getMessage());
     }
@@ -575,7 +575,7 @@ public class ClienteControllerTests {
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
       assertEquals(ErrorCode.UNAUTHORIZED, resultado.getCode());
 
-      assertEquals("Codigo de acesso invalido", resultado.getMessage());
+      assertEquals("Nao autorizado", resultado.getMessage());
     }
 
     @Test
@@ -605,7 +605,7 @@ public class ClienteControllerTests {
               .getContentAsString();
 
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.CLIENTE_NAO_EXISTE, resultado.getCode());
+      assertEquals(ErrorCode.CLIENTE_NAO_ENCONTRADO, resultado.getCode());
 
       assertEquals("Cliente nao existe", resultado.getMessage());
     }
@@ -634,7 +634,7 @@ public class ClienteControllerTests {
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
       assertEquals(ErrorCode.UNAUTHORIZED, resultado.getCode());
 
-      assertEquals("Codigo de acesso invalido", resultado.getMessage());
+      assertEquals("Nao autorizado", resultado.getMessage());
     }
   }
 }

@@ -26,11 +26,15 @@ public class InteresseServiceImpl implements InteresseService {
   @Autowired private AtivoRepository ativoRepository;
 
   @Override
-  public InteresseResponseDTO criar(InteresseCreateDTO interesseDto) {
+  public InteresseResponseDTO criar(InteresseCreateDTO interesseDto, Usuario usuario) {
+    if (!isAutorizado(usuario, interesseDto.getClienteId())) {
+      throw new CommerceException(ErrorCode.FORBIDDEN);
+    }
+
     Cliente cliente =
         clienteRepository
             .findById(interesseDto.getClienteId())
-            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_EXISTE));
+            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
 
     Ativo ativo =
         ativoRepository
@@ -38,35 +42,45 @@ public class InteresseServiceImpl implements InteresseService {
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
     Interesse interesse =
-        Interesse.builder().tipo(interesseDto.getTipo()).cliente(cliente).ativo(ativo).build();
-
-    Interesse savedInteresse = interesseRepository.save(interesse);
-
-    return new InteresseResponseDTO(savedInteresse);
-  }
-
-  @Override
-  public void remover(Long id) {
-    if (!interesseRepository.existsById(id)) {
-      throw new CommerceException(ErrorCode.INTERESSE_NAO_ENCONTRADO);
-    }
-    interesseRepository.deleteById(id);
-  }
-
-  @Override
-  public InteresseResponseDTO buscarPorId(Long id) {
-    Interesse interesse =
-        interesseRepository
-            .findById(id)
-            .orElseThrow(() -> new CommerceException(ErrorCode.INTERESSE_NAO_ENCONTRADO));
+        interesseRepository.save(
+            Interesse.builder().tipo(interesseDto.getTipo()).cliente(cliente).ativo(ativo).build());
 
     return new InteresseResponseDTO(interesse);
   }
 
   @Override
-  public List<InteresseResponseDTO> listar(Usuario usuario) {
-    List<Interesse> interesses = interesseRepository.findAll();
+  public void remover(Long id, Usuario usuario) {
+    var interesse = interesseRepository.findById(id).orElse(null);
+    if (interesse == null || !isAutorizado(usuario, interesse.getClienteId())) {
+      throw new CommerceException(ErrorCode.INTERESSE_NAO_ENCONTRADO);
+    }
 
+    interesseRepository.delete(interesse);
+  }
+
+  @Override
+  public InteresseResponseDTO buscarPorId(Long id, Usuario usuario) {
+    Interesse interesse =
+        interesseRepository
+            .findById(id)
+            .orElseThrow(() -> new CommerceException(ErrorCode.INTERESSE_NAO_ENCONTRADO));
+
+    if (!isAutorizado(usuario, interesse.getClienteId())) {
+      throw new CommerceException(ErrorCode.INTERESSE_NAO_ENCONTRADO);
+    }
+
+    return new InteresseResponseDTO(interesse);
+  }
+
+  @Override
+  public List<InteresseResponseDTO> listar() {
+    List<Interesse> interesses = interesseRepository.findAll();
     return interesses.stream().map(InteresseResponseDTO::new).collect(Collectors.toList());
+  }
+
+  private boolean isAutorizado(Usuario usuario, long clienteId) {
+    if (usuario.isAdmin()) return true;
+    var cliente = (Cliente) usuario;
+    return cliente.getId() == clienteId;
   }
 }

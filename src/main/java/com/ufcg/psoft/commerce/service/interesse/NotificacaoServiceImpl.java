@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
+import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Interesse;
@@ -74,7 +75,7 @@ public class NotificacaoServiceImpl implements NotificacaoService {
       send(msgFormatada);
 
       if (deletarAposNotificar) {
-        interesseService.remover(interesse.getId());
+        interesseService.remover(interesse.getId(), Admin.getInstance());
       }
     }
   }

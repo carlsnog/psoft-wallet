@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InteresseCreateDTO {
 
-  @NotNull(message = "Tipo é obrigatório")
+  @NotNull(message = "Tipo e obrigatorio")
   private TipoInteresseEnum tipo;
 
-  @NotNull(message = "ID do cliente é obrigatório")
+  @NotNull(message = "ID do cliente e obrigatorio")
   private Long clienteId;
 
-  @NotNull(message = "ID do ativo é obrigatório")
+  @NotNull(message = "ID do ativo e obrigatorio")
   private Long ativoId;
 }
