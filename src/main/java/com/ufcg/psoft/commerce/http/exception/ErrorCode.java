@@ -7,6 +7,7 @@ public enum ErrorCode {
   FORBIDDEN("Acesso negado", HttpStatus.FORBIDDEN),
   BAD_REQUEST("Requisicao invalida", HttpStatus.BAD_REQUEST),
   INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
+  JSON_INVALID("Corpo da requisição inválido ou malformado", HttpStatus.BAD_REQUEST),
 
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
