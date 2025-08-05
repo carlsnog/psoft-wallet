@@ -287,6 +287,75 @@ public class AtivoControllerTests {
     }
   }
 
+  @Test
+  @DisplayName(
+      "11. Falha: Enviar JSON de Ativo com sintaxe malformada (HttpMessageNotReadableException)")
+  void quandoEnviarJsonMalformadoRetornaBadRequest() throws Exception {
+    String malformedJson =
+        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"valor\": 100.00,"; // JSON incompleto
+
+    mvcDriver
+        .perform(
+            post(URI_ATIVOS)
+                .header(
+                    "Authorization",
+                    driver.createBasicAuthHeader(
+                        String.valueOf(Admin.getInstance().getUserId()),
+                        Admin.getInstance().getCodigoAcesso()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(malformedJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("JSON_INVALID"))
+        .andExpect(jsonPath("$.message").value("Corpo da requisição inválido ou malformado"))
+        .andDo(print());
+  }
+
+  @Test
+  @DisplayName(
+      "12. Falha: Enviar JSON de Ativo com tipo de dado incorreto para campo (HttpMessageNotReadableException)")
+  void quandoEnviarJsonComTipoDeDadoIncorretoRetornaBadRequest() throws Exception {
+    String invalidTypeJson =
+        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"valor\": \"cem\"}"; // 'valor' como string
+
+    mvcDriver
+        .perform(
+            post(URI_ATIVOS)
+                .header(
+                    "Authorization",
+                    driver.createBasicAuthHeader(
+                        String.valueOf(Admin.getInstance().getUserId()),
+                        Admin.getInstance().getCodigoAcesso()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidTypeJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("JSON_INVALID"))
+        .andExpect(jsonPath("$.message").value("Corpo da requisição inválido ou malformado"))
+        .andDo(print());
+  }
+
+  @Test
+  @DisplayName(
+      "13. Falha: Parâmetro de rota de Ativo com tipo inválido (MethodArgumentTypeMismatchException)")
+  void quandoParametroDeRotaInvalidoRetornaBadRequest() throws Exception {
+    driver
+        .get(URI_ATIVOS + "/naoNumerico", Admin.getInstance()) // ID não numérico
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.message").value("Parâmetro inválido: id"))
+        .andDo(print());
+  }
+
+  @Test
+  @DisplayName("14. Falha: Tentar recuperar um ativo com ID de formato inválido")
+  void quandoRecuperarAtivoComIdNegativoRetornaBadRequest() throws Exception {
+    driver
+        .get(URI_ATIVOS + "/-1hdla", Admin.getInstance())
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.message").value("Parâmetro inválido: id"))
+        .andDo(print());
+  }
+
   /**
    * Conjunto de testes para a operação de atualização de ativo (PUT /ativos/{id}). Cobre cenários
    * de sucesso para atualização parcial e completa, e falhas devido a ativo não encontrado,

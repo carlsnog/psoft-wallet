@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -112,16 +111,6 @@ public class GlobalExceptionHandler {
     ErrorDTO errorDTO =
         new ErrorDTO(ErrorCode.FORBIDDEN, "Método HTTP não permitido: " + ex.getMethod());
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorDTO);
-  }
-
-  @ExceptionHandler(NoHandlerFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public ResponseEntity<ErrorDTO> onNoHandlerFound(NoHandlerFoundException ex) {
-    log.warn("Rota não encontrada: {}", ex.getRequestURL(), ex);
-    ErrorDTO errorDTO =
-        new ErrorDTO(ErrorCode.BAD_REQUEST, "Rota não encontrada: " + ex.getRequestURL());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDTO);
   }
 
   @ExceptionHandler(MissingRequestHeaderException.class)
