@@ -7,14 +7,19 @@ import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
+import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
+import com.ufcg.psoft.commerce.model.Interesse;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.ufcg.psoft.commerce.repository.InteresseRepository;
+import com.ufcg.psoft.commerce.service.interesse.NotificacaoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,10 @@ public class AtivoServiceImpl implements AtivoService {
   @Autowired private AtivoRepository repository;
 
   @Autowired private AtivoFactory ativoFactory;
+
+  @Autowired private NotificacaoService notificacaoService;
+
+  @Autowired private InteresseRepository interesseRepository;
 
   @Autowired ModelMapper modelMapper;
 
@@ -119,6 +128,22 @@ public class AtivoServiceImpl implements AtivoService {
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
     ativo.setStatus(novoStatus);
     repository.save(ativo);
+
+    if(novoStatus == StatusAtivo.DISPONIVEL) {
+      notificaInteressadosPorDisponibilidade(ativo);
+    }
     return new AtivoResponseDTO(ativo);
+  }
+
+  private void notificaInteressadosPorDisponibilidade(Ativo ativo) {
+    List<Interesse> interesses = buscarInteressesPorDisponibilidade(ativo);
+    if(!interesses.isEmpty()) {
+      notificacaoService.notificarDisponibilidade(ativo);
+      interesseRepository.deleteAll(interesses);
+    }
+  }
+
+  private List<Interesse> buscarInteressesPorDisponibilidade(Ativo ativo) {
+    return interesseRepository.findByTipoAndAtivo_Id(TipoInteresseEnum.DISPONIBILIDADE, ativo.getId());
   }
 }
