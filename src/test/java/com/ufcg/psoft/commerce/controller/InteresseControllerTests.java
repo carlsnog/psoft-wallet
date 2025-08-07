@@ -80,7 +80,7 @@ public class InteresseControllerTests {
                 .codigoAcesso("123456")
                 .build());
 
-    // Criar cliente normal para testes de acesso negado
+    // Criar cliente normal para os testes
     clienteNormal =
         clienteRepository.save(
             Cliente.builder()

@@ -2,6 +2,9 @@ package com.ufcg.psoft.commerce.service.interesse;
 
 import com.ufcg.psoft.commerce.dto.InteresseCreateDTO;
 import com.ufcg.psoft.commerce.dto.InteresseResponseDTO;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
+import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
@@ -41,11 +44,34 @@ public class InteresseServiceImpl implements InteresseService {
             .findById(interesseDto.getAtivoId())
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
+    validaInteresse(usuario, ativo, interesseDto);
+
     Interesse interesse =
         interesseRepository.save(
             Interesse.builder().tipo(interesseDto.getTipo()).cliente(cliente).ativo(ativo).build());
 
     return new InteresseResponseDTO(interesse);
+  }
+
+  private void validaInteresse(Usuario usuario, Ativo ativo, InteresseCreateDTO interesseDto) {
+    PlanoEnum planoCliente = ((Cliente) usuario).getPlano();
+    TipoInteresseEnum interesseCliente = interesseDto.getTipo();
+
+    if (planoCliente == PlanoEnum.PREMIUM) {
+      return;
+    }
+
+    if (interesseCliente == TipoInteresseEnum.PRECO) {
+      throw new CommerceException(
+          ErrorCode.FORBIDDEN,
+          "Usuários normais não podem demonstrar interesse por variaçao de preço.");
+    }
+
+    if (ativo.getTipo() != AtivoTipo.TESOURO) {
+      throw new CommerceException(
+          ErrorCode.FORBIDDEN,
+          "Usuários normais só podem demonstrar interesse por ativos do tipo Tesouro Direto.");
+    }
   }
 
   @Override

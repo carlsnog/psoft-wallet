@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/interesses")
-@Autenticado(TipoAutenticacao.PREMIUM)
 public class InteresseController {
 
   @Autowired InteresseService interesseService;

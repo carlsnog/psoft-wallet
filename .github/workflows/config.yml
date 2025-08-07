@@ -2,6 +2,9 @@ name: Psoft Commerce CI
 
 on:
   pull_request:
+    paths:
+      - '**'
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:

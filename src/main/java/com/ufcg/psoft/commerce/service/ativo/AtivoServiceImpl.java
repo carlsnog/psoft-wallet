@@ -7,6 +7,7 @@ import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
+import com.ufcg.psoft.commerce.event.AtivoDisponivelEvent;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +27,8 @@ public class AtivoServiceImpl implements AtivoService {
   @Autowired private AtivoRepository repository;
 
   @Autowired private AtivoFactory ativoFactory;
+
+  @Autowired private ApplicationEventPublisher eventPublisher;
 
   @Autowired ModelMapper modelMapper;
 
@@ -119,6 +123,10 @@ public class AtivoServiceImpl implements AtivoService {
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
     ativo.setStatus(novoStatus);
     repository.save(ativo);
+
+    if (novoStatus == StatusAtivo.DISPONIVEL) {
+      eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
+    }
     return new AtivoResponseDTO(ativo);
   }
 }
