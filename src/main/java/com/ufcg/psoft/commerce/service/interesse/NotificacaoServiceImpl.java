@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Builder
@@ -30,8 +30,8 @@ class NotificacaoEstruturada {
 }
 
 @Service
-@Slf4j
 public class NotificacaoServiceImpl implements NotificacaoService {
+  private final Logger logger;
   private final InteresseRepository interesseRepository;
   private final InteresseService interesseService;
   private final ObjectMapper objectMapper;
@@ -39,10 +39,12 @@ public class NotificacaoServiceImpl implements NotificacaoService {
   public NotificacaoServiceImpl(
       InteresseRepository interesseRepository,
       InteresseService interesseService,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper,
+      Logger logger) {
     this.interesseRepository = interesseRepository;
     this.interesseService = interesseService;
     this.objectMapper = objectMapper;
+    this.logger = logger;
   }
 
   @Override
@@ -91,9 +93,9 @@ public class NotificacaoServiceImpl implements NotificacaoService {
   private void send(NotificacaoEstruturada msg) {
     try {
       var json = objectMapper.writeValueAsString(msg);
-      log.info(json);
+      logger.info(json);
     } catch (JsonProcessingException e) {
-      log.error("Erro ao enviar mensagem", e);
+      logger.error("Erro ao enviar mensagem", e);
     }
   }
 }

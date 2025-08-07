@@ -4,14 +4,16 @@ import com.ufcg.psoft.commerce.model.Ativo;
 import org.springframework.context.ApplicationEvent;
 
 public class AtivoDisponivelEvent extends ApplicationEvent {
-    private final Ativo ativo;
+  private static final long serialVersionUID = 1L;
 
-    public AtivoDisponivelEvent(Object source, Ativo ativo) {
-        super(source);
-        this.ativo = ativo;
-    }
+  private final Ativo ativo;
 
-    public Ativo getAtivo() {
-        return this.ativo;
-    }
+  public AtivoDisponivelEvent(Object source, Ativo ativo) {
+    super(source);
+    this.ativo = ativo;
+  }
+
+  public Ativo getAtivo() {
+    return this.ativo;
+  }
 }

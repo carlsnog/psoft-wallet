@@ -12,12 +12,10 @@ import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
-
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -126,10 +124,9 @@ public class AtivoServiceImpl implements AtivoService {
     ativo.setStatus(novoStatus);
     repository.save(ativo);
 
-    if(novoStatus == StatusAtivo.DISPONIVEL) {
+    if (novoStatus == StatusAtivo.DISPONIVEL) {
       eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
     }
     return new AtivoResponseDTO(ativo);
   }
-
 }
