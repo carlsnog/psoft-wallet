@@ -265,8 +265,8 @@ public class InteresseControllerTests {
   class InteresseVerificacaoAutenticacao {
 
     @Test
-    @DisplayName("Quando cliente normal tenta criar interesse (deve ser negado)")
-    void quandoClienteNormalTentaCriarInteresse() throws Exception {
+    @DisplayName("Quando cliente normal tenta criar interesse em Cripto (deve ser negado)")
+    void quandoClienteNormalTentaCriarInteresseCripto() throws Exception {
       // Act
       String responseJsonString =
           driver
@@ -281,6 +281,48 @@ public class InteresseControllerTests {
       assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
 
       assertEquals("Acesso negado", resultado.getMessage());
+    }
+
+    @Test
+    @DisplayName(
+        "Quando cliente normal tenta criar interesse em Tesouro Direto (deve ser autorizado)")
+    void quandoClienteNormalTentaCriarInteresseTesouro() throws Exception {
+      // Act
+      ativo =
+          ativoRepository.save(
+              Cripto.builder()
+                  .nome("Tesouro Selic")
+                  .descricao("Acompanha a taxa selic")
+                  .valor(BigDecimal.valueOf(100.00))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.TESOURO)
+                  .build());
+
+      interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .tipo(TipoInteresseEnum.DISPONIBILIDADE)
+              .clienteId(clienteNormal.getId())
+              .ativoId(ativo.getId())
+              .build();
+
+      String responseJsonString =
+          driver
+              .post(URI_INTERESSES, interesseCreateDTO, clienteNormal)
+              .andExpect(status().isCreated())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      InteresseResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, InteresseResponseDTO.class);
+
+      // Assert
+      assertAll(
+          () -> assertNotNull(resultado.getId()),
+          () -> assertEquals(TipoInteresseEnum.DISPONIBILIDADE, resultado.getTipo()),
+          () -> assertEquals(clienteNormal.getId(), resultado.getClienteId()),
+          () -> assertEquals(ativo.getId(), resultado.getAtivoId()));
     }
 
     @Test
@@ -356,25 +398,6 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente normal tenta excluir interesse (deve ser negado)")
-    void quandoClienteNormalTentaExcluirInteresse() throws Exception {
-      // Act
-      String responseJsonString =
-          driver
-              .delete(URI_INTERESSES + "/1", clienteNormal)
-              .andExpect(status().isForbidden())
-              .andDo(print())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-
-      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
-
-      assertEquals("Acesso negado", resultado.getMessage());
-    }
-
-    @Test
     @DisplayName("Quando tentamos excluir interesse sem autenticação")
     void quandoExcluirInteresseSemAutenticacao() throws Exception {
       // Act
@@ -445,22 +468,38 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente normal tenta recuperar interesse (deve ser negado)")
+    @DisplayName("Quando adm tenta recuperar um interesse de um cliente")
     void quandoClienteNormalTentaRecuperarInteresse() throws Exception {
       // Act
       String responseJsonString =
           driver
-              .get(URI_INTERESSES + "/1", clienteNormal)
-              .andExpect(status().isForbidden())
+              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .andExpect(status().isCreated())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      InteresseResponseDTO interesseCriado =
+          objectMapper.readValue(responseJsonString, InteresseResponseDTO.class);
+
+      String responseGetJsonString =
+          driver
+              .get(URI_INTERESSES + "/" + interesseCriado.getId(), Admin.getInstance())
+              .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
               .getResponse()
               .getContentAsString();
 
-      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
+      InteresseResponseDTO resultado =
+          objectMapper.readValue(responseGetJsonString, InteresseResponseDTO.class);
 
-      assertEquals("Acesso negado", resultado.getMessage());
+      // Assert
+      assertAll(
+          () -> assertEquals(interesseCriado.getId(), resultado.getId()),
+          () -> assertEquals(interesseCriado.getTipo(), resultado.getTipo()),
+          () -> assertEquals(interesseCriado.getClienteId(), resultado.getClienteId()),
+          () -> assertEquals(interesseCriado.getAtivoId(), resultado.getAtivoId()));
     }
 
     @Test
@@ -513,7 +552,7 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente premium tenta listar interesses (deve ser negado)")
+    @DisplayName("Quando cliente tenta listar interesses (deve ser negado)")
     void quandoClientePremiumTentaListarInteresses() throws Exception {
       // Act
       String responseJsonString =

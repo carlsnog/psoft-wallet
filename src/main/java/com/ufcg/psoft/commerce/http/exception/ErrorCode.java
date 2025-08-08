@@ -19,7 +19,13 @@ public enum ErrorCode {
 
   CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
 
-  INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND);
+  INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
+  INTERESSE_DISPONIBILIDADE_DIF_TESOURO(
+      "Usuários normais só podem demonstrar interesse por ativos do tipo Tesouro Direto.",
+      HttpStatus.FORBIDDEN),
+  INTERESSE_PRECO_RESTRITO(
+      "Usuários normais não podem demonstrar interesse por variação de preço.",
+      HttpStatus.FORBIDDEN);
 
   private final String message;
   private final HttpStatus httpStatus;
