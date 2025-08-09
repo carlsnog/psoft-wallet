@@ -1,9 +1,13 @@
 package com.ufcg.psoft.commerce.service.interesse.listeners.disponivel;
 
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
+import com.ufcg.psoft.commerce.model.Interesse;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
 import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEventListener;
 import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
+
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,5 +26,10 @@ public class AtivoDisponivelHandler extends AtivoBaseEventListener<AtivoDisponiv
   @Override
   protected TipoInteresseEnum getTipoInteresse() {
     return TipoInteresseEnum.DISPONIBILIDADE;
+  }
+
+  @Override
+  protected void depoisDeNotificar(List<Interesse> interesses) {
+    interesseRepository.deleteAll(interesses);
   }
 }

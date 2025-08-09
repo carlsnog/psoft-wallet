@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationListener;
 public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent>
     implements ApplicationListener<TNotificacao> {
 
-  private final InteresseRepository interesseRepository;
-  private final NotificacaoService notificacaoService;
+  protected final InteresseRepository interesseRepository;
+  protected final NotificacaoService notificacaoService;
 
   public AtivoBaseEventListener(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {
@@ -29,7 +29,7 @@ public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent
       notificacaoService.notificar(interesse.getCliente(), formatarMensagem(event));
     }
 
-    interesseRepository.deleteAll(interesses);
+    depoisDeNotificar(interesses);
   }
 
   private List<Interesse> buscarInteresses(Ativo ativo) {
@@ -39,4 +39,6 @@ public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent
   protected abstract String formatarMensagem(TNotificacao event);
 
   protected abstract TipoInteresseEnum getTipoInteresse();
+
+  protected void depoisDeNotificar(List<Interesse> interesses) {}
 }
