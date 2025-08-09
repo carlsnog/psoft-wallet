@@ -2,12 +2,12 @@ package com.ufcg.psoft.commerce.service.interesse.listeners.preco;
 
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
-import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEventHandler;
+import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEventListener;
 import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AtivoPrecoHandler extends AtivoBaseEventHandler<AtivoPrecoEvent> {
+public class AtivoPrecoHandler extends AtivoBaseEventListener<AtivoPrecoEvent> {
 
   public AtivoPrecoHandler(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {

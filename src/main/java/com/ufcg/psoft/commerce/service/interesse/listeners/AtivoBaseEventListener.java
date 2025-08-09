@@ -8,13 +8,13 @@ import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
 import java.util.List;
 import org.springframework.context.ApplicationListener;
 
-public abstract class AtivoBaseEventHandler<TNotificacao extends AtivoBaseEvent>
+public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent>
     implements ApplicationListener<TNotificacao> {
 
   private final InteresseRepository interesseRepository;
   private final NotificacaoService notificacaoService;
 
-  public AtivoBaseEventHandler(
+  public AtivoBaseEventListener(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {
     this.interesseRepository = interesseRepository;
     this.notificacaoService = notificacaoService;
