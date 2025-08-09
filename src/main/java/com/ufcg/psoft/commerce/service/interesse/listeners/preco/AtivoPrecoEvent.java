@@ -3,17 +3,14 @@ package com.ufcg.psoft.commerce.service.interesse.listeners.preco;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEvent;
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-public class AtivoPrecoEvent implements AtivoBaseEvent {
-
-  private Ativo ativo;
+@Getter
+public class AtivoPrecoEvent extends AtivoBaseEvent {
   private BigDecimal novoPreco;
+
+  public AtivoPrecoEvent(Object source, Ativo ativo, BigDecimal novoPreco) {
+    super(source, ativo);
+    this.novoPreco = novoPreco;
+  }
 }

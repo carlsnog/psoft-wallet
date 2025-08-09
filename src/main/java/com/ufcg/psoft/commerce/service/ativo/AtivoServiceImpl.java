@@ -115,7 +115,7 @@ public class AtivoServiceImpl implements AtivoService {
     repository.save(ativo);
 
     if (novoStatus == StatusAtivo.DISPONIVEL) {
-      eventPublisher.publishEvent(new AtivoDisponivelEvent(ativo));
+      eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
     }
 
     return new AtivoResponseDTO(ativo);

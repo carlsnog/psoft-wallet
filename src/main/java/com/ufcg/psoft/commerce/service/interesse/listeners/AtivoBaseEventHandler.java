@@ -6,9 +6,10 @@ import com.ufcg.psoft.commerce.model.Interesse;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
 import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
 import java.util.List;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationListener;
 
-public abstract class AtivoBaseEventHandler<TNotificacao extends AtivoBaseEvent> {
+public abstract class AtivoBaseEventHandler<TNotificacao extends AtivoBaseEvent>
+    implements ApplicationListener<TNotificacao> {
 
   private final InteresseRepository interesseRepository;
   private final NotificacaoService notificacaoService;
@@ -19,8 +20,8 @@ public abstract class AtivoBaseEventHandler<TNotificacao extends AtivoBaseEvent>
     this.notificacaoService = notificacaoService;
   }
 
-  @EventListener
-  public void handle(TNotificacao event) {
+  @Override
+  public void onApplicationEvent(TNotificacao event) {
     Ativo ativo = event.getAtivo();
     List<Interesse> interesses = buscarInteresses(ativo);
 
