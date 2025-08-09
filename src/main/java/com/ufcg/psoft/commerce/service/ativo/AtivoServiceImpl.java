@@ -14,7 +14,6 @@ import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 import com.ufcg.psoft.commerce.service.interesse.listeners.disponivel.AtivoDisponivelEvent;
 import com.ufcg.psoft.commerce.service.interesse.listeners.preco.AtivoCotacaoEvent;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -126,5 +125,4 @@ public class AtivoServiceImpl implements AtivoService {
 
     return new AtivoResponseDTO(ativo);
   }
-
 }
