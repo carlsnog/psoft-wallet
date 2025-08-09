@@ -80,11 +80,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -113,11 +114,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
-      
-      InteresseCreateDTO interessePrecoDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(cripto.getId())
-          .build();
+
+      InteresseCreateDTO interessePrecoDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -146,11 +148,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo cripto = criarCripto(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(cripto.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -173,11 +176,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.DISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -200,11 +204,9 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(null)
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder().clienteId(null).ativoId(tesouro.getId()).build();
 
       // Act
       String responseJsonString =
@@ -233,11 +235,9 @@ public class InteresseControllerTests {
     void quandoCriarInteresseComAtivoIdNulo() throws Exception {
       // Arrange
       Cliente clientePremium = criarClientePremium();
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(null)
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder().clienteId(clientePremium.getId()).ativoId(null).build();
 
       // Act
       String responseJsonString =
@@ -272,11 +272,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clienteNormal = criarClienteNormal();
       Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clienteNormal.getId())
-          .ativoId(cripto.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clienteNormal.getId())
+              .ativoId(cripto.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -295,16 +296,18 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente normal tenta criar interesse em Tesouro Direto (deve ser autorizado)")
+    @DisplayName(
+        "Quando cliente normal tenta criar interesse em Tesouro Direto (deve ser autorizado)")
     void quandoClienteNormalTentaCriarInteresseTesouro() throws Exception {
       // Arrange
       Cliente clienteNormal = criarClienteNormal();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clienteNormal.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clienteNormal.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Act
       String responseJsonString =
@@ -333,11 +336,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Act
       mvcDriver
@@ -355,11 +359,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Act
       mvcDriver
@@ -383,11 +388,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Primeiro criar o interesse
       String responseJsonString =
@@ -450,11 +456,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Primeiro criar o interesse
       String responseJsonString =
@@ -517,11 +524,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // Primeiro criar o interesse
       String responseJsonString =
@@ -578,24 +586,28 @@ public class InteresseControllerTests {
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
       Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
-      
+
       // Criar primeiro interesse
-      InteresseCreateDTO interesse1 = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
-      
+      InteresseCreateDTO interesse1 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       driver
           .post(URI_INTERESSES + "/disponibilidade", interesse1, clientePremium)
           .andExpect(status().isCreated());
 
       // Criar segundo interesse
-      InteresseCreateDTO interesse2 = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(cripto.getId())
-          .build();
+      InteresseCreateDTO interesse2 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
 
-      driver.post(URI_INTERESSES + "/preco", interesse2, clientePremium).andExpect(status().isCreated());
+      driver
+          .post(URI_INTERESSES + "/preco", interesse2, clientePremium)
+          .andExpect(status().isCreated());
 
       // Act - Admin lista todos os interesses
       String responseJsonString =
@@ -654,11 +666,12 @@ public class InteresseControllerTests {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
-      
-      InteresseCreateDTO interesseCreateDTO = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
 
       // 1. Criar interesse
       String responseJsonString =
@@ -698,24 +711,28 @@ public class InteresseControllerTests {
       Cliente clientePremium = criarClientePremium();
       Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
       Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
-      
+
       // 1. Criar primeiro interesse
-      InteresseCreateDTO interesse1 = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(tesouro.getId())
-          .build();
-      
+      InteresseCreateDTO interesse1 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       driver
           .post(URI_INTERESSES + "/disponibilidade", interesse1, clientePremium)
           .andExpect(status().isCreated());
 
       // 2. Criar segundo interesse
-      InteresseCreateDTO interesse2 = InteresseCreateDTO.builder()
-          .clienteId(clientePremium.getId())
-          .ativoId(cripto.getId())
-          .build();
+      InteresseCreateDTO interesse2 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
 
-      driver.post(URI_INTERESSES + "/preco", interesse2, clientePremium).andExpect(status().isCreated());
+      driver
+          .post(URI_INTERESSES + "/preco", interesse2, clientePremium)
+          .andExpect(status().isCreated());
 
       // 3. Verificar listagem como admin
       String responseJsonString =
