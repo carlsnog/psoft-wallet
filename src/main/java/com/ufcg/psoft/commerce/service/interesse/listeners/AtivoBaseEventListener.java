@@ -22,6 +22,7 @@ public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent
 
   @Override
   public void onApplicationEvent(TNotificacao event) {
+    if (!deveNotificar(event)) return;
     Ativo ativo = event.getAtivo();
     List<Interesse> interesses = buscarInteresses(ativo);
 
@@ -34,6 +35,10 @@ public abstract class AtivoBaseEventListener<TNotificacao extends AtivoBaseEvent
 
   private List<Interesse> buscarInteresses(Ativo ativo) {
     return interesseRepository.findByTipoAndAtivo_Id(getTipoInteresse(), ativo.getId());
+  }
+
+  protected boolean deveNotificar(TNotificacao event) {
+    return true;
   }
 
   protected abstract String formatarMensagem(TNotificacao event);

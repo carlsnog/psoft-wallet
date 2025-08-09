@@ -19,15 +19,9 @@ public class CotacaoUpsertDTO {
   @JsonProperty("cotacao")
   @NotNull(message = "Cotação é obrigatória")
   @Digits(
-          integer = 15,
-          fraction = 2,
-          message = "A cotação do ativo deve ter no máximo 15 dígitos inteiros e 2 decimais"
-  )
-  @DecimalMin(
-          value = "0.01",
-          inclusive = true,
-          message = "Cotação deve ser maior ou igual a 0.01"
-  )
+      integer = 15,
+      fraction = 2,
+      message = "A cotação do ativo deve ter no máximo 15 dígitos inteiros e 2 decimais")
+  @DecimalMin(value = "0.01", inclusive = true, message = "Cotação deve ser maior ou igual a 0.01")
   private BigDecimal cotacao;
-
 }

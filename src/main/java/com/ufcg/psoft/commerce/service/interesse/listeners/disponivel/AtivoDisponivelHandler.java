@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.interesse.listeners.disponivel;
 
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.model.Interesse;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
@@ -14,6 +15,12 @@ public class AtivoDisponivelHandler extends AtivoBaseEventListener<AtivoDisponiv
   public AtivoDisponivelHandler(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {
     super(interesseRepository, notificacaoService);
+  }
+
+  @Override
+  protected boolean deveNotificar(AtivoDisponivelEvent event) {
+    var ativo = event.getAtivo();
+    return ativo.getStatus() == StatusAtivo.DISPONIVEL;
   }
 
   @Override

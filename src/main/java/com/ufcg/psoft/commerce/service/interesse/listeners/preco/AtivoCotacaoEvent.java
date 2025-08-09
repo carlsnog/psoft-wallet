@@ -9,10 +9,12 @@ import lombok.Getter;
 public class AtivoCotacaoEvent extends AtivoBaseEvent {
   private static final long serialVersionUID = 1L;
 
-  private BigDecimal novaCotacao;
+  private final BigDecimal cotacaoAntiga;
+  private final BigDecimal novaCotacao;
 
-  public AtivoCotacaoEvent(Object source, Ativo ativo, BigDecimal novaCotacao) {
+  public AtivoCotacaoEvent(Object source, Ativo ativo, BigDecimal cotacaoAntiga) {
     super(source, ativo);
-    this.novaCotacao = novaCotacao;
+    this.cotacaoAntiga = cotacaoAntiga;
+    this.novaCotacao = ativo.getCotacao();
   }
 }

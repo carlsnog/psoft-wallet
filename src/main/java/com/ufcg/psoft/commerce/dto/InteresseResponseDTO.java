@@ -1,7 +1,6 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.model.Interesse;
 import jakarta.validation.constraints.NotNull;

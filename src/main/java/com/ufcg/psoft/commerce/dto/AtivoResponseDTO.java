@@ -5,10 +5,9 @@ import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.model.Ativo;
 import jakarta.validation.constraints.NotBlank;
-import java.math.BigDecimal;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

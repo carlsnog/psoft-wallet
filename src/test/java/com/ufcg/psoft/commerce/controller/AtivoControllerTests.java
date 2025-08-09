@@ -679,7 +679,8 @@ public class AtivoControllerTests {
       assertEquals(ativoCriado.getStatus(), resultado.getStatus());
       assertEquals(ativoCriado.getTipo(), resultado.getTipo());
       assertTrue(
-          BigDecimal.valueOf(ativoCriado.getCotacao().doubleValue()).compareTo(resultado.getCotacao())
+          BigDecimal.valueOf(ativoCriado.getCotacao().doubleValue())
+                  .compareTo(resultado.getCotacao())
               == 0);
     }
 
@@ -1356,7 +1357,7 @@ public class AtivoControllerTests {
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                      cotacaoUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
@@ -1379,7 +1380,7 @@ public class AtivoControllerTests {
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                      cotacaoUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
@@ -1402,7 +1403,7 @@ public class AtivoControllerTests {
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                      cotacaoUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
@@ -1428,7 +1429,7 @@ public class AtivoControllerTests {
           driver
               .put(
                   URI_ATIVOS + "/" + tesouro.getId() + "/cotacao",
-                      cotacaoUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
@@ -1453,7 +1454,9 @@ public class AtivoControllerTests {
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", cotacaoUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1474,7 +1477,9 @@ public class AtivoControllerTests {
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", cotacaoUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1495,7 +1500,9 @@ public class AtivoControllerTests {
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", cotacaoUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()

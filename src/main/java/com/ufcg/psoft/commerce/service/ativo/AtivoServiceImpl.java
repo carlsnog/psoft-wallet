@@ -12,6 +12,9 @@ import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 import com.ufcg.psoft.commerce.service.interesse.listeners.disponivel.AtivoDisponivelEvent;
+import com.ufcg.psoft.commerce.service.interesse.listeners.preco.AtivoCotacaoEvent;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -62,8 +65,13 @@ public class AtivoServiceImpl implements AtivoService {
             .findById(id)
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
-    ativo.atualizarCotacao(dto.getCotacao());
+    BigDecimal antigaCotacao = ativo.getCotacao();
+    BigDecimal novaCotacao = dto.getCotacao();
+    ativo.atualizarCotacao(novaCotacao);
     repository.save(ativo);
+
+    eventPublisher.publishEvent(new AtivoCotacaoEvent(this, ativo, antigaCotacao));
+
     return modelMapper.map(ativo, AtivoResponseDTO.class);
   }
 
@@ -114,10 +122,20 @@ public class AtivoServiceImpl implements AtivoService {
     ativo.setStatus(novoStatus);
     repository.save(ativo);
 
-    if (novoStatus == StatusAtivo.DISPONIVEL) {
-      eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
-    }
+    eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
 
     return new AtivoResponseDTO(ativo);
+  }
+
+  private boolean variacaoSignificativa(BigDecimal cotacaoAntiga, BigDecimal cotacaoNova) {
+    if (cotacaoAntiga == null || cotacaoAntiga.compareTo(BigDecimal.ZERO) == 0) {
+      return false;
+    }
+
+    BigDecimal diferenca = cotacaoNova.subtract(cotacaoAntiga).abs();
+    BigDecimal variacaoPercentual =
+        diferenca.divide(cotacaoAntiga, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+
+    return variacaoPercentual.compareTo(BigDecimal.valueOf(10)) >= 0;
   }
 }
