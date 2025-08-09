@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AtivoCotacaoHandler extends AtivoBaseEventListener<AtivoCotacaoEvent> {
   private static final BigDecimal LIMIAR = new BigDecimal("0.10"); // 10%
-  private static final BigDecimal CEM = new BigDecimal("100");
 
   public AtivoCotacaoHandler(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {
@@ -38,7 +37,7 @@ public class AtivoCotacaoHandler extends AtivoBaseEventListener<AtivoCotacaoEven
             .abs()
             .divide(antiga, 4, RoundingMode.HALF_UP)
             .multiply(BigDecimal.valueOf(100));
-    return "A cotação do ativo "
+    return "a cotação do ativo "
         + e.getAtivo().getNome()
         + " variou "
         + pct.setScale(2, RoundingMode.HALF_UP)

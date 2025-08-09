@@ -25,7 +25,7 @@ public class AtivoDisponivelHandler extends AtivoBaseEventListener<AtivoDisponiv
 
   @Override
   protected String formatarMensagem(AtivoDisponivelEvent event) {
-    return "O ativo " + event.getAtivo().getNome() + " está disponível para compra!";
+    return "o ativo " + event.getAtivo().getNome() + " está disponível para compra!";
   }
 
   @Override
