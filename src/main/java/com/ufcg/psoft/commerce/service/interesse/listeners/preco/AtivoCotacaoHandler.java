@@ -7,24 +7,24 @@ import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AtivoPrecoHandler extends AtivoBaseEventListener<AtivoPrecoEvent> {
+public class AtivoCotacaoHandler extends AtivoBaseEventListener<AtivoCotacaoEvent> {
 
-  public AtivoPrecoHandler(
+  public AtivoCotacaoHandler(
       InteresseRepository interesseRepository, NotificacaoService notificacaoService) {
     super(interesseRepository, notificacaoService);
   }
 
   @Override
-  protected String formatarMensagem(AtivoPrecoEvent event) {
-    return "O preco do ativo "
+  protected String formatarMensagem(AtivoCotacaoEvent event) {
+    return "A cotação do ativo "
         + event.getAtivo().getNome()
         + " foi atualizado para "
-        + event.getNovoPreco()
+        + event.getNovaCotacao()
         + "!";
   }
 
   @Override
   protected TipoInteresseEnum getTipoInteresse() {
-    return TipoInteresseEnum.PRECO;
+    return TipoInteresseEnum.COTACAO;
   }
 }

@@ -28,7 +28,7 @@ public class InteresseServiceImpl implements InteresseService {
   @Autowired private AtivoRepository ativoRepository;
 
   @Override
-  public InteresseResponseDTO criarInteressePreco(
+  public InteresseResponseDTO criarInteresseCotacao(
       Usuario usuario, InteresseCreateDTO interesseDto) {
     if (!podeCriarClienteInteresse(usuario, interesseDto.getClienteId())) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
@@ -49,13 +49,13 @@ public class InteresseServiceImpl implements InteresseService {
     }
 
     if (ativo.getStatus() != StatusAtivo.DISPONIVEL) {
-      throw new CommerceException(ErrorCode.INTERESSE_PRECO_ATIVO_NAO_DISPONIVEL);
+      throw new CommerceException(ErrorCode.INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL);
     }
 
     Interesse interesse =
         interesseRepository.save(
             Interesse.builder()
-                .tipo(TipoInteresseEnum.PRECO)
+                .tipo(TipoInteresseEnum.COTACAO)
                 .cliente(cliente)
                 .ativo(ativo)
                 .build());

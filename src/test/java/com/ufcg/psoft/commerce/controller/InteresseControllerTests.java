@@ -109,13 +109,13 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando criamos um interesse válido com tipo PRECO")
-    void quandoCriarInteresseValidoPreco() throws Exception {
+    @DisplayName("Quando criamos um interesse válido com tipo COTACAO")
+    void quandoCriarInteresseValidoCotacao() throws Exception {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
 
-      InteresseCreateDTO interessePrecoDTO =
+      InteresseCreateDTO interesseCotacaoDTO =
           InteresseCreateDTO.builder()
               .clienteId(clientePremium.getId())
               .ativoId(cripto.getId())
@@ -124,7 +124,7 @@ public class InteresseControllerTests {
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES + "/preco", interessePrecoDTO, clientePremium)
+              .post(URI_INTERESSES + "/cotacao", interesseCotacaoDTO, clientePremium)
               .andExpect(status().isCreated())
               .andDo(print())
               .andReturn()
@@ -137,14 +137,14 @@ public class InteresseControllerTests {
       // Assert
       assertAll(
           () -> assertNotNull(resultado.getId()),
-          () -> assertEquals(TipoInteresseEnum.PRECO, resultado.getTipo()),
+          () -> assertEquals(TipoInteresseEnum.COTACAO, resultado.getTipo()),
           () -> assertEquals(clientePremium.getId(), resultado.getClienteId()),
           () -> assertEquals(cripto.getId(), resultado.getAtivoId()));
     }
 
     @Test
-    @DisplayName("Quando tentamos criar interesse de preco com ativo em status indisponivel")
-    void quandoCriarInteressePrecoEmStatusIndisponivel() throws Exception {
+    @DisplayName("Quando tentamos criar interesse de cotacao com ativo em status INDISPONIVEL")
+    void quandoCriarInteresseCotacaoEmStatusIndisponivel() throws Exception {
       // Arrange
       Cliente clientePremium = criarClientePremium();
       Ativo cripto = criarCripto(StatusAtivo.INDISPONIVEL);
@@ -158,7 +158,7 @@ public class InteresseControllerTests {
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES + "/preco", interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/cotacao", interesseCreateDTO, clientePremium)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -167,7 +167,7 @@ public class InteresseControllerTests {
 
       // Assert
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.INTERESSE_PRECO_ATIVO_NAO_DISPONIVEL, resultado.getCode());
+      assertEquals(ErrorCode.INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL, resultado.getCode());
     }
 
     @Test
@@ -606,7 +606,7 @@ public class InteresseControllerTests {
               .build();
 
       driver
-          .post(URI_INTERESSES + "/preco", interesse2, clientePremium)
+          .post(URI_INTERESSES + "/cotacao", interesse2, clientePremium)
           .andExpect(status().isCreated());
 
       // Act - Admin lista todos os interesses
@@ -731,7 +731,7 @@ public class InteresseControllerTests {
               .build();
 
       driver
-          .post(URI_INTERESSES + "/preco", interesse2, clientePremium)
+          .post(URI_INTERESSES + "/cotacao", interesse2, clientePremium)
           .andExpect(status().isCreated());
 
       // 3. Verificar listagem como admin
@@ -777,7 +777,7 @@ public class InteresseControllerTests {
         Cripto.builder()
             .nome("Doge")
             .descricao("Moeda dogecoin")
-            .valor(BigDecimal.valueOf(100.00))
+            .cotacao(BigDecimal.valueOf(100.00))
             .status(status)
             .tipo(AtivoTipo.CRIPTO)
             .build());
@@ -788,7 +788,7 @@ public class InteresseControllerTests {
         Tesouro.builder()
             .nome("Tesouro Selic")
             .descricao("Acompanha a taxa selic")
-            .valor(BigDecimal.valueOf(100.00))
+            .cotacao(BigDecimal.valueOf(100.00))
             .status(status)
             .tipo(AtivoTipo.TESOURO)
             .build());

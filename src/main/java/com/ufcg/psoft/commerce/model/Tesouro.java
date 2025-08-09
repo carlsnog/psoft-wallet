@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Tesouro extends Ativo {
   @Override
-  public void atualizarValor(BigDecimal novoValor) {
+  public void atualizarCotacao(BigDecimal novaCotacao) {
     throw new CommerceException(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO);
   }
 }

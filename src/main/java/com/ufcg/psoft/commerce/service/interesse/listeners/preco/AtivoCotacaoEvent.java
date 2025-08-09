@@ -6,13 +6,13 @@ import java.math.BigDecimal;
 import lombok.Getter;
 
 @Getter
-public class AtivoPrecoEvent extends AtivoBaseEvent {
+public class AtivoCotacaoEvent extends AtivoBaseEvent {
   private static final long serialVersionUID = 1L;
 
-  private BigDecimal novoPreco;
+  private BigDecimal novaCotacao;
 
-  public AtivoPrecoEvent(Object source, Ativo ativo, BigDecimal novoPreco) {
+  public AtivoCotacaoEvent(Object source, Ativo ativo, BigDecimal novaCotacao) {
     super(source, ativo);
-    this.novoPreco = novoPreco;
+    this.novaCotacao = novaCotacao;
   }
 }

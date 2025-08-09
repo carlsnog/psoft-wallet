@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface InteresseService {
 
-  InteresseResponseDTO criarInteressePreco(Usuario usuario, InteresseCreateDTO interesseDto);
+  InteresseResponseDTO criarInteresseCotacao(Usuario usuario, InteresseCreateDTO interesseDto);
 
   InteresseResponseDTO criarInteresseDisponibilidade(
       Usuario usuario, InteresseCreateDTO interesseDto);
