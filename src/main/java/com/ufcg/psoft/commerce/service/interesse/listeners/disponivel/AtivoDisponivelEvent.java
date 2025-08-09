@@ -6,6 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class AtivoDisponivelEvent extends AtivoBaseEvent {
+  private static final long serialVersionUID = 1L;
+
   public AtivoDisponivelEvent(Object source, Ativo ativo) {
     super(source, ativo);
   }

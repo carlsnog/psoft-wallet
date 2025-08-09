@@ -7,6 +7,8 @@ import lombok.Getter;
 
 @Getter
 public class AtivoPrecoEvent extends AtivoBaseEvent {
+  private static final long serialVersionUID = 1L;
+
   private BigDecimal novoPreco;
 
   public AtivoPrecoEvent(Object source, Ativo ativo, BigDecimal novoPreco) {
