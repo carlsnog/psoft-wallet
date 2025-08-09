@@ -18,6 +18,7 @@ public class AtivoCotacaoHandler extends AtivoBaseEventListener<AtivoCotacaoEven
     super(interesseRepository, notificacaoService);
   }
 
+  @Override
   protected boolean deveNotificar(AtivoCotacaoEvent e) {
     var antiga = e.getCotacaoAntiga();
     var nova = e.getNovaCotacao();

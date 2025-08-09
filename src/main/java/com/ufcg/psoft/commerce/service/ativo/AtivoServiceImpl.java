@@ -127,15 +127,4 @@ public class AtivoServiceImpl implements AtivoService {
     return new AtivoResponseDTO(ativo);
   }
 
-  private boolean variacaoSignificativa(BigDecimal cotacaoAntiga, BigDecimal cotacaoNova) {
-    if (cotacaoAntiga == null || cotacaoAntiga.compareTo(BigDecimal.ZERO) == 0) {
-      return false;
-    }
-
-    BigDecimal diferenca = cotacaoNova.subtract(cotacaoAntiga).abs();
-    BigDecimal variacaoPercentual =
-        diferenca.divide(cotacaoAntiga, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
-
-    return variacaoPercentual.compareTo(BigDecimal.valueOf(10)) >= 0;
-  }
 }

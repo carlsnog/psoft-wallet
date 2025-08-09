@@ -41,6 +41,7 @@ public class ClienteController {
   }
 
   @PutMapping("/{id}")
+  @Autenticado()
   public ResponseEntity<?> atualizarCliente(
       @PathVariable Long id,
       @RequestUser Usuario usuario,
