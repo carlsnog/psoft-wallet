@@ -17,7 +17,7 @@ public interface AtivoService {
 
   void remover(Long id);
 
-  AtivoResponseDTO buscarPorId(Long id);
+  AtivoResponseDTO recuperar(Long id, Usuario usuario);
 
   List<AtivoResponseDTO> listar(Usuario usuario);
 

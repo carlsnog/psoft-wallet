@@ -48,8 +48,9 @@ public class AtivoController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> recuperarAtivo(@PathVariable Long id) {
-    return ResponseEntity.status(HttpStatus.OK).body(ativoService.buscarPorId(id));
+  @Autenticado(TipoAutenticacao.NORMAL)
+  public ResponseEntity<?> recuperarAtivo(@PathVariable Long id, @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK).body(ativoService.recuperar(id, usuario));
   }
 
   @GetMapping("")
