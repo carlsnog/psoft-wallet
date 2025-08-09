@@ -76,7 +76,7 @@ public class AtivoControllerTests {
             .nome("PETR4")
             .descricao("Petrobras PN")
             .status(StatusAtivo.DISPONIVEL)
-            .valor(BigDecimal.valueOf(30.50))
+            .cotacao(BigDecimal.valueOf(30.50))
             .tipo(AtivoTipo.ACAO)
             .build();
 
@@ -85,7 +85,7 @@ public class AtivoControllerTests {
             .nome("PETR4")
             .descricao("Petrobras PN")
             .status(StatusAtivo.DISPONIVEL)
-            .valor(BigDecimal.valueOf(30.50))
+            .cotacao(BigDecimal.valueOf(30.50))
             .tipo(AtivoTipo.ACAO)
             .build();
 
@@ -257,13 +257,13 @@ public class AtivoControllerTests {
     }
 
     /**
-     * Testa a falha na criação de um ativo quando o valor é nulo. Espera um status HTTP 400 Bad
+     * Testa a falha na criação de um ativo quando o cotacao é nulo. Espera um status HTTP 400 Bad
      * Request.
      */
     @Test
-    @DisplayName("9. Falha: Tentar criar um ativo com valor nulo")
-    void quandoCriarAtivoComValorNuloRetornaBadRequest() throws Exception {
-      ativoUpsertDTO.setValor(null);
+    @DisplayName("9. Falha: Tentar criar um ativo com cotacao nulo")
+    void quandoCriarAtivoComCotacaoNuloRetornaBadRequest() throws Exception {
+      ativoUpsertDTO.setCotacao(null);
 
       driver
           .post(URI_ATIVOS, ativoUpsertDTO, Admin.getInstance())
@@ -292,7 +292,7 @@ public class AtivoControllerTests {
       "11. Falha: Enviar JSON de Ativo com sintaxe malformada (HttpMessageNotReadableException)")
   void quandoEnviarJsonMalformadoRetornaBadRequest() throws Exception {
     String malformedJson =
-        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"valor\": 100.00,"; // JSON incompleto
+        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"cotacao\": 100.00,"; // JSON incompleto
 
     mvcDriver
         .perform(
@@ -315,7 +315,7 @@ public class AtivoControllerTests {
       "12. Falha: Enviar JSON de Ativo com tipo de dado incorreto para campo (HttpMessageNotReadableException)")
   void quandoEnviarJsonComTipoDeDadoIncorretoRetornaBadRequest() throws Exception {
     String invalidTypeJson =
-        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"valor\": \"cem\"}"; // 'valor' como string
+        "{\"nome\": \"Teste Ativo\", \"descricao\": \"Descricao Teste\", \"cotacao\": \"cem\"}"; // 'cotacao' como string
 
     mvcDriver
         .perform(
@@ -679,7 +679,8 @@ public class AtivoControllerTests {
       assertEquals(ativoCriado.getStatus(), resultado.getStatus());
       assertEquals(ativoCriado.getTipo(), resultado.getTipo());
       assertTrue(
-          BigDecimal.valueOf(ativoCriado.getValor().doubleValue()).compareTo(resultado.getValor())
+          BigDecimal.valueOf(ativoCriado.getCotacao().doubleValue())
+                  .compareTo(resultado.getCotacao())
               == 0);
     }
 
@@ -857,7 +858,7 @@ public class AtivoControllerTests {
               .nome("VALE3")
               .descricao("Vale S.A.")
               .status(StatusAtivo.DISPONIVEL)
-              .valor(BigDecimal.valueOf(70.00))
+              .cotacao(BigDecimal.valueOf(70.00))
               .tipo(AtivoTipo.ACAO)
               .build());
 
@@ -1322,7 +1323,7 @@ public class AtivoControllerTests {
               Cripto.builder()
                   .nome("Doge")
                   .descricao("Moeda dogecoin")
-                  .valor(BigDecimal.valueOf(100.00))
+                  .cotacao(BigDecimal.valueOf(100.00))
                   .status(StatusAtivo.DISPONIVEL)
                   .tipo(AtivoTipo.CRIPTO)
                   .build());
@@ -1332,7 +1333,7 @@ public class AtivoControllerTests {
               Acao.builder()
                   .nome("PETR4")
                   .descricao("Acao petrobras")
-                  .valor(BigDecimal.valueOf(100.00))
+                  .cotacao(BigDecimal.valueOf(100.00))
                   .status(StatusAtivo.DISPONIVEL)
                   .tipo(AtivoTipo.ACAO)
                   .build());
@@ -1341,7 +1342,7 @@ public class AtivoControllerTests {
               Tesouro.builder()
                   .nome("Selic")
                   .descricao("tesouro selic")
-                  .valor(BigDecimal.valueOf(100.00))
+                  .cotacao(BigDecimal.valueOf(100.00))
                   .status(StatusAtivo.DISPONIVEL)
                   .tipo(AtivoTipo.TESOURO)
                   .build());
@@ -1350,13 +1351,13 @@ public class AtivoControllerTests {
     @Test
     @DisplayName("Atualiza cotação de cripto com cotacao valida")
     void quandoAtualizarCotacaoCriptoValidoRetornaSucesso() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                  valorUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
@@ -1367,19 +1368,19 @@ public class AtivoControllerTests {
       AtivoResponseDTO resultado =
           objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
-      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getCotacao()) == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de cripto com sucesso")
     void quandoAtualizarCotacaoCriptoExatamenteUmPorcentoRetornaSucesso() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(101)).build();
       String responseJsonString =
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                  valorUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
@@ -1390,19 +1391,19 @@ public class AtivoControllerTests {
       AtivoResponseDTO resultado =
           objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
-      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getCotacao()) == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de cripto com sucesso")
     void quandoAtualizarCotacaoCriptoMenosUmPorcentoRetornaSucesso() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(100.5)).build();
       String responseJsonString =
           driver
               .put(
                   URI_ATIVOS + "/" + cripto.getId() + "/cotacao",
-                  valorUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
@@ -1415,20 +1416,20 @@ public class AtivoControllerTests {
 
       assertTrue(
           BigDecimal.valueOf(100.00)
-                  .compareTo(ativoRepository.findById(cripto.getId()).get().getValor())
+                  .compareTo(ativoRepository.findById(cripto.getId()).get().getCotacao())
               == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de tesouro retorna erro")
     void quandoTentaAtualizarTesouro() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
               .put(
                   URI_ATIVOS + "/" + tesouro.getId() + "/cotacao",
-                  valorUpsertDTO,
+                  cotacaoUpsertDTO,
                   Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
@@ -1441,19 +1442,21 @@ public class AtivoControllerTests {
 
       assertTrue(
           BigDecimal.valueOf(100.00)
-                  .compareTo(ativoRepository.findById(tesouro.getId()).get().getValor())
+                  .compareTo(ativoRepository.findById(tesouro.getId()).get().getCotacao())
               == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de acao com cotacao valido")
     void quandoAtualizarCotacaoAcaoValidoRetornaSucesso() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(200)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(200)).build();
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1463,18 +1466,20 @@ public class AtivoControllerTests {
       AtivoResponseDTO resultado =
           objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
-      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getValor()) == 0);
+      assertTrue(BigDecimal.valueOf(200).compareTo(resultado.getCotacao()) == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de acao com cotacao exatamente 1% retorna sucesso")
     void quandoAtualizarCotacaoAcaoExatamenteUmPorcentoRetornaSucesso() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(101)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(101)).build();
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
@@ -1484,18 +1489,20 @@ public class AtivoControllerTests {
       AtivoResponseDTO resultado =
           objectMapper.readValue(responseJsonString, AtivoResponseDTO.class);
 
-      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getValor()) == 0);
+      assertTrue(BigDecimal.valueOf(101).compareTo(resultado.getCotacao()) == 0);
     }
 
     @Test
     @DisplayName("Atualiza cotação de acao com cotacao menor que 1% retorna erro")
     void quandoAtualizarCotacaoAcaoMenosUmPorcentoRetornaErro() throws Exception {
-      ValorUpsertDTO valorUpsertDTO =
-          ValorUpsertDTO.builder().valor(BigDecimal.valueOf(100.5)).build();
+      CotacaoUpsertDTO cotacaoUpsertDTO =
+          CotacaoUpsertDTO.builder().cotacao(BigDecimal.valueOf(100.5)).build();
       String responseJsonString =
           driver
               .put(
-                  URI_ATIVOS + "/" + acao.getId() + "/cotacao", valorUpsertDTO, Admin.getInstance())
+                  URI_ATIVOS + "/" + acao.getId() + "/cotacao",
+                  cotacaoUpsertDTO,
+                  Admin.getInstance())
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -1507,7 +1514,7 @@ public class AtivoControllerTests {
 
       assertTrue(
           BigDecimal.valueOf(100.00)
-                  .compareTo(ativoRepository.findById(acao.getId()).get().getValor())
+                  .compareTo(ativoRepository.findById(acao.getId()).get().getCotacao())
               == 0);
     }
   }

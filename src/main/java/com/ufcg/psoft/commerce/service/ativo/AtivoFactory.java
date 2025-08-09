@@ -20,7 +20,7 @@ public class AtivoFactory {
                   .nome(dto.getNome())
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
-                  .valor(dto.getValor())
+                  .cotacao(dto.getCotacao())
                   .tipo(AtivoTipo.CRIPTO)
                   .build(),
           AtivoTipo.TESOURO,
@@ -29,7 +29,7 @@ public class AtivoFactory {
                   .nome(dto.getNome())
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
-                  .valor(dto.getValor())
+                  .cotacao(dto.getCotacao())
                   .tipo(AtivoTipo.TESOURO)
                   .build(),
           AtivoTipo.ACAO,
@@ -38,7 +38,7 @@ public class AtivoFactory {
                   .nome(dto.getNome())
                   .descricao(dto.getDescricao())
                   .status(dto.getStatus())
-                  .valor(dto.getValor())
+                  .cotacao(dto.getCotacao())
                   .tipo(AtivoTipo.ACAO)
                   .build());
 

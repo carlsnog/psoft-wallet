@@ -3,7 +3,7 @@ package com.ufcg.psoft.commerce.service.ativo;
 import com.ufcg.psoft.commerce.dto.AtivoCreateDTO;
 import com.ufcg.psoft.commerce.dto.AtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.AtivoUpdateDTO;
-import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
+import com.ufcg.psoft.commerce.dto.CotacaoUpsertDTO;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
@@ -12,6 +12,8 @@ import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.service.auth.UsuarioService;
 import com.ufcg.psoft.commerce.service.interesse.listeners.disponivel.AtivoDisponivelEvent;
+import com.ufcg.psoft.commerce.service.interesse.listeners.preco.AtivoCotacaoEvent;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -56,14 +58,19 @@ public class AtivoServiceImpl implements AtivoService {
   }
 
   @Override
-  public AtivoResponseDTO atualizarCotacao(Long id, ValorUpsertDTO dto) {
+  public AtivoResponseDTO atualizarCotacao(Long id, CotacaoUpsertDTO dto) {
     Ativo ativo =
         repository
             .findById(id)
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
-    ativo.atualizarValor(dto.getValor());
+    BigDecimal antigaCotacao = ativo.getCotacao();
+    BigDecimal novaCotacao = dto.getCotacao();
+    ativo.atualizarCotacao(novaCotacao);
     repository.save(ativo);
+
+    eventPublisher.publishEvent(new AtivoCotacaoEvent(this, ativo, antigaCotacao));
+
     return modelMapper.map(ativo, AtivoResponseDTO.class);
   }
 
@@ -114,9 +121,7 @@ public class AtivoServiceImpl implements AtivoService {
     ativo.setStatus(novoStatus);
     repository.save(ativo);
 
-    if (novoStatus == StatusAtivo.DISPONIVEL) {
-      eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
-    }
+    eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
 
     return new AtivoResponseDTO(ativo);
   }

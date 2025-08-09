@@ -5,6 +5,8 @@ import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.model.Ativo;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,9 +34,10 @@ public class AtivoResponseDTO {
   @NotBlank(message = "Status de disponibilidade obrigatorio")
   private StatusAtivo status;
 
-  @JsonProperty("valor")
-  @NotBlank(message = "Valor do ativo obrigatorio")
-  private BigDecimal valor;
+  @JsonProperty("cotacao")
+  @NotNull(message = "Cotação do ativo é obrigatória")
+  @Positive(message = "Cotação deve ser positiva")
+  private BigDecimal cotacao;
 
   @JsonProperty("tipo")
   private AtivoTipo tipo;
@@ -43,7 +46,7 @@ public class AtivoResponseDTO {
     this.id = ativo.getId();
     this.nome = ativo.getNome();
     this.descricao = ativo.getDescricao();
-    this.valor = ativo.getValor();
+    this.cotacao = ativo.getCotacao();
     this.status = ativo.getStatus();
     this.tipo = ativo.getTipo();
   }

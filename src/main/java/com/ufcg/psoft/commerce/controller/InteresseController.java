@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/interesses")
-@Autenticado()
+@Autenticado(TipoAutenticacao.NORMAL)
 public class InteresseController {
 
   @Autowired InteresseService interesseService;
 
   @Autenticado(TipoAutenticacao.PREMIUM)
-  @PostMapping("/preco")
+  @PostMapping("/cotacao")
   public ResponseEntity<?> criarInteressePreco(
       @RequestBody @Valid InteresseCreateDTO interesseDto, @RequestUser Usuario usuario) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(interesseService.criarInteressePreco(usuario, interesseDto));
+        .body(interesseService.criarInteresseCotacao(usuario, interesseDto));
   }
 
   @PostMapping("/disponibilidade")

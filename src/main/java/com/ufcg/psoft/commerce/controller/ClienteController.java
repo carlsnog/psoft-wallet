@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/clientes")
+@Autenticado(TipoAutenticacao.NORMAL)
 public class ClienteController {
 
   @Autowired ClienteService clienteService;
 
   @GetMapping("/{id}")
-  @Autenticado(TipoAutenticacao.NORMAL)
   public ResponseEntity<?> recuperarCliente(@PathVariable Long id, @RequestUser Usuario usuario) {
     return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperar(usuario, id));
   }
@@ -35,12 +35,13 @@ public class ClienteController {
   }
 
   @PostMapping
+  @Autenticado(TipoAutenticacao.PUBLICA)
   public ResponseEntity<?> criarCliente(@RequestBody @Valid ClienteUpsertDTO clienteDto) {
     return ResponseEntity.status(HttpStatus.CREATED).body(this.clienteService.criar(clienteDto));
   }
 
   @PutMapping("/{id}")
-  @Autenticado
+  @Autenticado()
   public ResponseEntity<?> atualizarCliente(
       @PathVariable Long id,
       @RequestUser Usuario usuario,
@@ -49,7 +50,6 @@ public class ClienteController {
   }
 
   @DeleteMapping("/{id}")
-  @Autenticado(TipoAutenticacao.NORMAL)
   public ResponseEntity<?> excluirCliente(@PathVariable Long id) {
     clienteService.remover(id);
     return ResponseEntity.noContent().build();
