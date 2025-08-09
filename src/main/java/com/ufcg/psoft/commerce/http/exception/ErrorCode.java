@@ -11,6 +11,7 @@ public enum ErrorCode {
 
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
+  ATIVO_JA_ESTA_NO_STATUS("O ativo ja esta no status informado", HttpStatus.BAD_REQUEST),
   OPERACAO_INVALIDA_PARA_O_TIPO("O tipo do ativo não permite a operação", HttpStatus.BAD_REQUEST),
   ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO(
       "O novo valor não respeita a faixa de variação de no mínimo 1% em relação ao valor antigo",
@@ -20,12 +21,12 @@ public enum ErrorCode {
   CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
 
   INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
-  INTERESSE_DISPONIBILIDADE_DIF_TESOURO(
-      "Usuários normais só podem demonstrar interesse por ativos do tipo Tesouro Direto.",
-      HttpStatus.FORBIDDEN),
-  INTERESSE_PRECO_RESTRITO(
-      "Usuários normais não podem demonstrar interesse por variação de preço.",
-      HttpStatus.FORBIDDEN);
+  INTERESSE_PRECO_ATIVO_NAO_DISPONIVEL(
+      "O ativo nao esta disponivel, nao e possivel demonstrar interesse por preco",
+      HttpStatus.BAD_REQUEST),
+  INTERESSE_DISPONIBILIDADE_ATIVO_JA_DISPONIVEL(
+      "O ativo ja esta disponivel, nao e possivel demonstrar interesse por disponibilidade",
+      HttpStatus.BAD_REQUEST);
 
   private final String message;
   private final HttpStatus httpStatus;

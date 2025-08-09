@@ -19,11 +19,19 @@ public class InteresseController {
 
   @Autowired InteresseService interesseService;
 
-  @PostMapping
-  public ResponseEntity<?> criarInteresse(
+  @Autenticado(TipoAutenticacao.PREMIUM)
+  @PostMapping("/preco")
+  public ResponseEntity<?> criarInteressePreco(
       @RequestBody @Valid InteresseCreateDTO interesseDto, @RequestUser Usuario usuario) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(interesseService.criar(interesseDto, usuario));
+        .body(interesseService.criarInteressePreco(usuario, interesseDto));
+  }
+
+  @PostMapping("/disponibilidade")
+  public ResponseEntity<?> criarInteresseDisponibilidade(
+      @RequestBody @Valid InteresseCreateDTO interesseDto, @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(interesseService.criarInteresseDisponibilidade(usuario, interesseDto));
   }
 
   @DeleteMapping("/{id}")

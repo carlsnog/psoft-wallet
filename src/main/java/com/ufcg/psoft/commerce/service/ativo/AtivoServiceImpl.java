@@ -7,13 +7,13 @@ import com.ufcg.psoft.commerce.dto.ValorUpsertDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
-import com.ufcg.psoft.commerce.event.AtivoDisponivelEvent;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
+import com.ufcg.psoft.commerce.service.interesse.listeners.disponivel.AtivoDisponivelEvent;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -121,12 +121,18 @@ public class AtivoServiceImpl implements AtivoService {
         repository
             .findById(id)
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
+
+    if (ativo.getStatus() == novoStatus) {
+      throw new CommerceException(ErrorCode.ATIVO_JA_ESTA_NO_STATUS);
+    }
+
     ativo.setStatus(novoStatus);
     repository.save(ativo);
 
     if (novoStatus == StatusAtivo.DISPONIVEL) {
-      eventPublisher.publishEvent(new AtivoDisponivelEvent(this, ativo));
+      eventPublisher.publishEvent(new AtivoDisponivelEvent(ativo));
     }
+
     return new AtivoResponseDTO(ativo);
   }
 }
