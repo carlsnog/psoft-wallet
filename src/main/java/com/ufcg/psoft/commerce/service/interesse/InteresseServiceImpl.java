@@ -3,7 +3,9 @@ package com.ufcg.psoft.commerce.service.interesse;
 import com.ufcg.psoft.commerce.dto.InteresseCreateDTO;
 import com.ufcg.psoft.commerce.dto.InteresseResponseDTO;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
+import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
+import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
@@ -27,6 +29,7 @@ public class InteresseServiceImpl implements InteresseService {
   @Autowired private UsuarioService usuarioService;
   @Autowired private AtivoRepository ativoRepository;
 
+  @Autenticado(TipoAutenticacao.PREMIUM)
   @Override
   public InteresseResponseDTO criarInteresseCotacao(
       Usuario usuario, InteresseCreateDTO interesseDto) {

@@ -4,15 +4,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.ufcg.psoft.commerce.dto.CotacaoUpsertDTO;
+import com.ufcg.psoft.commerce.dto.InteresseCreateDTO;
 import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
-import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
+import com.ufcg.psoft.commerce.service.interesse.InteresseService;
 import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -28,6 +29,7 @@ class CotacaoNotificacaoTest {
   @Autowired ClienteRepository clienteRepository;
   @Autowired InteresseRepository interesseRepository;
   @Autowired AtivoService ativoService;
+  @Autowired InteresseService interesseService;
 
   @MockBean NotificacaoService notificacaoService;
 
@@ -42,10 +44,11 @@ class CotacaoNotificacaoTest {
   @Test
   @DisplayName("Cotação: +12% deve notificar")
   void variacaoAcimaDe10PorCentoSobe_notifica() {
-    Cliente cliente = criarClienteNormal();
-
+    Cliente cliente = criarClientePremium();
+    Usuario usuario = cliente;
     var ativo = criarCriptoComCotacao("100.00");
-    criarInteresseCotacao(cliente, ativo.getId());
+
+    criarInteresseCotacao(usuario, cliente.getId(), ativo.getId());
 
     // +12%
     ativoService.atualizarCotacao(ativo.getId(), cotacao("112.00"));
@@ -58,9 +61,11 @@ class CotacaoNotificacaoTest {
   @Test
   @DisplayName("Cotação: -10% deve notificar")
   void variacaoMenosDezPorCentoCai_notifica() {
-    Cliente cliente = criarClienteNormal();
+    Cliente cliente = criarClientePremium();
+    Usuario usuario = cliente;
     var ativo = criarCriptoComCotacao("100.00");
-    criarInteresseCotacao(cliente, ativo.getId());
+
+    criarInteresseCotacao(usuario, cliente.getId(), ativo.getId());
 
     // -10%
     ativoService.atualizarCotacao(ativo.getId(), cotacao("90.00"));
@@ -73,9 +78,11 @@ class CotacaoNotificacaoTest {
   @Test
   @DisplayName("Cotação: +9% NÃO deve notificar")
   void variacaoAbaixoDe10PorCento_naoNotifica() {
-    Cliente cliente = criarClienteNormal();
+    Cliente cliente = criarClientePremium();
+    Usuario usuario = cliente;
+
     var ativo = criarCriptoComCotacao("100.00");
-    criarInteresseCotacao(cliente, ativo.getId());
+    criarInteresseCotacao(usuario, cliente.getId(), ativo.getId());
 
     // +9%
     ativoService.atualizarCotacao(ativo.getId(), cotacao("109.00"));
@@ -86,9 +93,10 @@ class CotacaoNotificacaoTest {
   @Test
   @DisplayName("Cotação: exatamente +10% deve notificar")
   void variacaoExatamenteDezPorCento_notifica() {
-    Cliente cliente = criarClienteNormal();
+    Cliente cliente = criarClientePremium();
+    Usuario usuario = cliente;
     var ativo = criarCriptoComCotacao("100.00");
-    criarInteresseCotacao(cliente, ativo.getId());
+    criarInteresseCotacao(usuario, cliente.getId(), ativo.getId());
 
     // +10%
     ativoService.atualizarCotacao(ativo.getId(), cotacao("110.00"));
@@ -101,12 +109,15 @@ class CotacaoNotificacaoTest {
   @Test
   @DisplayName("Cotação: com 2 interessados no mesmo ativo, ambos devem ser notificados (≥10%)")
   void doisInteressadosMesmaCotacao_ambosRecebemNotificacao() {
-    var c1 = criarClienteNormal();
-    var c2 = criarClienteNormal();
+    var c1 = criarClientePremium();
+    var c2 = criarClientePremium();
+    Usuario u1 = c1;
+    Usuario u2 = c2;
+
     var ativo = criarCriptoComCotacao("100.00");
 
-    criarInteresseCotacao(c1, ativo.getId());
-    criarInteresseCotacao(c2, ativo.getId());
+    criarInteresseCotacao(u1, c1.getId(), ativo.getId());
+    criarInteresseCotacao(u2, c2.getId(), ativo.getId());
 
     //  +12%
     ativoService.atualizarCotacao(ativo.getId(), cotacao("112.00"));
@@ -149,18 +160,16 @@ class CotacaoNotificacaoTest {
             .build());
   }
 
-  private void criarInteresseCotacao(Cliente c, Long ativoId) {
-    var ativo = ativoRepository.findById(ativoId).orElseThrow();
-    interesseRepository.save(
-        Interesse.builder().cliente(c).ativo(ativo).tipo(TipoInteresseEnum.COTACAO).build());
+  private void criarInteresseCotacao(Usuario usuario, Long clienteId, Long ativoId) {
+    interesseService.criarInteresseCotacao(usuario, new InteresseCreateDTO(clienteId, ativoId));
   }
 
-  private Cliente criarClienteNormal() {
+  private Cliente criarClientePremium() {
     return clienteRepository.save(
         Cliente.builder()
-            .nome("Cliente Normal da Silva")
-            .plano(PlanoEnum.NORMAL)
-            .endereco("Rua dos Testes Normal, 456")
+            .nome("Cliente Premium da Silva")
+            .plano(PlanoEnum.PREMIUM)
+            .endereco("Rua dos TestesPremium, 456")
             .codigoAcesso("654321")
             .build());
   }
