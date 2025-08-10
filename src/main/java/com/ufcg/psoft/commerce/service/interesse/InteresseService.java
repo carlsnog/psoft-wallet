@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface InteresseService {
 
-  InteresseResponseDTO criar(InteresseCreateDTO interesseDto, Usuario usuario);
+  InteresseResponseDTO criarInteresseCotacao(Usuario usuario, InteresseCreateDTO interesseDto);
+
+  InteresseResponseDTO criarInteresseDisponibilidade(
+      Usuario usuario, InteresseCreateDTO interesseDto);
 
   void remover(Long id, Usuario usuario);
 

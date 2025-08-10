@@ -33,21 +33,21 @@ public abstract class Ativo {
 
   // TODO mudar para cotação
   @Column(nullable = false, scale = 2, precision = 19)
-  private BigDecimal valor;
+  private BigDecimal cotacao;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private AtivoTipo tipo;
 
-  public void atualizarValor(BigDecimal novoValor) {
-    BigDecimal diferenca = novoValor.subtract(valor);
+  public void atualizarCotacao(BigDecimal novaCotacao) {
+    BigDecimal diferenca = novaCotacao.subtract(cotacao);
     diferenca = diferenca.abs();
 
-    BigDecimal taxa = diferenca.divide(valor, 16, RoundingMode.HALF_UP);
+    BigDecimal taxa = diferenca.divide(cotacao, 16, RoundingMode.HALF_UP);
 
     if (taxa.compareTo(BigDecimal.valueOf(0.01)) < 0)
       throw new CommerceException(ErrorCode.ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO);
 
-    this.valor = novoValor;
+    this.cotacao = novaCotacao;
   }
 }

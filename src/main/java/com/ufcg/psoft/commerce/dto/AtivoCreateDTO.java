@@ -30,17 +30,14 @@ public class AtivoCreateDTO {
   @NotNull(message = "Status é obrigatório")
   private StatusAtivo status;
 
-  @JsonProperty("valor")
+  @JsonProperty("cotacao")
+  @NotNull(message = "Cotação é obrigatória")
   @Digits(
       integer = 15,
       fraction = 2,
-      message = "Valor deve ter no máximo 15 dígitos inteiros e 2 decimais")
-  @DecimalMin(
-      value = "0.01",
-      inclusive = true,
-      message = "Valor deve ser positivo e maior que zero")
-  @NotNull(message = "Valor é obrigatório")
-  private BigDecimal valor;
+      message = "A cotação do ativo deve ter no máximo 15 dígitos inteiros e 2 decimais")
+  @DecimalMin(value = "0.01", inclusive = true, message = "Cotação deve ser maior ou igual a 0.01")
+  private BigDecimal cotacao;
 
   @JsonProperty("tipo")
   @NotNull(message = "Tipo é obrigatório")

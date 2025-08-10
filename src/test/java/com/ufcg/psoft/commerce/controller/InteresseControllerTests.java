@@ -26,6 +26,7 @@ import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Cripto;
+import com.ufcg.psoft.commerce.model.Tesouro;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.utils.CustomDriver;
@@ -51,62 +52,16 @@ public class InteresseControllerTests {
   final String URI_INTERESSES = "/interesses";
 
   @Autowired MockMvc mvcDriver;
-  CustomDriver driver;
-
   @Autowired ClienteRepository clienteRepository;
   @Autowired AtivoRepository ativoRepository;
 
   ObjectMapper objectMapper = new ObjectMapper();
-
-  Cliente clientePremium;
-  Cliente clienteNormal;
-  Ativo ativo;
-
-  InteresseCreateDTO interesseCreateDTO;
+  CustomDriver driver;
 
   @BeforeEach
   void setup() {
-    // Object Mapper suporte para LocalDateTime
     objectMapper.registerModule(new JavaTimeModule());
     driver = new CustomDriver(mvcDriver, objectMapper);
-
-    // Criar cliente premium para os testes
-    clientePremium =
-        clienteRepository.save(
-            Cliente.builder()
-                .nome("Cliente Premium da Silva")
-                .plano(PlanoEnum.PREMIUM)
-                .endereco("Rua dos Testes Premium, 123")
-                .codigoAcesso("123456")
-                .build());
-
-    // Criar cliente normal para testes de acesso negado
-    clienteNormal =
-        clienteRepository.save(
-            Cliente.builder()
-                .nome("Cliente Normal da Silva")
-                .plano(PlanoEnum.NORMAL)
-                .endereco("Rua dos Testes Normal, 456")
-                .codigoAcesso("654321")
-                .build());
-
-    // Criar ativo para testes
-    ativo =
-        ativoRepository.save(
-            Cripto.builder()
-                .nome("Doge")
-                .descricao("Moeda dogecoin")
-                .valor(BigDecimal.valueOf(100.00))
-                .status(StatusAtivo.DISPONIVEL)
-                .tipo(AtivoTipo.CRIPTO)
-                .build());
-
-    interesseCreateDTO =
-        InteresseCreateDTO.builder()
-            .tipo(TipoInteresseEnum.DISPONIBILIDADE)
-            .clienteId(clientePremium.getId())
-            .ativoId(ativo.getId())
-            .build();
   }
 
   @AfterEach
@@ -122,10 +77,20 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando criamos um interesse válido com tipo DISPONIBILIDADE")
     void quandoCriarInteresseValidoDisponibilidade() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isCreated())
               .andDo(print())
               .andReturn()
@@ -140,24 +105,26 @@ public class InteresseControllerTests {
           () -> assertNotNull(resultado.getId()),
           () -> assertEquals(TipoInteresseEnum.DISPONIBILIDADE, resultado.getTipo()),
           () -> assertEquals(clientePremium.getId(), resultado.getClienteId()),
-          () -> assertEquals(ativo.getId(), resultado.getAtivoId()));
+          () -> assertEquals(tesouro.getId(), resultado.getAtivoId()));
     }
 
     @Test
-    @DisplayName("Quando criamos um interesse válido com tipo PRECO")
-    void quandoCriarInteresseValidoPreco() throws Exception {
+    @DisplayName("Quando criamos um interesse válido com tipo COTACAO")
+    void quandoCriarInteresseValidoCotacao() throws Exception {
       // Arrange
-      InteresseCreateDTO interessePrecoDTO =
+      Cliente clientePremium = criarClientePremium();
+      Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
+
+      InteresseCreateDTO interesseCotacaoDTO =
           InteresseCreateDTO.builder()
-              .tipo(TipoInteresseEnum.PRECO)
               .clienteId(clientePremium.getId())
-              .ativoId(ativo.getId())
+              .ativoId(cripto.getId())
               .build();
 
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interessePrecoDTO, clientePremium)
+              .post(URI_INTERESSES + "/cotacao", interesseCotacaoDTO, clientePremium)
               .andExpect(status().isCreated())
               .andDo(print())
               .andReturn()
@@ -170,49 +137,81 @@ public class InteresseControllerTests {
       // Assert
       assertAll(
           () -> assertNotNull(resultado.getId()),
-          () -> assertEquals(TipoInteresseEnum.PRECO, resultado.getTipo()),
+          () -> assertEquals(TipoInteresseEnum.COTACAO, resultado.getTipo()),
           () -> assertEquals(clientePremium.getId(), resultado.getClienteId()),
-          () -> assertEquals(ativo.getId(), resultado.getAtivoId()));
+          () -> assertEquals(cripto.getId(), resultado.getAtivoId()));
     }
 
     @Test
-    @DisplayName("Quando tentamos criar interesse com tipo nulo")
-    void quandoCriarInteresseComTipoNulo() throws Exception {
+    @DisplayName("Quando tentamos criar interesse de cotacao com ativo em status INDISPONIVEL")
+    void quandoCriarInteresseCotacaoEmStatusIndisponivel() throws Exception {
       // Arrange
-      interesseCreateDTO.setTipo(null);
+      Cliente clientePremium = criarClientePremium();
+      Ativo cripto = criarCripto(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
 
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/cotacao", interesseCreateDTO, clientePremium)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
               .getResponse()
               .getContentAsString();
 
+      // Assert
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.BAD_REQUEST, resultado.getCode());
+      assertEquals(ErrorCode.INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL, resultado.getCode());
+    }
 
-      assertInstanceOf(ArrayList.class, resultado.getData());
-      ArrayList<String> errors = (ArrayList<String>) resultado.getData();
+    @Test
+    @DisplayName("Quando tentamos criar interesse de disponibilidade com ativo em status invalido")
+    void quandoCriarInteresseDisponibilidadeEmStatusInvalido() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.DISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
+      // Act
+      String responseJsonString =
+          driver
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
+              .andExpect(status().isBadRequest())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
 
       // Assert
-      assertAll(
-          () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-          () -> assertEquals("Tipo e obrigatorio", errors.get(0)));
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+      assertEquals(ErrorCode.INTERESSE_DISPONIBILIDADE_ATIVO_JA_DISPONIVEL, resultado.getCode());
     }
 
     @Test
     @DisplayName("Quando tentamos criar interesse com clienteId nulo")
     void quandoCriarInteresseComClienteIdNulo() throws Exception {
       // Arrange
-      interesseCreateDTO.setClienteId(null);
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder().clienteId(null).ativoId(tesouro.getId()).build();
 
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -235,12 +234,15 @@ public class InteresseControllerTests {
     @DisplayName("Quando tentamos criar interesse com ativoId nulo")
     void quandoCriarInteresseComAtivoIdNulo() throws Exception {
       // Arrange
-      interesseCreateDTO.setAtivoId(null);
+      Cliente clientePremium = criarClientePremium();
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder().clienteId(clientePremium.getId()).ativoId(null).build();
 
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isBadRequest())
               .andDo(print())
               .andReturn()
@@ -265,12 +267,22 @@ public class InteresseControllerTests {
   class InteresseVerificacaoAutenticacao {
 
     @Test
-    @DisplayName("Quando cliente normal tenta criar interesse (deve ser negado)")
-    void quandoClienteNormalTentaCriarInteresse() throws Exception {
+    @DisplayName("Quando cliente normal tenta criar interesse em Cripto (deve ser negado)")
+    void quandoClienteNormalTentaCriarInteresseCripto() throws Exception {
+      // Arrange
+      Cliente clienteNormal = criarClienteNormal();
+      Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clienteNormal.getId())
+              .ativoId(cripto.getId())
+              .build();
+
       // Act
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clienteNormal)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clienteNormal)
               .andExpect(status().isForbidden())
               .andDo(print())
               .andReturn()
@@ -284,12 +296,57 @@ public class InteresseControllerTests {
     }
 
     @Test
+    @DisplayName(
+        "Quando cliente normal tenta criar interesse em Tesouro Direto (deve ser autorizado)")
+    void quandoClienteNormalTentaCriarInteresseTesouro() throws Exception {
+      // Arrange
+      Cliente clienteNormal = criarClienteNormal();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clienteNormal.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
+      // Act
+      String responseJsonString =
+          driver
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clienteNormal)
+              .andExpect(status().isCreated())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      InteresseResponseDTO resultado =
+          objectMapper.readValue(responseJsonString, InteresseResponseDTO.class);
+
+      // Assert
+      assertAll(
+          () -> assertNotNull(resultado.getId()),
+          () -> assertEquals(TipoInteresseEnum.DISPONIBILIDADE, resultado.getTipo()),
+          () -> assertEquals(clienteNormal.getId(), resultado.getClienteId()),
+          () -> assertEquals(tesouro.getId(), resultado.getAtivoId()));
+    }
+
+    @Test
     @DisplayName("Quando tentamos criar interesse sem autenticação")
     void quandoCriarInteresseSemAutenticacao() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       // Act
       mvcDriver
           .perform(
-              post(URI_INTERESSES)
+              post(URI_INTERESSES + "/disponibilidade")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(interesseCreateDTO)))
           .andExpect(status().isUnauthorized())
@@ -299,10 +356,20 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando tentamos criar interesse com autenticação inválida")
     void quandoCriarInteresseComAutenticacaoInvalida() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       // Act
       mvcDriver
           .perform(
-              post(URI_INTERESSES)
+              post(URI_INTERESSES + "/disponibilidade")
                   .header("Authorization", driver.createBasicAuthHeader("999", "invalid"))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(interesseCreateDTO)))
@@ -318,10 +385,20 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando excluímos um interesse válido")
     void quandoExcluirInteresseValido() throws Exception {
-      // Arrange - Primeiro criar o interesse
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
+      // Primeiro criar o interesse
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isCreated())
               .andReturn()
               .getResponse()
@@ -339,6 +416,9 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando tentamos excluir um interesse inexistente")
     void quandoExcluirInteresseInexistente() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+
       // Act
       String responseJsonString =
           driver
@@ -353,25 +433,6 @@ public class InteresseControllerTests {
       assertEquals(ErrorCode.INTERESSE_NAO_ENCONTRADO, resultado.getCode());
 
       assertEquals("Interesse nao encontrado", resultado.getMessage());
-    }
-
-    @Test
-    @DisplayName("Quando cliente normal tenta excluir interesse (deve ser negado)")
-    void quandoClienteNormalTentaExcluirInteresse() throws Exception {
-      // Act
-      String responseJsonString =
-          driver
-              .delete(URI_INTERESSES + "/1", clienteNormal)
-              .andExpect(status().isForbidden())
-              .andDo(print())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-
-      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
-
-      assertEquals("Acesso negado", resultado.getMessage());
     }
 
     @Test
@@ -392,10 +453,20 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando recuperamos um interesse válido")
     void quandoRecuperarInteresseValido() throws Exception {
-      // Arrange - Primeiro criar o interesse
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
+      // Primeiro criar o interesse
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isCreated())
               .andReturn()
               .getResponse()
@@ -428,6 +499,9 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando tentamos recuperar um interesse inexistente")
     void quandoRecuperarInteresseInexistente() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+
       // Act
       String responseJsonString =
           driver
@@ -445,22 +519,49 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente normal tenta recuperar interesse (deve ser negado)")
-    void quandoClienteNormalTentaRecuperarInteresse() throws Exception {
-      // Act
+    @DisplayName("Quando admin tenta recuperar um interesse de um cliente")
+    void quandoAdminTentaRecuperarInteresse() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
+      // Primeiro criar o interesse
       String responseJsonString =
           driver
-              .get(URI_INTERESSES + "/1", clienteNormal)
-              .andExpect(status().isForbidden())
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
+              .andExpect(status().isCreated())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      InteresseResponseDTO interesseCriado =
+          objectMapper.readValue(responseJsonString, InteresseResponseDTO.class);
+
+      // Act - Admin recupera o interesse
+      String responseGetJsonString =
+          driver
+              .get(URI_INTERESSES + "/" + interesseCriado.getId(), Admin.getInstance())
+              .andExpect(status().isOk())
               .andDo(print())
               .andReturn()
               .getResponse()
               .getContentAsString();
 
-      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
-      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
+      InteresseResponseDTO resultado =
+          objectMapper.readValue(responseGetJsonString, InteresseResponseDTO.class);
 
-      assertEquals("Acesso negado", resultado.getMessage());
+      // Assert
+      assertAll(
+          () -> assertEquals(interesseCriado.getId(), resultado.getId()),
+          () -> assertEquals(interesseCriado.getTipo(), resultado.getTipo()),
+          () -> assertEquals(interesseCriado.getClienteId(), resultado.getClienteId()),
+          () -> assertEquals(interesseCriado.getAtivoId(), resultado.getAtivoId()));
     }
 
     @Test
@@ -481,19 +582,32 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando admin lista todos os interesses")
     void quandoAdminListaInteresses() throws Exception {
-      // Arrange - Criar alguns interesses primeiro
-      driver
-          .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
-          .andExpect(status().isCreated());
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+      Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
 
-      InteresseCreateDTO interesse2 =
+      // Criar primeiro interesse
+      InteresseCreateDTO interesse1 =
           InteresseCreateDTO.builder()
-              .tipo(TipoInteresseEnum.PRECO)
               .clienteId(clientePremium.getId())
-              .ativoId(ativo.getId())
+              .ativoId(tesouro.getId())
               .build();
 
-      driver.post(URI_INTERESSES, interesse2, clientePremium).andExpect(status().isCreated());
+      driver
+          .post(URI_INTERESSES + "/disponibilidade", interesse1, clientePremium)
+          .andExpect(status().isCreated());
+
+      // Criar segundo interesse
+      InteresseCreateDTO interesse2 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(cripto.getId())
+              .build();
+
+      driver
+          .post(URI_INTERESSES + "/cotacao", interesse2, clientePremium)
+          .andExpect(status().isCreated());
 
       // Act - Admin lista todos os interesses
       String responseJsonString =
@@ -513,8 +627,11 @@ public class InteresseControllerTests {
     }
 
     @Test
-    @DisplayName("Quando cliente premium tenta listar interesses (deve ser negado)")
+    @DisplayName("Quando cliente tenta listar interesses (deve ser negado)")
     void quandoClientePremiumTentaListarInteresses() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+
       // Act
       String responseJsonString =
           driver
@@ -546,10 +663,20 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando executamos fluxo completo: criar, recuperar, excluir")
     void quandoExecutarFluxoCompletoCRUD() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+
+      InteresseCreateDTO interesseCreateDTO =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       // 1. Criar interesse
       String responseJsonString =
           driver
-              .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+              .post(URI_INTERESSES + "/disponibilidade", interesseCreateDTO, clientePremium)
               .andExpect(status().isCreated())
               .andReturn()
               .getResponse()
@@ -580,20 +707,32 @@ public class InteresseControllerTests {
     @Test
     @DisplayName("Quando criamos múltiplos interesses e verificamos listagem")
     void quandoCriarMultiplosInteressesEVerificarListagem() throws Exception {
+      // Arrange
+      Cliente clientePremium = criarClientePremium();
+      Ativo tesouro = criarTesouro(StatusAtivo.INDISPONIVEL);
+      Ativo cripto = criarCripto(StatusAtivo.DISPONIVEL);
+
       // 1. Criar primeiro interesse
+      InteresseCreateDTO interesse1 =
+          InteresseCreateDTO.builder()
+              .clienteId(clientePremium.getId())
+              .ativoId(tesouro.getId())
+              .build();
+
       driver
-          .post(URI_INTERESSES, interesseCreateDTO, clientePremium)
+          .post(URI_INTERESSES + "/disponibilidade", interesse1, clientePremium)
           .andExpect(status().isCreated());
 
       // 2. Criar segundo interesse
       InteresseCreateDTO interesse2 =
           InteresseCreateDTO.builder()
-              .tipo(TipoInteresseEnum.PRECO)
               .clienteId(clientePremium.getId())
-              .ativoId(ativo.getId())
+              .ativoId(cripto.getId())
               .build();
 
-      driver.post(URI_INTERESSES, interesse2, clientePremium).andExpect(status().isCreated());
+      driver
+          .post(URI_INTERESSES + "/cotacao", interesse2, clientePremium)
+          .andExpect(status().isCreated());
 
       // 3. Verificar listagem como admin
       String responseJsonString =
@@ -610,5 +749,48 @@ public class InteresseControllerTests {
       // Assert
       assertAll(() -> assertEquals(2, resultado.size()));
     }
+  }
+
+  // Métodos auxiliares para criar entidades de teste
+  private Cliente criarClientePremium() {
+    return clienteRepository.save(
+        Cliente.builder()
+            .nome("Cliente Premium da Silva")
+            .plano(PlanoEnum.PREMIUM)
+            .endereco("Rua dos Testes Premium, 123")
+            .codigoAcesso("123456")
+            .build());
+  }
+
+  private Cliente criarClienteNormal() {
+    return clienteRepository.save(
+        Cliente.builder()
+            .nome("Cliente Normal da Silva")
+            .plano(PlanoEnum.NORMAL)
+            .endereco("Rua dos Testes Normal, 456")
+            .codigoAcesso("654321")
+            .build());
+  }
+
+  private Ativo criarCripto(StatusAtivo status) {
+    return ativoRepository.save(
+        Cripto.builder()
+            .nome("Doge")
+            .descricao("Moeda dogecoin")
+            .cotacao(BigDecimal.valueOf(100.00))
+            .status(status)
+            .tipo(AtivoTipo.CRIPTO)
+            .build());
+  }
+
+  private Ativo criarTesouro(StatusAtivo status) {
+    return ativoRepository.save(
+        Tesouro.builder()
+            .nome("Tesouro Selic")
+            .descricao("Acompanha a taxa selic")
+            .cotacao(BigDecimal.valueOf(100.00))
+            .status(status)
+            .tipo(AtivoTipo.TESOURO)
+            .build());
   }
 }
