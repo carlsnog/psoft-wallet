@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.interesse.listeners.preco;
+package com.ufcg.psoft.commerce.service.interesse.listeners.cotacao;
 
 import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;

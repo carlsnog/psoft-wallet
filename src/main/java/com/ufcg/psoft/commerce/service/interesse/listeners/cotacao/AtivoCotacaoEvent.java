@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.interesse.listeners.preco;
+package com.ufcg.psoft.commerce.service.interesse.listeners.cotacao;
 
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEvent;
