@@ -31,7 +31,6 @@ public abstract class Ativo {
   @Column(nullable = false)
   private StatusAtivo status;
 
-  // TODO mudar para cotação
   @Column(nullable = false, scale = 2, precision = 19)
   private BigDecimal cotacao;
 

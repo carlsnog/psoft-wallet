@@ -33,10 +33,10 @@ public class Interesse {
   private Ativo ativo;
 
   public Long getClienteId() {
-    return cliente != null ? cliente.getId() : null;
+    return cliente.getId();
   }
 
   public Long getAtivoId() {
-    return ativo != null ? ativo.getId() : null;
+    return ativo.getId();
   }
 }
