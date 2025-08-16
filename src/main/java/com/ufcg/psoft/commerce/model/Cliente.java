@@ -1,34 +1,53 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
-@Data
 @Builder
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
-public class Cliente {
+@NoArgsConstructor
+@Entity
+@Table(name = "cliente")
+public class Cliente extends Usuario {
 
-    @JsonProperty("id")
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private long id;
 
-    @JsonProperty("nome")
-    @Column(nullable = false)
-    private String nome;
+  @Column(nullable = false)
+  private String codigoAcesso;
 
-    @JsonProperty("endereco")
-    @Column(nullable = false)
-    private String endereco;
+  @Getter
+  @Column(nullable = false)
+  private String nome;
 
-    @JsonIgnore
-    @Column(nullable = false)
-    private String codigo;
+  @Getter
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private PlanoEnum plano;
+
+  @Getter
+  @Column(nullable = false)
+  private String endereco;
+
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Interesse> interesses;
+
+  @Override
+  public String getUserId() {
+    return String.valueOf(id);
+  }
+
+  @Override
+  public boolean isAdmin() {
+    return false;
+  }
 }
