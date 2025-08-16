@@ -11,51 +11,51 @@ import com.ufcg.psoft.commerce.model.compra.Compra;
 
 public abstract class CompraState {
 
-    private Compra compra;
+  private Compra compra;
 
-    public CompraState(Compra compra) {
-        this.compra = compra;
+  public CompraState(Compra compra) {
+    this.compra = compra;
+  }
+
+  public abstract void confirmar(Usuario usuario);
+
+  public boolean isFinal() {
+    return false;
+  }
+
+  protected void preValidarAtivo() {
+    if (getAtivo().getStatus() != StatusAtivo.DISPONIVEL) {
+      throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
+    }
+  }
+
+  protected void preValidarAdmin(Usuario usuario) {
+    if (!usuario.isAdmin()) {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_ADMIN);
+    }
+  }
+
+  protected void preValidarCliente(Usuario usuario) {
+    if (usuario.isAdmin()) {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
     }
 
-    public abstract void confirmar(Usuario usuario);
-
-    public boolean isFinal() {
-        return false;
+    var cliente = (Cliente) usuario;
+    if (getCliente().getId() != cliente.getId()) {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
     }
+  }
 
-    protected void preValidarAtivo() {
-        if (getAtivo().getStatus() != StatusAtivo.DISPONIVEL) {
-            throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
-        }
-    }
+  protected void setStatus(CompraStatusEnum status) {
+    this.compra.setStatus(status);
+    this.compra.setState(CompraStateFactory.getState(this.compra));
+  }
 
-    protected void preValidarAdmin(Usuario usuario) {
-        if (!usuario.isAdmin()) {
-            throw new CommerceException(ErrorCode.ACAO_APENAS_ADMIN);
-        }
-    }
+  protected Ativo getAtivo() {
+    return this.compra.getAtivo();
+  }
 
-    protected void preValidarCliente(Usuario usuario) {
-        if (usuario.isAdmin()) {
-            throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
-        }
-
-        var cliente = (Cliente) usuario;
-        if (getCliente().getId() != cliente.getId()) {
-            throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
-        }
-    }
-
-    protected void setStatus(CompraStatusEnum status) {
-        this.compra.setStatus(status);
-        this.compra.setState(CompraStateFactory.getState(this.compra));
-    }
-
-    protected Ativo getAtivo() {
-        return this.compra.getAtivo();
-    }
-
-    protected Cliente getCliente() {
-        return this.compra.getCliente();
-    }
+  protected Cliente getCliente() {
+    return this.compra.getCliente();
+  }
 }

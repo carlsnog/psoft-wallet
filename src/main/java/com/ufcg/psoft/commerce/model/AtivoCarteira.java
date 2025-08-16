@@ -28,7 +28,6 @@ public class AtivoCarteira {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-
   @Column(nullable = false)
   private int quantidade;
 

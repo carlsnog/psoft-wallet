@@ -6,15 +6,15 @@ import com.ufcg.psoft.commerce.model.compra.Compra;
 
 public class CompradoState extends CompraState {
 
-    public CompradoState(Compra compra) {
-        super(compra);
-    }
+  public CompradoState(Compra compra) {
+    super(compra);
+  }
 
-    @Override
-    public void confirmar(Usuario usuario) {
-        preValidarAtivo();
-        preValidarAdmin(usuario);
+  @Override
+  public void confirmar(Usuario usuario) {
+    preValidarAtivo();
+    preValidarAdmin(usuario);
 
-        setStatus(CompraStatusEnum.EM_CARTEIRA);
-    }
+    setStatus(CompraStatusEnum.EM_CARTEIRA);
+  }
 }

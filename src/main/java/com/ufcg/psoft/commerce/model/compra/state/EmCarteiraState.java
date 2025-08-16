@@ -7,17 +7,17 @@ import com.ufcg.psoft.commerce.model.compra.Compra;
 
 public class EmCarteiraState extends CompraState {
 
-    public EmCarteiraState(Compra compra) {
-        super(compra);
-    }
+  public EmCarteiraState(Compra compra) {
+    super(compra);
+  }
 
-    @Override
-    public boolean isFinal() {
-        return true;
-    }
+  @Override
+  public boolean isFinal() {
+    return true;
+  }
 
-    @Override
-    public void confirmar(Usuario usuario) {
-        throw new CommerceException(ErrorCode.CONFIRMANDO_COMPRA_FINALIZADA);
-    }
+  @Override
+  public void confirmar(Usuario usuario) {
+    throw new CommerceException(ErrorCode.CONFIRMANDO_COMPRA_FINALIZADA);
+  }
 }
