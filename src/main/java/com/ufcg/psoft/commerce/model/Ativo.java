@@ -3,9 +3,11 @@ package com.ufcg.psoft.commerce.model;
 import com.ufcg.psoft.commerce.enums.*;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.model.compra.Compra;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -37,6 +39,9 @@ public abstract class Ativo {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private AtivoTipo tipo;
+
+  @OneToMany(mappedBy = "ativo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Compra> compras;
 
   public void atualizarCotacao(BigDecimal novaCotacao) {
     BigDecimal diferenca = novaCotacao.subtract(cotacao);

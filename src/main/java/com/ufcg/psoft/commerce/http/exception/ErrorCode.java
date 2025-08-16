@@ -8,9 +8,14 @@ public enum ErrorCode {
   BAD_REQUEST("Requisicao invalida", HttpStatus.BAD_REQUEST),
   INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
   JSON_INVALID("Corpo da requisição inválido ou malformado", HttpStatus.BAD_REQUEST),
+  ACAO_APENAS_ADMIN("Apenas administradores podem realizar esta ação", HttpStatus.FORBIDDEN),
+  ACAO_APENAS_CLIENTE_DONO_COMPRA(
+      "Apenas o cliente proprietário pode realizar esta ação", HttpStatus.FORBIDDEN),
+  CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
 
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
+  ATIVO_NAO_DISPONIVEL("O ativo nao esta disponivel", HttpStatus.BAD_REQUEST),
   ATIVO_JA_ESTA_NO_STATUS("O ativo ja esta no status informado", HttpStatus.BAD_REQUEST),
   OPERACAO_INVALIDA_PARA_O_TIPO("O tipo do ativo não permite a operação", HttpStatus.BAD_REQUEST),
   ATUALIZA_COTACAO_NAO_ATENDE_REQUISITO(
@@ -18,7 +23,7 @@ public enum ErrorCode {
       HttpStatus.BAD_REQUEST),
   ATIVO_JA_EXISTE("Ativo com este nome ja existe", HttpStatus.CONFLICT),
 
-  CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
+  CONFIRMANDO_COMPRA_FINALIZADA("A compra ja foi finalizada", HttpStatus.BAD_REQUEST),
 
   INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
   INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL(

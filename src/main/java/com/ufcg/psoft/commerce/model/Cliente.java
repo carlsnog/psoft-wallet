@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
+import com.ufcg.psoft.commerce.model.compra.Compra;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,12 @@ public class Cliente extends Usuario {
 
   @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Interesse> interesses;
+
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<AtivoCarteira> carteira;
+
+  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Compra> compras;
 
   @Override
   public String getUserId() {
