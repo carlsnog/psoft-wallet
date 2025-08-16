@@ -11,7 +11,7 @@ import com.ufcg.psoft.commerce.model.compra.Compra;
 
 public abstract class CompraState {
 
-  private Compra compra;
+  private final Compra compra;
 
   public CompraState(Compra compra) {
     this.compra = compra;

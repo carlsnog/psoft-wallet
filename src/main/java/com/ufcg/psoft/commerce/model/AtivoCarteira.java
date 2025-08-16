@@ -32,12 +32,12 @@ public class AtivoCarteira {
   private int quantidade;
 
   @Column(nullable = false, scale = 2, precision = 19)
-  private BigDecimal valor_aquisicao;
+  private BigDecimal valorAquisicao;
 
   public BigDecimal getLucro() {
     return this.ativo
         .getCotacao()
-        .subtract(this.valor_aquisicao)
+        .subtract(this.valorAquisicao)
         .multiply(BigDecimal.valueOf(this.quantidade));
   }
 
