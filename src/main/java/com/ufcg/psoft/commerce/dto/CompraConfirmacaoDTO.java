@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class CompraConfirmacaoDTO {
 
-  @JsonProperty("status")
+  @JsonProperty("status_atual")
   private CompraStatusEnum
       statusAtual; // Usado como hash para evitar que requests duplicadas ou a partir de dados stale
   // causem processamento duplicado
