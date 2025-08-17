@@ -19,6 +19,7 @@ public interface AtivoService {
   void remover(Long id);
 
   Ativo getAtivo(Long id, Usuario usuario);
+
   Ativo getAtivoDisponivel(Long id, Usuario usuario);
 
   AtivoResponseDTO recuperar(Long id, Usuario usuario);
