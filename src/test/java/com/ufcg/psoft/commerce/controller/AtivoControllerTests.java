@@ -51,6 +51,8 @@ public class AtivoControllerTests {
   // Service real para interagir com o banco
   @Autowired AtivoService ativoService;
 
+  @Autowired AtivoRepository ativoRepository;
+
   // Objeto para serializar e desserializar JSON
   ObjectMapper objectMapper = new ObjectMapper();
 
@@ -70,6 +72,11 @@ public class AtivoControllerTests {
     objectMapper.registerModule(new JavaTimeModule());
     driver = new CustomDriver(mvcDriver, objectMapper);
 
+    // Limpa a tabela de ativos antes de cada teste
+    ativoRepository.deleteAll();
+
+    // Reseta as sequências
+    // entityManager.createNativeQuery("ALTER SEQUENCE ativo_seq RESTART WITH 1").executeUpdate();
     ativoResponseDTO =
         AtivoResponseDTO.builder()
             .id(1L)
@@ -142,7 +149,7 @@ public class AtivoControllerTests {
       AtivoCreateDTO criptoUpsertDTO =
           ativoUpsertDTO.toBuilder()
               .tipo(AtivoTipo.CRIPTO)
-              .nome("BTC")
+              .nome("BTCN")
               .descricao("Bitcoin")
               .build();
 
@@ -150,7 +157,7 @@ public class AtivoControllerTests {
       driver
           .post(URI_ATIVOS, criptoUpsertDTO, Admin.getInstance())
           .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.nome").value("BTC"))
+          .andExpect(jsonPath("$.nome").value("BTCN"))
           .andExpect(jsonPath("$.tipo").value("CRIPTO"))
           .andDo(print());
     }
@@ -544,7 +551,7 @@ public class AtivoControllerTests {
       // Cria dois ativos
       AtivoResponseDTO ativo1 = ativoService.criar(ativoUpsertDTO);
       AtivoResponseDTO ativo2 =
-          ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
+          ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE03").build());
 
       // Exclui o primeiro ativo
       driver
@@ -802,7 +809,7 @@ public class AtivoControllerTests {
     void quandoListarMultiplosAtivosRetornaSucesso() throws Exception {
       // Insere ativos reais no banco
       ativoService.criar(ativoUpsertDTO);
-      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE03").build());
       ativoService.criar(ativoUpsertDTO.toBuilder().nome("GOOGL34").build());
 
       driver
@@ -810,7 +817,7 @@ public class AtivoControllerTests {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(3))
           .andExpect(jsonPath("$[0].nome").value("PETR4"))
-          .andExpect(jsonPath("$[1].nome").value("VALE3"))
+          .andExpect(jsonPath("$[1].nome").value("VALE03"))
           .andExpect(jsonPath("$[2].nome").value("GOOGL34"))
           .andDo(print());
     }
@@ -835,7 +842,7 @@ public class AtivoControllerTests {
     void quandoListarAtivosVerificaNumeroCorreto() throws Exception {
       // Insere dois ativos reais no banco
       ativoService.criar(ativoUpsertDTO);
-      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE03").build());
 
       driver
           .get(URI_ATIVOS, Admin.getInstance())
@@ -855,7 +862,7 @@ public class AtivoControllerTests {
       ativoService.criar(ativoUpsertDTO);
       ativoService.criar(
           ativoUpsertDTO.toBuilder()
-              .nome("VALE3")
+              .nome("VALE03")
               .descricao("Vale S.A.")
               .status(StatusAtivo.DISPONIVEL)
               .cotacao(BigDecimal.valueOf(70.00))
@@ -880,7 +887,7 @@ public class AtivoControllerTests {
 
       assertEquals(2, resultados.size());
       assertEquals("PETR4", resultados.get(0).getNome());
-      assertEquals("VALE3", resultados.get(1).getNome());
+      assertEquals("VALE03", resultados.get(1).getNome());
     }
 
     /**
@@ -919,7 +926,7 @@ public class AtivoControllerTests {
     void quandoListarAtivosAposExclusaoRetornaSucesso() throws Exception {
       // Cria dois ativos
       AtivoResponseDTO ativo1 = ativoService.criar(ativoUpsertDTO);
-      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE3").build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("VALE03").build());
 
       // Simula a exclusão de um ativo
       driver
@@ -931,7 +938,7 @@ public class AtivoControllerTests {
           .get(URI_ATIVOS, Admin.getInstance())
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(1))
-          .andExpect(jsonPath("$[0].nome").value("VALE3"))
+          .andExpect(jsonPath("$[0].nome").value("VALE03"))
           .andDo(print());
     }
 
@@ -1012,8 +1019,8 @@ public class AtivoControllerTests {
     @DisplayName("11. Sucesso: Verificar a visualização de ativos por plano")
     void quandoListarAtivosVerificaVisualizacaoPorPlano() throws Exception {
       // Cria um ativo do tipo Tesouro
-      ativoService.criar(ativoUpsertDTO.toBuilder().nome("CDB").tipo(AtivoTipo.TESOURO).build());
-      ativoService.criar(ativoUpsertDTO.toBuilder().nome("BTC").tipo(AtivoTipo.CRIPTO).build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("CDBb").tipo(AtivoTipo.TESOURO).build());
+      ativoService.criar(ativoUpsertDTO.toBuilder().nome("BTCN").tipo(AtivoTipo.CRIPTO).build());
 
       var cliente =
           clienteRepository.save(
@@ -1036,14 +1043,14 @@ public class AtivoControllerTests {
       driver
           .get(URI_ATIVOS, cliente)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$[0].nome").value("CDB"))
+          .andExpect(jsonPath("$[0].nome").value("CDBb"))
           .andDo(print());
 
       driver
           .get(URI_ATIVOS, clientePremium)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$[0].nome").value("CDB"))
-          .andExpect(jsonPath("$[0].nome").value("CDB"))
+          .andExpect(jsonPath("$[0].nome").value("CDBb"))
+          .andExpect(jsonPath("$[0].nome").value("CDBb"))
           .andDo(print());
     }
   }
@@ -1321,7 +1328,7 @@ public class AtivoControllerTests {
       cripto =
           ativoRepository.save(
               Cripto.builder()
-                  .nome("Doge")
+                  .nome("Doges")
                   .descricao("Moeda dogecoin")
                   .cotacao(BigDecimal.valueOf(100.00))
                   .status(StatusAtivo.DISPONIVEL)
@@ -1340,8 +1347,8 @@ public class AtivoControllerTests {
       tesouro =
           ativoRepository.save(
               Tesouro.builder()
-                  .nome("Selic")
-                  .descricao("tesouro selic")
+                  .nome("Selick")
+                  .descricao("tesouro selick")
                   .cotacao(BigDecimal.valueOf(100.00))
                   .status(StatusAtivo.DISPONIVEL)
                   .tipo(AtivoTipo.TESOURO)

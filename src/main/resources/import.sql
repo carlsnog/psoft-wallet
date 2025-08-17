@@ -25,3 +25,7 @@ INSERT INTO ativo (dtype, id, nome, descricao, status, cotacao, tipo) VALUES ('T
 INSERT INTO ativo (dtype, id, nome, descricao, status, cotacao, tipo) VALUES ('Tesouro', 13, 'Tesouro IPCA', 'Tesouro IPCA+', 'DISPONIVEL', 110.00, 'TESOURO');
 INSERT INTO ativo (dtype, id, nome, descricao, status, cotacao, tipo) VALUES ('Tesouro', 14, 'Tesouro Prefixado', 'Tesouro Prefixado', 'DISPONIVEL', 108.00, 'TESOURO');
 INSERT INTO ativo (dtype, id, nome, descricao, status, cotacao, tipo) VALUES ('Tesouro', 15, 'LCI', 'Letra de Crédito Imobiliário', 'DISPONIVEL', 102.00, 'TESOURO');
+
+-- Reset das sequências para evitar conflitos com os IDs fixos
+ALTER SEQUENCE cliente_seq RESTART WITH 1000;
+ALTER SEQUENCE ativo_seq RESTART WITH 1000;
