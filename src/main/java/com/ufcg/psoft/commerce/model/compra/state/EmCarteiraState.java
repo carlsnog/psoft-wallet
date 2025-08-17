@@ -12,11 +12,6 @@ public class EmCarteiraState extends CompraState {
   }
 
   @Override
-  public boolean isFinal() {
-    return true;
-  }
-
-  @Override
   public void confirmar(Usuario usuario) {
     throw new CommerceException(ErrorCode.CONFIRMANDO_COMPRA_FINALIZADA);
   }

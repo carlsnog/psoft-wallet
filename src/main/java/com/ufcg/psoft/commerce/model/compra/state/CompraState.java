@@ -19,7 +19,7 @@ public abstract class CompraState {
 
   public abstract void confirmar(Usuario usuario);
 
-  public boolean isFinal() {
+  public boolean deveFinalizar() {
     return false;
   }
 
@@ -48,7 +48,6 @@ public abstract class CompraState {
 
   protected void setStatus(CompraStatusEnum status) {
     this.compra.setStatus(status);
-    this.compra.setState(CompraStateFactory.getState(this.compra));
   }
 
   protected Ativo getAtivo() {

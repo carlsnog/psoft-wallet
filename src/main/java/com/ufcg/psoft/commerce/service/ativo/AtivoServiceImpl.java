@@ -84,7 +84,7 @@ public class AtivoServiceImpl implements AtivoService {
   }
 
   @Override
-  public AtivoResponseDTO recuperar(Long id, Usuario usuario) {
+  public Ativo getAtivo(Long id, Usuario usuario) {
     Ativo ativo =
         repository
             .findById(id)
@@ -94,6 +94,21 @@ public class AtivoServiceImpl implements AtivoService {
       throw new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO);
     }
 
+    return ativo;
+  }
+
+  @Override
+  public Ativo getAtivoDisponivel(Long id, Usuario usuario) {
+    Ativo ativo = getAtivo(id, usuario);
+    if (ativo.getStatus() != StatusAtivo.DISPONIVEL) {
+      throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
+    }
+    return ativo;
+  }
+
+  @Override
+  public AtivoResponseDTO recuperar(Long id, Usuario usuario) {
+    Ativo ativo = getAtivo(id, usuario);
     return modelMapper.map(ativo, AtivoResponseDTO.class);
   }
 
