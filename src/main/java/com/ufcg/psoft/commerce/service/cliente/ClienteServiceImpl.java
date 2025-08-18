@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.cliente;
 
+import com.ufcg.psoft.commerce.dto.CarteiraResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
@@ -71,14 +72,23 @@ public class ClienteServiceImpl implements ClienteService {
 
   @Override
   public ClienteResponseDTO recuperar(Usuario usuario, Long id) {
+    var cliente = getCliente(usuario, id);
+    return new ClienteResponseDTO(cliente);
+  }
+
+  @Override
+  public CarteiraResponseDTO recuperarCarteira(Usuario usuario, Long id) {
+    var cliente = getCliente(usuario, id);
+    return new CarteiraResponseDTO(cliente.getCarteira());
+  }
+
+  private Cliente getCliente(Usuario usuario, Long id) {
     if (!usuario.isAdmin() && !usuario.getUserId().equals(String.valueOf(id))) {
       throw new CommerceException(ErrorCode.FORBIDDEN);
     }
 
-    Cliente cliente =
-        clienteRepository
-            .findById(id)
-            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
-    return new ClienteResponseDTO(cliente);
+    return clienteRepository
+        .findById(id)
+        .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
   }
 }

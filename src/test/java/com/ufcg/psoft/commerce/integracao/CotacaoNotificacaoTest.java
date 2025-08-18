@@ -152,7 +152,7 @@ class CotacaoNotificacaoTest {
   private com.ufcg.psoft.commerce.model.Ativo criarCriptoComCotacao(String valor) {
     return ativoRepository.save(
         Cripto.builder()
-            .nome("Doge")
+            .nome("Doges")
             .descricao("Moeda")
             .cotacao(new BigDecimal(valor))
             .status(StatusAtivo.DISPONIVEL)

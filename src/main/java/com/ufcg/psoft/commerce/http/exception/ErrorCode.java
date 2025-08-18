@@ -8,6 +8,8 @@ public enum ErrorCode {
   BAD_REQUEST("Requisicao invalida", HttpStatus.BAD_REQUEST),
   INTERNAL_ERROR("Um erro inesperado aconteceu", HttpStatus.INTERNAL_SERVER_ERROR),
   JSON_INVALID("Corpo da requisição inválido ou malformado", HttpStatus.BAD_REQUEST),
+  CONFLICT("Conflito", HttpStatus.CONFLICT),
+
   ACAO_APENAS_ADMIN("Apenas administradores podem realizar esta ação", HttpStatus.FORBIDDEN),
   ACAO_APENAS_CLIENTE_DONO_COMPRA(
       "Apenas o cliente proprietário pode realizar esta ação", HttpStatus.FORBIDDEN),
@@ -24,6 +26,7 @@ public enum ErrorCode {
   ATIVO_JA_EXISTE("Ativo com este nome ja existe", HttpStatus.CONFLICT),
 
   CONFIRMANDO_COMPRA_FINALIZADA("A compra ja foi finalizada", HttpStatus.BAD_REQUEST),
+  COMPRA_NAO_ENCONTRADA("Compra nao encontrada", HttpStatus.NOT_FOUND),
 
   INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
   INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL(

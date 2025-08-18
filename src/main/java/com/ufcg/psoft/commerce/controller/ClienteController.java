@@ -31,12 +31,27 @@ public class ClienteController {
       value = {
         @ApiResponse(responseCode = "200", description = "Cliente encontrado"),
         @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
-        @ApiResponse(responseCode = "401", description = "Não autorizado")
+        @ApiResponse(responseCode = "403", description = "Não autorizado")
       })
   public ResponseEntity<?> recuperarCliente(
       @Parameter(description = "ID do cliente") @PathVariable Long id,
       @RequestUser Usuario usuario) {
     return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperar(usuario, id));
+  }
+
+  @GetMapping("/{id}/carteira")
+  @Autenticado(TipoAutenticacao.NORMAL)
+  @Operation(summary = "Listar carteira", description = "Lista os ativos da carteira de um cliente")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Carteira listada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Não autorizado")
+      })
+  public ResponseEntity<?> recuperarCarteira(
+      @Parameter(description = "ID do cliente") @PathVariable Long id,
+      @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK).body(clienteService.recuperarCarteira(usuario, id));
   }
 
   @GetMapping("")

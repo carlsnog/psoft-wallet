@@ -11,10 +11,13 @@ public class CompradoState extends CompraState {
   }
 
   @Override
+  public boolean deveFinalizar() {
+    return true;
+  }
+
+  @Override
   public void confirmar(Usuario usuario) {
     preValidarAtivo();
-    preValidarAdmin(usuario);
-
     setStatus(CompraStatusEnum.EM_CARTEIRA);
   }
 }
