@@ -91,7 +91,7 @@ public class AtivoServiceImpl implements AtivoService {
             .orElseThrow(() -> new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO));
 
     if (!usuarioService.podeVerTipoAtivo(usuario, ativo.getTipo())) {
-      throw new CommerceException(ErrorCode.ATIVO_NAO_ENCONTRADO);
+      throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
     }
 
     return ativo;

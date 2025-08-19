@@ -82,4 +82,25 @@ public class CompraController {
     return ResponseEntity.status(HttpStatus.OK)
         .body(compraService.confirmar(usuario, id, confirmacaoDto));
   }
+
+  @PostMapping("/{id}/liberar")
+  @Autenticado(TipoAutenticacao.ADMIN)
+  @Operation(
+      summary = "Liberar compra",
+      description = "Administrador libera a disponibilidade de uma compra solicitada")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Compra liberada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "404", description = "Compra não encontrada"),
+        @ApiResponse(responseCode = "401", description = "Não autorizado"),
+        @ApiResponse(responseCode = "409", description = "Conflito entre compras")
+      })
+  public ResponseEntity<?> liberarCompra(
+      @Parameter(description = "ID da compra") @PathVariable Long id,
+      @RequestBody @Valid CompraConfirmacaoDTO confirmacaoDto,
+      @RequestUser Usuario usuario) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(compraService.liberarDisponibilidade(usuario, id, confirmacaoDto));
+  }
 }
