@@ -15,4 +15,6 @@ public interface CompraService {
   List<CompraResponseDTO> listar(Usuario usuario);
 
   CompraResponseDTO confirmar(Usuario usuario, Long id, CompraConfirmacaoDTO dto);
+
+  CompraResponseDTO liberarDisponibilidade(Usuario adm, Long id, CompraConfirmacaoDTO dto);
 }

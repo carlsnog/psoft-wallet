@@ -27,6 +27,12 @@ public enum ErrorCode {
 
   CONFIRMANDO_COMPRA_FINALIZADA("A compra ja foi finalizada", HttpStatus.BAD_REQUEST),
   COMPRA_NAO_ENCONTRADA("Compra nao encontrada", HttpStatus.NOT_FOUND),
+  COMPRA_NAO_ESTA_SOLICITADA(
+      "A compra não está no status SOLICITADO e portanto não pode ser liberada",
+      HttpStatus.CONFLICT),
+  COMPRA_NAO_ESTA_DISPONIVEL(
+      "A compra não está no status DISPONIVEL e pontanto não pode ser confirmada",
+      HttpStatus.CONFLICT),
 
   INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
   INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL(

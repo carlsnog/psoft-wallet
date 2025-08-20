@@ -41,7 +41,7 @@ public abstract class CompraState {
     }
 
     var cliente = (Cliente) usuario;
-    if (getCliente().getId() != cliente.getId()) {
+    if (!this.compra.getClienteId().equals(cliente.getId())) {
       throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
     }
   }

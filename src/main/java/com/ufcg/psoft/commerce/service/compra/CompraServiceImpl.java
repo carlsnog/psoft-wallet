@@ -3,6 +3,8 @@ package com.ufcg.psoft.commerce.service.compra;
 import com.ufcg.psoft.commerce.dto.CompraConfirmacaoDTO;
 import com.ufcg.psoft.commerce.dto.CompraCreateDTO;
 import com.ufcg.psoft.commerce.dto.CompraResponseDTO;
+import com.ufcg.psoft.commerce.enums.CompraStatusEnum;
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.AtivoCarteira;
@@ -44,6 +46,10 @@ public class CompraServiceImpl implements CompraService {
 
     var cliente = (Cliente) usuario;
     var ativo = ativoService.getAtivoDisponivel(dto.getAtivoId(), usuario);
+
+    if (ativo.getStatus() == StatusAtivo.INDISPONIVEL) {
+      throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
+    }
 
     var compra =
         Compra.builder()
@@ -94,6 +100,9 @@ public class CompraServiceImpl implements CompraService {
   @Override
   @Transactional
   public CompraResponseDTO confirmar(Usuario usuario, Long id, CompraConfirmacaoDTO dto) {
+    if (usuario.isAdmin()) {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
+    }
     var compra =
         compraRepository
             .findById(id)
@@ -101,6 +110,10 @@ public class CompraServiceImpl implements CompraService {
 
     if (compra.getStatus() != dto.getStatusAtual()) { // Nesse caso houve concorrência de requests
       throw new CommerceException(ErrorCode.CONFLICT);
+    }
+
+    if (compra.getStatus() != CompraStatusEnum.DISPONIVEL) {
+      throw new CommerceException(ErrorCode.COMPRA_NAO_ESTA_DISPONIVEL);
     }
 
     compra.confirmar(usuario);
@@ -130,5 +143,32 @@ public class CompraServiceImpl implements CompraService {
 
     compra.confirmar(cliente);
     compra.finalizar();
+  }
+
+  @Transactional
+  @Override
+  public CompraResponseDTO liberarDisponibilidade(
+      Usuario admin, Long id, CompraConfirmacaoDTO dto) {
+    if (!admin.isAdmin()) {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_ADMIN);
+    }
+    var compra =
+        compraRepository
+            .findById(id)
+            .orElseThrow(() -> new CommerceException(ErrorCode.COMPRA_NAO_ENCONTRADA));
+
+    if (compra.getStatus() != dto.getStatusAtual()) { // Nesse caso houve concorrência de requests
+      throw new CommerceException(ErrorCode.CONFLICT);
+    }
+
+    if (compra.getStatus() != CompraStatusEnum.SOLICITADO) {
+      throw new CommerceException(ErrorCode.COMPRA_NAO_ESTA_SOLICITADA);
+    }
+
+    compra.confirmar(admin);
+
+    compraRepository.save(compra);
+
+    return new CompraResponseDTO(compra);
   }
 }
