@@ -3,6 +3,8 @@ package com.ufcg.psoft.commerce.model;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
 import com.ufcg.psoft.commerce.model.compra.Compra;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +49,9 @@ public class Cliente extends Usuario {
 
   @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Compra> compras;
+
+  @Column(nullable = false, scale = 2, precision = 19)
+  private BigDecimal saldo = BigDecimal.ZERO;
 
   @Override
   public String getUserId() {

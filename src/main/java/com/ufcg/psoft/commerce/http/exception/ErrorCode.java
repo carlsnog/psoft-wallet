@@ -14,6 +14,7 @@ public enum ErrorCode {
   ACAO_APENAS_CLIENTE_DONO_COMPRA(
       "Apenas o cliente proprietário pode realizar esta ação", HttpStatus.FORBIDDEN),
   CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
+    SALDO_INSUFICIENTE("Saldo insuficiente para realizar a compra", HttpStatus.BAD_REQUEST),
 
   ATIVO_NAO_ENCONTRADO("Ativo nao encontrado", HttpStatus.NOT_FOUND),
   TIPO_ATIVO_INVALIDO("Tipo de ativo invalido", HttpStatus.BAD_REQUEST),
@@ -24,6 +25,7 @@ public enum ErrorCode {
       "O novo cotacao não respeita a faixa de variação de no mínimo 1% em relação ao cotacao antigo",
       HttpStatus.BAD_REQUEST),
   ATIVO_JA_EXISTE("Ativo com este nome ja existe", HttpStatus.CONFLICT),
+
 
   CONFIRMANDO_COMPRA_FINALIZADA("A compra ja foi finalizada", HttpStatus.BAD_REQUEST),
   COMPRA_NAO_ENCONTRADA("Compra nao encontrada", HttpStatus.NOT_FOUND),

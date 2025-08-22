@@ -15,6 +15,8 @@ import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.CompraRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import jakarta.transaction.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,12 @@ public class CompraServiceImpl implements CompraService {
 
     if (ativo.getStatus() == StatusAtivo.INDISPONIVEL) {
       throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
+    }
+
+    BigDecimal valorTotal = ativo.getCotacao().multiply(BigDecimal.valueOf(dto.getQuantidade()));
+
+    if (cliente.getSaldo().compareTo(valorTotal) < 0) {
+          throw new CommerceException(ErrorCode.SALDO_INSUFICIENTE);
     }
 
     var compra =
