@@ -602,4 +602,146 @@ public class CompraControllerTests {
       assertEquals(ErrorCode.CONFLICT, resultado.getCode());
     }
   }
+
+  @Nested
+  @DisplayName("Conjunto de casos de verificação de solicitação de compra (US09)")
+  class CompraSolicitacaoTests {
+
+    @Test
+    @DisplayName(
+        "Quando cliente PREMIUM solicita compra de Ação disponível deve ser criada com sucesso")
+    void quandoClientePremiumCompraAcaoDisponivel() throws Exception {
+      // Arrange
+      Cliente clientePremium =
+          clienteRepository
+              .findById(2L)
+              .orElseThrow(
+                  () -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO)); // Nívea, PREMIUM
+
+      Ativo ativo = ativoService.getAtivoDisponivel(1L, clientePremium); // PETR4 por ex.
+
+      CompraCreateDTO compraDto = new CompraCreateDTO();
+      compraDto.setAtivoId(ativo.getId());
+      compraDto.setQuantidade(5);
+
+      // Act
+      String responseJson =
+          driver
+              .post(URI_COMPRAS, compraDto, clientePremium)
+              .andExpect(status().isCreated())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      CompraResponseDTO resultado = objectMapper.readValue(responseJson, CompraResponseDTO.class);
+
+      // Assert
+      assertAll(
+          () -> assertNotNull(resultado.getId()),
+          () -> assertEquals(ativo.getId(), resultado.getAtivoId()),
+          () -> assertEquals(CompraStatusEnum.SOLICITADO, resultado.getStatus()));
+    }
+
+    @Test
+    @DisplayName(
+        "Quando cliente NORMAL solicita compra de Tesouro Direto disponível deve ser criada com sucesso")
+    void quandoClienteNormalCompraTesouroDisponivel() throws Exception {
+      // Arrange
+      Cliente clienteNormal =
+          clienteRepository
+              .findById(1L)
+              .orElseThrow(
+                  () -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO)); // Gustavo, NORMAL
+
+      Ativo ativoTesouro =
+          ativoService.getAtivoDisponivel(
+              11L, clienteNormal); // supondo que id=10 seja Tesouro Direto
+
+      CompraCreateDTO compraDto = new CompraCreateDTO();
+      compraDto.setAtivoId(ativoTesouro.getId());
+      compraDto.setQuantidade(2);
+
+      // Act
+      String responseJson =
+          driver
+              .post(URI_COMPRAS, compraDto, clienteNormal)
+              .andExpect(status().isCreated())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      CompraResponseDTO resultado = objectMapper.readValue(responseJson, CompraResponseDTO.class);
+
+      // Assert
+      assertAll(
+          () -> assertNotNull(resultado.getId()),
+          () -> assertEquals(ativoTesouro.getId(), resultado.getAtivoId()),
+          () -> assertEquals(CompraStatusEnum.SOLICITADO, resultado.getStatus()));
+    }
+
+    @Test
+    @DisplayName("Quando cliente NORMAL solicita compra de Ação deve falhar")
+    void quandoClienteNormalCompraAcaoDeveFalhar() throws Exception {
+      // Arrange
+      Cliente clienteNormal =
+          clienteRepository
+              .findById(1L)
+              .orElseThrow(
+                  () -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO)); // Gustavo, NORMAL
+
+      CompraCreateDTO compraDto = new CompraCreateDTO();
+      compraDto.setAtivoId(1L);
+      compraDto.setQuantidade(1);
+
+      // Act & Assert
+      driver
+          .post(URI_COMPRAS, compraDto, clienteNormal)
+          .andExpect(status().isBadRequest())
+          .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Quando cliente NORMAL solicita compra de Cripto deve falhar")
+    void quandoClienteNormalCompraCriptoDeveFalhar() throws Exception {
+      // Arrange
+      Cliente clienteNormal =
+          clienteRepository
+              .findById(1L)
+              .orElseThrow(
+                  () -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO)); // Gustavo, NORMAL
+
+      CompraCreateDTO compraDto = new CompraCreateDTO();
+      compraDto.setAtivoId(6L);
+      compraDto.setQuantidade(1);
+
+      // Act & Assert
+      driver
+          .post(URI_COMPRAS, compraDto, clienteNormal)
+          .andExpect(status().isBadRequest())
+          .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Quando cliente tenta comprar ativo inexistente deve retornar NOT FOUND")
+    void quandoCompraAtivoInexistente() throws Exception {
+      // Arrange
+      Cliente clientePremium =
+          clienteRepository
+              .findById(2L)
+              .orElseThrow(
+                  () -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO)); // Nívea, PREMIUM
+
+      CompraCreateDTO compraDto = new CompraCreateDTO();
+      compraDto.setAtivoId(9999L); // ID que não existe
+      compraDto.setQuantidade(1);
+
+      // Act & Assert
+      driver
+          .post(URI_COMPRAS, compraDto, clientePremium)
+          .andExpect(status().isNotFound())
+          .andDo(print());
+    }
+  }
 }
