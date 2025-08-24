@@ -5,7 +5,7 @@ import com.ufcg.psoft.commerce.enums.TipoInteresseEnum;
 import com.ufcg.psoft.commerce.model.Interesse;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
 import com.ufcg.psoft.commerce.service.interesse.listeners.AtivoBaseEventListener;
-import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
+import com.ufcg.psoft.commerce.service.notificacao.NotificacaoService;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

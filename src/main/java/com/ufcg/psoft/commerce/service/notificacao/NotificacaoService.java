@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.interesse.notificacao;
+package com.ufcg.psoft.commerce.service.notificacao;
 
 import com.ufcg.psoft.commerce.model.Cliente;
 import java.time.LocalDateTime;
