@@ -14,7 +14,7 @@ import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.InteresseRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.interesse.InteresseService;
-import com.ufcg.psoft.commerce.service.interesse.notificacao.NotificacaoService;
+import com.ufcg.psoft.commerce.service.notificacao.NotificacaoService;
 import java.math.BigDecimal;
 import java.util.Objects;
 import org.junit.jupiter.api.*;

@@ -14,12 +14,14 @@ import com.ufcg.psoft.commerce.model.compra.Compra;
 import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.CompraRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
+import com.ufcg.psoft.commerce.service.compra.listeners.liberada.CompraLiberadaEvent;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,14 +30,17 @@ public class CompraServiceImpl implements CompraService {
   private final CompraRepository compraRepository;
   private final AtivoCarteiraRepository ativoCarteiraRepository;
   private final AtivoService ativoService;
+  private final ApplicationEventPublisher eventPublisher;
 
   public CompraServiceImpl(
       CompraRepository compraRepository,
       AtivoCarteiraRepository ativoCarteiraRepository,
-      AtivoService ativoService) {
+      AtivoService ativoService,
+      ApplicationEventPublisher eventPublisher) {
     this.compraRepository = compraRepository;
     this.ativoCarteiraRepository = ativoCarteiraRepository;
     this.ativoService = ativoService;
+    this.eventPublisher = eventPublisher;
   }
 
   @Override
@@ -168,6 +173,8 @@ public class CompraServiceImpl implements CompraService {
     compra.confirmar(admin);
 
     compraRepository.save(compra);
+
+    eventPublisher.publishEvent(new CompraLiberadaEvent(this, compra));
 
     return new CompraResponseDTO(compra);
   }

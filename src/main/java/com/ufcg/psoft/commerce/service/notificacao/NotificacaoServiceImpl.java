@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.interesse.notificacao;
+package com.ufcg.psoft.commerce.service.notificacao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
