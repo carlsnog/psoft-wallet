@@ -41,13 +41,13 @@ public class CarteiraAtivoResponseDTO {
     this.ativoNome = ativoCarteira.getAtivo().getNome();
     this.ativoTipo = ativoCarteira.getAtivo().getTipo();
     this.lucro = ativoCarteira.getLucro();
-    this.valorUnitario = ativoCarteira.getValor();
+    this.valorUnitario = ativoCarteira.getValorUnitario();
     this.valorTotal = ativoCarteira.getValor();
-    this.quantidade = 1;
+    this.quantidade = ativoCarteira.getQuantidade();
   }
 
   public void adicionar(AtivoCarteira ativoCarteira) {
-    this.quantidade += 1;
+    this.quantidade += ativoCarteira.getQuantidade();
     this.valorTotal = this.valorTotal.add(ativoCarteira.getValor());
     this.lucro = this.lucro.add(ativoCarteira.getLucro());
   }

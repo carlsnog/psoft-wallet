@@ -11,7 +11,7 @@ public enum ErrorCode {
   CONFLICT("Conflito", HttpStatus.CONFLICT),
 
   ACAO_APENAS_ADMIN("Apenas administradores podem realizar esta ação", HttpStatus.FORBIDDEN),
-  ACAO_APENAS_CLIENTE_DONO_COMPRA(
+  ACAO_APENAS_CLIENTE_DONO(
       "Apenas o cliente proprietário pode realizar esta ação", HttpStatus.FORBIDDEN),
   CLIENTE_NAO_ENCONTRADO("Cliente nao existe", HttpStatus.NOT_FOUND),
 
@@ -31,8 +31,12 @@ public enum ErrorCode {
       "A compra não está no status SOLICITADO e portanto não pode ser liberada",
       HttpStatus.CONFLICT),
   COMPRA_NAO_ESTA_DISPONIVEL(
-      "A compra não está no status DISPONIVEL e pontanto não pode ser confirmada",
+      "A compra não está no status DISPONIVEL e portanto não pode ser confirmada",
       HttpStatus.CONFLICT),
+
+  RESGATE_NAO_ENCONTRADO("Resgate nao encontrado", HttpStatus.NOT_FOUND),
+  RESGATE_JA_ESTA_EM_CONTA("O resgate ja esta em conta", HttpStatus.BAD_REQUEST),
+  SALDO_INSUFICIENTE("Saldo insuficiente para realizar o resgate", HttpStatus.BAD_REQUEST),
 
   INTERESSE_NAO_ENCONTRADO("Interesse nao encontrado", HttpStatus.NOT_FOUND),
   INTERESSE_COTACAO_ATIVO_NAO_DISPONIVEL(

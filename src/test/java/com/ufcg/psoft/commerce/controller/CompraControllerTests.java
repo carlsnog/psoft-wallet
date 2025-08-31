@@ -398,7 +398,7 @@ public class CompraControllerTests {
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
 
       // Assert
-      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA, resultado.getCode());
+      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO, resultado.getCode());
     }
 
     // Cenário 11: Cliente tenta confirmar compra de outro cliente
@@ -433,7 +433,7 @@ public class CompraControllerTests {
       ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
 
       // Assert
-      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA, resultado.getCode());
+      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO, resultado.getCode());
     }
 
     // Cenário 12: Fluxo completo, cliente criando compra, admin liberando e cliente confirmando
@@ -658,7 +658,7 @@ public class CompraControllerTests {
               .getContentAsString();
 
       ErrorDTO erro = objectMapper.readValue(responseJson, ErrorDTO.class);
-      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA, erro.getCode());
+      assertEquals(ErrorCode.ACAO_APENAS_CLIENTE_DONO, erro.getCode());
     }
 
     @Test

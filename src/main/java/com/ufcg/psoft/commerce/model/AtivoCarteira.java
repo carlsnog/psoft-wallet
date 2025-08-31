@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.model.compra.Compra;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,17 +29,25 @@ public class AtivoCarteira {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  public BigDecimal getValor() {
+  public BigDecimal getValorUnitario() {
     return this.ativo.getCotacao();
   }
 
+  public BigDecimal getValor() {
+    return this.ativo.getCotacao().multiply(BigDecimal.valueOf(this.quantidade));
+  }
+
   public BigDecimal getLucro() {
-    return this.ativo.getCotacao().subtract(this.compra.getValorUnitario());
+    return (this.ativo.getCotacao().subtract(this.compra.getValorUnitario()))
+        .multiply(BigDecimal.valueOf(this.quantidade));
   }
 
   @ManyToOne
   @JoinColumn(name = "ativo_id")
   private Ativo ativo;
+
+  @Column(nullable = false)
+  private int quantidade;
 
   @ManyToOne
   @JoinColumn(name = "cliente_id")

@@ -17,7 +17,6 @@ import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.compra.listeners.liberada.CompraLiberadaEvent;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,7 +45,7 @@ public class CompraServiceImpl implements CompraService {
   @Override
   public CompraResponseDTO criar(Usuario usuario, CompraCreateDTO dto) {
     if (usuario.isAdmin()) {
-      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO);
     }
 
     var cliente = (Cliente) usuario;
@@ -106,7 +105,7 @@ public class CompraServiceImpl implements CompraService {
   @Transactional
   public CompraResponseDTO confirmar(Usuario usuario, Long id, CompraConfirmacaoDTO dto) {
     if (usuario.isAdmin()) {
-      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO_COMPRA);
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO);
     }
     var compra =
         compraRepository
@@ -136,15 +135,15 @@ public class CompraServiceImpl implements CompraService {
     var cliente = compra.getCliente();
     var ativo = compra.getAtivo();
 
-    var ativosCarteira = new ArrayList<AtivoCarteira>();
-    for (int i = 0; i < compra.getQuantidade(); i++) {
-      var ativoCarteira =
-          AtivoCarteira.builder().ativo(ativo).cliente(cliente).compra(compra).build();
+    var ativoCarteira =
+        AtivoCarteira.builder()
+            .ativo(ativo)
+            .quantidade(compra.getQuantidade())
+            .cliente(cliente)
+            .compra(compra)
+            .build();
 
-      ativosCarteira.add(ativoCarteira);
-    }
-
-    ativoCarteiraRepository.saveAll(ativosCarteira);
+    ativoCarteiraRepository.save(ativoCarteira);
 
     compra.confirmar(cliente);
     compra.finalizar();

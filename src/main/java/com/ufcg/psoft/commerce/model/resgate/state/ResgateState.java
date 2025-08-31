@@ -1,32 +1,25 @@
-package com.ufcg.psoft.commerce.model.compra.state;
+package com.ufcg.psoft.commerce.model.resgate.state;
 
-import com.ufcg.psoft.commerce.enums.CompraStatusEnum;
-import com.ufcg.psoft.commerce.enums.StatusAtivo;
+import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.resgate.Resgate;
 
-public abstract class CompraState {
+public abstract class ResgateState {
 
-  private final Compra compra;
+  private final Resgate resgate;
 
-  public CompraState(Compra compra) {
-    this.compra = compra;
+  public ResgateState(Resgate resgate) {
+    this.resgate = resgate;
   }
 
   public abstract void confirmar(Usuario usuario);
 
   public boolean deveFinalizar() {
     return false;
-  }
-
-  protected void preValidarAtivo() {
-    if (getAtivo().getStatus() != StatusAtivo.DISPONIVEL) {
-      throw new CommerceException(ErrorCode.ATIVO_NAO_DISPONIVEL);
-    }
   }
 
   protected void preValidarAdmin(Usuario usuario) {
@@ -41,20 +34,29 @@ public abstract class CompraState {
     }
 
     var cliente = (Cliente) usuario;
-    if (!this.compra.getClienteId().equals(cliente.getId())) {
+    if (!this.resgate.getClienteId().equals(cliente.getId())) {
       throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO);
     }
   }
 
-  protected void setStatus(CompraStatusEnum status) {
-    this.compra.setStatus(status);
+  protected void preValidarSaldo() {
+    var saldoDisponivel = getCliente().getSaldo(getAtivo().getId());
+    var quantidadeSolicitada = this.resgate.getQuantidade();
+
+    if (saldoDisponivel < quantidadeSolicitada) {
+      throw new CommerceException(ErrorCode.SALDO_INSUFICIENTE);
+    }
+  }
+
+  protected void setStatus(ResgateStatusEnum status) {
+    this.resgate.setStatus(status);
   }
 
   protected Ativo getAtivo() {
-    return this.compra.getAtivo();
+    return this.resgate.getAtivo();
   }
 
   protected Cliente getCliente() {
-    return this.compra.getCliente();
+    return this.resgate.getCliente();
   }
 }

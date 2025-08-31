@@ -39,10 +39,21 @@ public class Cliente extends Usuario {
   @Column(nullable = false)
   private String endereco;
 
+  public int getSaldo(long ativoId) {
+    return carteira.stream()
+        .filter(ac -> ac.getAtivo().getId().equals(ativoId))
+        .mapToInt(AtivoCarteira::getQuantidade)
+        .sum();
+  }
+
   @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Interesse> interesses;
 
-  @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(
+      mappedBy = "cliente",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
+      orphanRemoval = true)
   private List<AtivoCarteira> carteira;
 
   @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

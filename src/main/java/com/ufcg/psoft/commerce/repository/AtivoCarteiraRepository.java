@@ -9,4 +9,6 @@ public interface AtivoCarteiraRepository extends JpaRepository<AtivoCarteira, Lo
   List<AtivoCarteira> findAllByCliente_Id(Long clienteId);
 
   List<AtivoCarteira> findAllByAtivo_Id(Long ativoId);
+
+  List<AtivoCarteira> findAllByCliente_IdAndAtivo_Id(long id, long ativoId);
 }
