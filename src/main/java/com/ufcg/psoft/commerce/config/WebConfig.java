@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -23,6 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
     resolvers.add(new RequestUserResolver());
   }
 
+  @Value("${API_URL:http://localhost:8080}")
+  private String apiUrl;
+
   /** Configura o OpenAPI para usar autenticação basic */
   @Bean
   public OpenAPI customOpenAPI() {
@@ -35,8 +39,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .version("1.0.0")
                 .contact(new Contact().name("Grupo 04"))
                 .license(new License().name("MIT").url("https://opensource.org/licenses/MIT")))
-        .addServersItem(
-            new Server().url("http://localhost:8080").description("Servidor de Desenvolvimento"))
+        .addServersItem(new Server().url(apiUrl).description("Servidor"))
         .components(
             new Components()
                 .addSecuritySchemes(
