@@ -4,16 +4,16 @@ import com.ufcg.psoft.commerce.model.resgate.Resgate;
 import org.springframework.context.ApplicationEvent;
 
 public abstract class ResgateBaseEvent extends ApplicationEvent {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final transient Resgate resgate;
+  private final transient Resgate resgate;
 
-    public ResgateBaseEvent(Object source, Resgate resgate) {
-        super(source);
-        this.resgate = resgate;
-    }
+  public ResgateBaseEvent(Object source, Resgate resgate) {
+    super(source);
+    this.resgate = resgate;
+  }
 
-    public Resgate getResgate() {
-        return resgate;
-    }
+  public Resgate getResgate() {
+    return resgate;
+  }
 }
