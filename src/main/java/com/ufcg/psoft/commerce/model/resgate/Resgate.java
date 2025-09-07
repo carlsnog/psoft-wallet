@@ -57,6 +57,12 @@ public class Resgate {
   @Enumerated(EnumType.STRING)
   private ResgateStatusEnum status = ResgateStatusEnum.SOLICITADO;
 
+  @Column(precision = 19, scale = 2)
+  private BigDecimal lucro;
+
+  @Column(precision = 19, scale = 2)
+  private BigDecimal impostoPago;
+
   private ResgateState getState() {
     return this.status.getState(this);
   }

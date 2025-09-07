@@ -8,6 +8,7 @@ import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
+import com.ufcg.psoft.commerce.model.AtivoCarteira;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.model.resgate.Resgate;
@@ -15,8 +16,12 @@ import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
+import com.ufcg.psoft.commerce.service.imposto.ImpostoCalculator;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,16 +34,19 @@ public class ResgateServiceImpl implements ResgateService {
   private final AtivoCarteiraRepository ativoCarteiraRepository;
   private final AtivoService ativoService;
   private final ClienteService clienteService;
+  private final ImpostoCalculator impostoCalculator;
 
   public ResgateServiceImpl(
       ResgateRepository resgateRepository,
       AtivoCarteiraRepository ativoCarteiraRepository,
       AtivoService ativoService,
-      ClienteService clienteService) {
+      ClienteService clienteService,
+      ImpostoCalculator impostoCalculator) {
     this.resgateRepository = resgateRepository;
     this.ativoCarteiraRepository = ativoCarteiraRepository;
     this.ativoService = ativoService;
     this.clienteService = clienteService;
+    this.impostoCalculator = impostoCalculator;
   }
 
   @Override
@@ -127,6 +135,15 @@ public class ResgateServiceImpl implements ResgateService {
       throw new CommerceException(ErrorCode.CONFLICT);
     }
 
+    var lucro = calcularLucroFIFO(resgate);
+    var imposto =
+        impostoCalculator
+            .calcular(resgate.getAtivo().getTipo(), lucro)
+            .setScale(2, RoundingMode.HALF_UP);
+
+    resgate.setLucro(lucro.setScale(2, RoundingMode.HALF_UP));
+    resgate.setImpostoPago(imposto);
+
     resgate.confirmar(usuario);
     resgateRepository.save(resgate);
 
@@ -135,6 +152,37 @@ public class ResgateServiceImpl implements ResgateService {
     }
 
     return new ResgateResponseDTO(resgate);
+  }
+
+  private BigDecimal calcularLucroFIFO(Resgate resgate) {
+    var cliente = resgate.getCliente();
+    var ativoId = resgate.getAtivo().getId();
+    var qtdNecessaria = resgate.getQuantidade();
+
+    var lotes =
+        cliente.getCarteira().stream()
+            .filter(ac -> ac.getAtivo().getId().equals(ativoId))
+            .sorted(Comparator.comparing(ac -> ac.getCompra().getFinalizadaEm()))
+            .collect(Collectors.toList());
+
+    if (lotes.stream().mapToInt(AtivoCarteira::getQuantidade).sum() < qtdNecessaria)
+      throw new CommerceException(ErrorCode.SALDO_INSUFICIENTE);
+
+    BigDecimal custoTotal = BigDecimal.ZERO;
+    int restante = qtdNecessaria;
+
+    for (var lote : lotes) {
+      if (restante == 0) break;
+      int usar = Math.min(restante, lote.getQuantidade());
+      var custoUnit = lote.getCompra().getValorUnitario();
+      custoTotal = custoTotal.add(custoUnit.multiply(BigDecimal.valueOf(usar)));
+      restante -= usar;
+    }
+
+    var precoVendaTotal = resgate.getValorUnitario().multiply(BigDecimal.valueOf(qtdNecessaria));
+    var lucro = precoVendaTotal.subtract(custoTotal);
+
+    return lucro.signum() > 0 ? lucro : BigDecimal.ZERO;
   }
 
   private void removerDaCarteira(Resgate resgate, Usuario usuario) {

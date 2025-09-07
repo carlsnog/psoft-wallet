@@ -38,6 +38,12 @@ public class ResgateResponseDTO {
   @JsonProperty("status")
   private ResgateStatusEnum status;
 
+  @JsonProperty("lucro")
+  private BigDecimal lucro;
+
+  @JsonProperty("impostoPago")
+  private BigDecimal impostoPago;
+
   public ResgateResponseDTO(Resgate resgate) {
     this.id = resgate.getId();
     this.ativoId = resgate.getAtivoId();
