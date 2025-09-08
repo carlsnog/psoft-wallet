@@ -15,11 +15,14 @@ import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
+import com.ufcg.psoft.commerce.service.resgate.listeners.ResgateConfirmadoEvent;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,6 +32,7 @@ public class ResgateServiceImpl implements ResgateService {
   private final AtivoCarteiraRepository ativoCarteiraRepository;
   private final AtivoService ativoService;
   private final ClienteService clienteService;
+  private ApplicationEventPublisher eventPublisher;
 
   public ResgateServiceImpl(
       ResgateRepository resgateRepository,
@@ -39,6 +43,11 @@ public class ResgateServiceImpl implements ResgateService {
     this.ativoCarteiraRepository = ativoCarteiraRepository;
     this.ativoService = ativoService;
     this.clienteService = clienteService;
+  }
+
+  @Autowired
+  public void setEventPublisher(ApplicationEventPublisher publisher) {
+    this.eventPublisher = publisher;
   }
 
   @Override
@@ -133,7 +142,7 @@ public class ResgateServiceImpl implements ResgateService {
     if (resgate.deveFinalizar()) {
       removerDaCarteira(resgate, usuario);
     }
-
+    eventPublisher.publishEvent(new ResgateConfirmadoEvent(this, resgate));
     return new ResgateResponseDTO(resgate);
   }
 
@@ -168,6 +177,7 @@ public class ResgateServiceImpl implements ResgateService {
     }
 
     resgate.confirmar(usuario);
+
     resgate.finalizar();
   }
 }
