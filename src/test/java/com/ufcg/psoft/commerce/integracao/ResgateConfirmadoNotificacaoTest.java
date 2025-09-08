@@ -99,8 +99,10 @@ class ResgateConfirmacaoNotificacaoTest {
 
     assertThat(output.getOut()).doesNotContain("Notificação");
   }
+
   @Test
-  @DisplayName("Notificação: 2 resgates confirmados (clientes distintos) -> 2 prints, nomes corretos")
+  @DisplayName(
+      "Notificação: 2 resgates confirmados (clientes distintos) -> 2 prints, nomes corretos")
   void doisClientes_doisResgates_duasNotificacoes(CapturedOutput output) {
     // cliente 1
     Cliente c1 = criarCliente("Cliente A");
@@ -142,6 +144,7 @@ class ResgateConfirmacaoNotificacaoTest {
     // assert: não houve notificação de resgate
     assertThat(output.getOut()).doesNotContain("Notificação: O resgate do ativo");
   }
+
   // ============ helpers ============
 
   private Cliente criarCliente(String nome) {
