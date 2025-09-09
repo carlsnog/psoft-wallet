@@ -3,11 +3,15 @@ package com.ufcg.psoft.commerce.service.cliente;
 import com.ufcg.psoft.commerce.dto.CarteiraResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.dto.ExtratoDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
+import com.ufcg.psoft.commerce.mapper.ExtratoMapper;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.util.CsvExporter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -90,5 +94,19 @@ public class ClienteServiceImpl implements ClienteService {
     return clienteRepository
         .findById(id)
         .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
+  }
+
+  @Override
+  public byte[] gerarExtratoCsv(Long clienteId) {
+    Cliente cliente =
+        clienteRepository
+            .findById(clienteId)
+            .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
+
+    List<ExtratoDTO> linhas = new ArrayList<>();
+    cliente.getCompras().forEach(c -> linhas.add(ExtratoMapper.fromCompra(c)));
+    cliente.getResgates().forEach(r -> linhas.add(ExtratoMapper.fromResgate(r)));
+
+    return CsvExporter.gerarCsv(linhas);
   }
 }
