@@ -1,15 +1,16 @@
-package com.ufcg.psoft.commerce.model.compra.state;
+package com.ufcg.psoft.commerce.model.transacao.compra.state;
 
-import com.ufcg.psoft.commerce.enums.CompraStatusEnum;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.TransacaoState;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.CompraStatusEnum;
 
-public abstract class CompraState {
+public abstract class CompraState implements TransacaoState {
 
   private final Compra compra;
 
@@ -17,8 +18,10 @@ public abstract class CompraState {
     this.compra = compra;
   }
 
+  @Override
   public abstract void confirmar(Usuario usuario);
 
+  @Override
   public boolean deveFinalizar() {
     return false;
   }

@@ -1,8 +1,8 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -44,8 +44,8 @@ public class ResgateResponseDTO {
     this.quantidade = resgate.getQuantidade();
     this.valorUnitario = resgate.getValorUnitario();
     this.valorTotal = resgate.getValorTotal();
-    this.solicitadoEm = resgate.getSolicitadoEm();
-    this.finalizadoEm = resgate.getFinalizadoEm();
+    this.solicitadoEm = resgate.getAbertaEm();
+    this.finalizadoEm = resgate.getFinalizadaEm();
     this.status = resgate.getStatus();
   }
 }

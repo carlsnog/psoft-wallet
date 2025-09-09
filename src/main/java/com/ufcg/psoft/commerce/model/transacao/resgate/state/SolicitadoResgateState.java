@@ -1,8 +1,8 @@
-package com.ufcg.psoft.commerce.model.resgate.state;
+package com.ufcg.psoft.commerce.model.transacao.resgate.state;
 
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 
 public class SolicitadoResgateState extends ResgateState {
   public SolicitadoResgateState(Resgate resgate) {
