@@ -1,40 +1,52 @@
 package com.ufcg.psoft.commerce.util;
 
 import com.ufcg.psoft.commerce.dto.ExtratoDTO;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 public class CsvExporter {
 
   public static byte[] gerarCsv(List<ExtratoDTO> linhas) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(
-        "Tipo,Ativo,Quantidade,Valor Unitário,Total,Lucro,Imposto Pago,Aberta Em,Finalizada Em,Status\n");
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+        CSVPrinter csvPrinter =
+            CSVFormat.DEFAULT
+                .withHeader(
+                    "Tipo",
+                    "Ativo",
+                    "Quantidade",
+                    "Valor Unitário",
+                    "Total",
+                    "Lucro",
+                    "Imposto Pago",
+                    "Aberta Em",
+                    "Finalizada Em")
+                .print(writer)) {
 
-    for (ExtratoDTO l : linhas) {
-      sb.append(l.tipo())
-          .append(",")
-          .append(l.ativo())
-          .append(",")
-          .append(l.quantidade())
-          .append(",")
-          .append(l.valorUnitario())
-          .append(",")
-          .append(l.total())
-          .append(",")
-          .append(l.lucro() != null ? l.lucro() : BigDecimal.ZERO)
-          .append(",")
-          .append(l.impostoPago() != null ? l.impostoPago() : BigDecimal.ZERO)
-          .append(",")
-          .append(l.abertaEm())
-          .append(",")
-          .append(l.finalizadaEm() != null ? l.finalizadaEm() : "")
-          .append(",")
-          .append(l.status())
-          .append("\n");
+      for (ExtratoDTO l : linhas) {
+        csvPrinter.printRecord(
+            l.tipo(),
+            l.ativo(),
+            l.quantidade(),
+            l.valorUnitario(),
+            l.total(),
+            l.lucro() != null ? l.lucro() : BigDecimal.ZERO,
+            l.impostoPago() != null ? l.impostoPago() : BigDecimal.ZERO,
+            l.abertaEm(),
+            l.finalizadaEm() != null ? l.finalizadaEm() : "");
+      }
+
+      csvPrinter.flush();
+      return baos.toByteArray();
+
+    } catch (IOException e) {
+      throw new RuntimeException("Erro ao gerar CSV", e);
     }
-
-    return sb.toString().getBytes(StandardCharsets.UTF_8);
   }
 }

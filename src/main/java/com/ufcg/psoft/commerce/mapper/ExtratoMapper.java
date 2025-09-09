@@ -1,39 +1,34 @@
 package com.ufcg.psoft.commerce.mapper;
 
 import com.ufcg.psoft.commerce.dto.ExtratoDTO;
+import com.ufcg.psoft.commerce.model.transacao.Transacao;
 import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 import java.math.BigDecimal;
 
 public class ExtratoMapper {
 
-  public static ExtratoDTO fromCompra(Compra c) {
-    var total = c.getValorUnitario().multiply(BigDecimal.valueOf(c.getQuantidade()));
+  public static ExtratoDTO fromTransacao(Transacao transacao) {
+    BigDecimal total =
+        transacao.getValorUnitario().multiply(BigDecimal.valueOf(transacao.getQuantidade()));
+
     return new ExtratoDTO(
-        "Compra",
-        c.getAtivo().getNome(),
-        c.getQuantidade(),
-        c.getValorUnitario(),
+        transacao.getTipoTransacao(),
+        transacao.getAtivo().getNome(),
+        transacao.getQuantidade(),
+        transacao.getValorUnitario(),
         total,
-        BigDecimal.ZERO,
-        BigDecimal.ZERO,
-        c.getAbertaEm(),
-        c.getFinalizadaEm(),
-        c.getStatus().name());
+        transacao.getLucro(),
+        transacao.getImpostoPago(),
+        transacao.getAbertaEm(),
+        transacao.getFinalizadaEm());
   }
 
-  public static ExtratoDTO fromResgate(Resgate r) {
-    var total = r.getValorUnitario().multiply(BigDecimal.valueOf(r.getQuantidade()));
-    return new ExtratoDTO(
-        "Resgate",
-        r.getAtivo().getNome(),
-        r.getQuantidade(),
-        r.getValorUnitario(),
-        total,
-        r.getLucro(),
-        r.getImpostoPago(),
-        r.getAbertaEm(),
-        r.getFinalizadaEm(),
-        r.getStatus().name());
+  public static ExtratoDTO fromCompra(Compra compra) {
+    return fromTransacao(compra);
+  }
+
+  public static ExtratoDTO fromResgate(Resgate resgate) {
+    return fromTransacao(resgate);
   }
 }

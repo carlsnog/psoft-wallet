@@ -38,6 +38,11 @@ public class Compra extends Transacao {
     return this.status.getState(this);
   }
 
+  @Override
+  public String getTipoTransacao() {
+    return "Compra";
+  }
+
   @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<AtivoCarteira> ativoCarteiras;
 }

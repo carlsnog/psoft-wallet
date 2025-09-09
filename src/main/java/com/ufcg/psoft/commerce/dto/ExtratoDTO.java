@@ -12,5 +12,4 @@ public record ExtratoDTO(
     BigDecimal lucro,
     BigDecimal impostoPago,
     LocalDateTime abertaEm,
-    LocalDateTime finalizadaEm,
-    String status) {}
+    LocalDateTime finalizadaEm) {}

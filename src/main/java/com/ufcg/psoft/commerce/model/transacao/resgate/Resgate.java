@@ -39,4 +39,19 @@ public class Resgate extends Transacao {
   protected ResgateState getState() {
     return this.status.getState(this);
   }
+
+  @Override
+  public String getTipoTransacao() {
+    return "Resgate";
+  }
+
+  @Override
+  public BigDecimal getLucro() {
+    return this.lucro;
+  }
+
+  @Override
+  public BigDecimal getImpostoPago() {
+    return this.impostoPago;
+  }
 }
