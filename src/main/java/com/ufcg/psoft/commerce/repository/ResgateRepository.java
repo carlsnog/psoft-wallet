@@ -1,6 +1,6 @@
 package com.ufcg.psoft.commerce.repository;
 
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;

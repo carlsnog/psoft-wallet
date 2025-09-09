@@ -10,7 +10,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.ResgateConfirmacaoDTO;
 import com.ufcg.psoft.commerce.dto.ResgateCreateDTO;
 import com.ufcg.psoft.commerce.dto.ResgateResponseDTO;
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
 import com.ufcg.psoft.commerce.model.Acao;
@@ -18,8 +17,9 @@ import com.ufcg.psoft.commerce.model.Admin;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.AtivoCarteira;
 import com.ufcg.psoft.commerce.model.Cliente;
-import com.ufcg.psoft.commerce.model.compra.Compra;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
@@ -97,7 +97,7 @@ public class ResgateControllerTests {
             .quantidade(quantidade)
             .valorUnitario(ativo.getCotacao())
             .abertaEm(LocalDateTime.now())
-            .status(com.ufcg.psoft.commerce.enums.CompraStatusEnum.EM_CARTEIRA)
+            .status(com.ufcg.psoft.commerce.model.transacao.compra.CompraStatusEnum.EM_CARTEIRA)
             .finalizadaEm(LocalDateTime.now())
             .build());
   }
@@ -126,7 +126,7 @@ public class ResgateControllerTests {
             .ativo(ativo)
             .quantidade(1)
             .valorUnitario(ativo.getCotacao())
-            .solicitadoEm(LocalDateTime.now())
+            .abertaEm(LocalDateTime.now())
             .status(status)
             .build());
   }

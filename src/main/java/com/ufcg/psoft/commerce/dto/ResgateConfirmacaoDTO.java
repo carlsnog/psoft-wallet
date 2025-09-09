@@ -1,7 +1,7 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

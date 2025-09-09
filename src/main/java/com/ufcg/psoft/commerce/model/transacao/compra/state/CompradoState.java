@@ -1,8 +1,8 @@
-package com.ufcg.psoft.commerce.model.compra.state;
+package com.ufcg.psoft.commerce.model.transacao.compra.state;
 
-import com.ufcg.psoft.commerce.enums.CompraStatusEnum;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.CompraStatusEnum;
 
 public class CompradoState extends CompraState {
 

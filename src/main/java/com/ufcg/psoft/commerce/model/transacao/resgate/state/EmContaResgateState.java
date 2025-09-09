@@ -1,9 +1,9 @@
-package com.ufcg.psoft.commerce.model.resgate.state;
+package com.ufcg.psoft.commerce.model.transacao.resgate.state;
 
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 
 public class EmContaResgateState extends ResgateState {
   public EmContaResgateState(Resgate resgate) {
