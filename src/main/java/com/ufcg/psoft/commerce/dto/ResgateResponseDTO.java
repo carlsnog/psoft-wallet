@@ -53,5 +53,7 @@ public class ResgateResponseDTO {
     this.solicitadoEm = resgate.getSolicitadoEm();
     this.finalizadoEm = resgate.getFinalizadoEm();
     this.status = resgate.getStatus();
+    this.lucro = resgate.getLucro();
+    this.impostoPago = resgate.getImpostoPago();
   }
 }

@@ -18,4 +18,10 @@ public class Tesouro extends Ativo {
   public void atualizarCotacao(BigDecimal novaCotacao) {
     throw new CommerceException(ErrorCode.OPERACAO_INVALIDA_PARA_O_TIPO);
   }
+
+  @Override
+  public BigDecimal calcularImposto(BigDecimal lucro) {
+    if (lucro.signum() <= 0) return BigDecimal.ZERO;
+    return lucro.multiply(new BigDecimal("0.10"));
+  }
 }

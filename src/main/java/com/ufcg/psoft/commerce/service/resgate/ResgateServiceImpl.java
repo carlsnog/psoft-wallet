@@ -16,7 +16,6 @@ import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
-import com.ufcg.psoft.commerce.service.imposto.ImpostoCalculator;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,19 +33,16 @@ public class ResgateServiceImpl implements ResgateService {
   private final AtivoCarteiraRepository ativoCarteiraRepository;
   private final AtivoService ativoService;
   private final ClienteService clienteService;
-  private final ImpostoCalculator impostoCalculator;
 
   public ResgateServiceImpl(
       ResgateRepository resgateRepository,
       AtivoCarteiraRepository ativoCarteiraRepository,
       AtivoService ativoService,
-      ClienteService clienteService,
-      ImpostoCalculator impostoCalculator) {
+      ClienteService clienteService) {
     this.resgateRepository = resgateRepository;
     this.ativoCarteiraRepository = ativoCarteiraRepository;
     this.ativoService = ativoService;
     this.clienteService = clienteService;
-    this.impostoCalculator = impostoCalculator;
   }
 
   @Override
@@ -136,10 +132,7 @@ public class ResgateServiceImpl implements ResgateService {
     }
 
     var lucro = calcularLucroFIFO(resgate);
-    var imposto =
-        impostoCalculator
-            .calcular(resgate.getAtivo().getTipo(), lucro)
-            .setScale(2, RoundingMode.HALF_UP);
+    var imposto = resgate.getAtivo().calcularImposto(lucro).setScale(2, RoundingMode.HALF_UP);
 
     resgate.setLucro(lucro.setScale(2, RoundingMode.HALF_UP));
     resgate.setImpostoPago(imposto);
