@@ -7,17 +7,19 @@ import com.ufcg.psoft.commerce.dto.ResgateResponseDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
+import com.ufcg.psoft.commerce.model.AtivoCarteira;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
-import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
 import com.ufcg.psoft.commerce.service.resgate.listeners.ResgateConfirmadoEvent;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,18 +31,15 @@ import org.springframework.stereotype.Service;
 public class ResgateServiceImpl implements ResgateService {
 
   private final ResgateRepository resgateRepository;
-  private final AtivoCarteiraRepository ativoCarteiraRepository;
   private final AtivoService ativoService;
   private final ClienteService clienteService;
   private ApplicationEventPublisher eventPublisher;
 
   public ResgateServiceImpl(
       ResgateRepository resgateRepository,
-      AtivoCarteiraRepository ativoCarteiraRepository,
       AtivoService ativoService,
       ClienteService clienteService) {
     this.resgateRepository = resgateRepository;
-    this.ativoCarteiraRepository = ativoCarteiraRepository;
     this.ativoService = ativoService;
     this.clienteService = clienteService;
   }
@@ -137,38 +136,59 @@ public class ResgateServiceImpl implements ResgateService {
     }
 
     resgate.confirmar(usuario);
-    resgateRepository.save(resgate);
 
     if (resgate.deveFinalizar()) {
-      removerDaCarteira(resgate, usuario);
+      var removidos = removerDaCarteira(resgate, usuario);
+
+      calcularLucro(resgate, removidos);
+
+      resgateRepository.save(resgate);
     }
     eventPublisher.publishEvent(new ResgateConfirmadoEvent(this, resgate));
     return new ResgateResponseDTO(resgate);
   }
 
-  private void removerDaCarteira(Resgate resgate, Usuario usuario) {
-    var cliente = resgate.getCliente();
-    var qtdParaRemover = resgate.getQuantidade();
+  private void calcularLucro(Resgate resgate, List<AtivoCarteira> carteira) {
+    var lucro = BigDecimal.ZERO;
+    for (var ativoCarteira : carteira) {
+      lucro = lucro.add(ativoCarteira.getLucro(resgate.getValorUnitario()));
+    }
+    var imposto = resgate.getAtivo().calcularImposto(lucro);
 
+    resgate.setLucro(lucro);
+    resgate.setImpostoPago(imposto);
+  }
+
+  private List<AtivoCarteira> removerDaCarteira(Resgate resgate, Usuario usuario) {
+    var cliente = resgate.getCliente();
     var ativoId = resgate.getAtivo().getId();
-    var ativos =
+
+    var qtdParaRemover = resgate.getQuantidade();
+    var removidos = new ArrayList<AtivoCarteira>();
+
+    var carteira =
         cliente.getCarteira().stream()
             .filter(ac -> ac.getAtivo().getId().equals(ativoId))
             .collect(Collectors.toList());
 
     // Remove os ativos usando um algoritmo de FIFO para garantir a rotação dos ativoCarteira
-    ativos.sort(
+    carteira.sort(
         (a, b) -> a.getCompra().getFinalizadaEm().compareTo(b.getCompra().getFinalizadaEm()));
 
-    for (var ativoCarteira : ativos) {
+    for (var ativoCarteira : carteira) {
       if (ativoCarteira.getQuantidade() > qtdParaRemover) {
         ativoCarteira.setQuantidade(ativoCarteira.getQuantidade() - qtdParaRemover);
-        ativoCarteiraRepository.save(ativoCarteira);
+
+        var removido = ativoCarteira.clone();
+        removido.setQuantidade(qtdParaRemover);
+        removidos.add(removido);
+
         qtdParaRemover = 0;
         break;
       }
 
       qtdParaRemover -= ativoCarteira.getQuantidade();
+      removidos.add(ativoCarteira);
       cliente.getCarteira().remove(ativoCarteira);
     }
 
@@ -177,7 +197,8 @@ public class ResgateServiceImpl implements ResgateService {
     }
 
     resgate.confirmar(usuario);
-
     resgate.finalizar();
+
+    return removidos;
   }
 }

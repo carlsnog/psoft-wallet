@@ -7,6 +7,7 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,12 @@ public class Resgate extends Transacao {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   private ResgateStatusEnum status = ResgateStatusEnum.SOLICITADO;
+
+  @Column(precision = 19, scale = 2)
+  private BigDecimal lucro;
+
+  @Column(precision = 19, scale = 2)
+  private BigDecimal impostoPago;
 
   @Override
   protected ResgateState getState() {

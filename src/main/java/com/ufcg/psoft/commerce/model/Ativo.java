@@ -54,4 +54,6 @@ public abstract class Ativo {
 
     this.cotacao = novaCotacao;
   }
+
+  public abstract BigDecimal calcularImposto(BigDecimal lucro);
 }

@@ -23,7 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "ativo_carteira")
-public class AtivoCarteira {
+public class AtivoCarteira implements Cloneable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,7 +38,11 @@ public class AtivoCarteira {
   }
 
   public BigDecimal getLucro() {
-    return (this.ativo.getCotacao().subtract(this.compra.getValorUnitario()))
+    return getLucro(this.ativo.getCotacao());
+  }
+
+  public BigDecimal getLucro(BigDecimal cotacaoAtivo) {
+    return (cotacaoAtivo.subtract(this.compra.getValorUnitario()))
         .multiply(BigDecimal.valueOf(this.quantidade));
   }
 
@@ -56,4 +60,15 @@ public class AtivoCarteira {
   @ManyToOne(optional = false)
   @JoinColumn(name = "compra_id", nullable = false)
   private Compra compra;
+
+  @Override
+  public AtivoCarteira clone() {
+    return AtivoCarteira.builder()
+        .id(id)
+        .ativo(ativo)
+        .quantidade(quantidade)
+        .cliente(cliente)
+        .compra(compra)
+        .build();
+  }
 }
