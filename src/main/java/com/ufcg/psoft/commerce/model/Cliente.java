@@ -1,7 +1,7 @@
 package com.ufcg.psoft.commerce.model;
 
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;

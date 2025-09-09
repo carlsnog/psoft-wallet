@@ -3,7 +3,7 @@ package com.ufcg.psoft.commerce.model;
 import com.ufcg.psoft.commerce.enums.*;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;

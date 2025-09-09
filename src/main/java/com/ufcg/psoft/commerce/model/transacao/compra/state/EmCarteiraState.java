@@ -1,9 +1,9 @@
-package com.ufcg.psoft.commerce.model.compra.state;
+package com.ufcg.psoft.commerce.model.transacao.compra.state;
 
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 
 public class EmCarteiraState extends CompraState {
 

@@ -1,14 +1,15 @@
-package com.ufcg.psoft.commerce.model.resgate.state;
+package com.ufcg.psoft.commerce.model.transacao.resgate.state;
 
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.TransacaoState;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 
-public abstract class ResgateState {
+public abstract class ResgateState implements TransacaoState {
 
   private final Resgate resgate;
 
@@ -16,8 +17,10 @@ public abstract class ResgateState {
     this.resgate = resgate;
   }
 
+  @Override
   public abstract void confirmar(Usuario usuario);
 
+  @Override
   public boolean deveFinalizar() {
     return false;
   }

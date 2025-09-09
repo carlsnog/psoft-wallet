@@ -1,7 +1,7 @@
 package com.ufcg.psoft.commerce.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.enums.CompraStatusEnum;
+import com.ufcg.psoft.commerce.model.transacao.compra.CompraStatusEnum;
 import lombok.Data;
 
 @Data

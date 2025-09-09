@@ -1,6 +1,6 @@
 package com.ufcg.psoft.commerce.model;
 
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

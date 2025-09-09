@@ -1,6 +1,6 @@
 package com.ufcg.psoft.commerce.service.resgate;
 
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 import org.springframework.context.ApplicationEvent;
 
 public abstract class ResgateBaseEvent extends ApplicationEvent {

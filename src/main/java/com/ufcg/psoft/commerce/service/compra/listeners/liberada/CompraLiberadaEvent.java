@@ -1,7 +1,6 @@
 package com.ufcg.psoft.commerce.service.compra.listeners.liberada;
 
-// CompraDisponivelEvent.java
-import com.ufcg.psoft.commerce.model.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import com.ufcg.psoft.commerce.service.compra.listeners.CompraBaseEvent;
 import lombok.Getter;
 

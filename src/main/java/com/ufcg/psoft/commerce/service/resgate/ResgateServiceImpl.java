@@ -4,13 +4,13 @@ import com.ufcg.psoft.commerce.dto.CarteiraAtivoResponseDTO;
 import com.ufcg.psoft.commerce.dto.ResgateConfirmacaoDTO;
 import com.ufcg.psoft.commerce.dto.ResgateCreateDTO;
 import com.ufcg.psoft.commerce.dto.ResgateResponseDTO;
-import com.ufcg.psoft.commerce.enums.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
-import com.ufcg.psoft.commerce.model.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
@@ -70,7 +70,7 @@ public class ResgateServiceImpl implements ResgateService {
             .status(ResgateStatusEnum.SOLICITADO)
             .quantidade(dto.getQuantidade())
             .valorUnitario(ativo.getCotacao())
-            .solicitadoEm(LocalDateTime.now())
+            .abertaEm(LocalDateTime.now())
             .build();
 
     resgateRepository.save(resgate);
