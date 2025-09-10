@@ -3,11 +3,13 @@ package com.ufcg.psoft.commerce.service.cliente;
 import com.ufcg.psoft.commerce.dto.CarteiraResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.dto.ExtratoDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.util.CsvExporter;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -90,5 +92,18 @@ public class ClienteServiceImpl implements ClienteService {
     return clienteRepository
         .findById(id)
         .orElseThrow(() -> new CommerceException(ErrorCode.CLIENTE_NAO_ENCONTRADO));
+  }
+
+  @Override
+  public byte[] gerarExtratoCsv(Usuario usuario, Long clienteId) {
+    var extrato = gerarExtrato(usuario, clienteId);
+    return CsvExporter.gerarCsv(extrato);
+  }
+
+  private List<ExtratoDTO> gerarExtrato(Usuario usuario, Long id) {
+    var cliente = getCliente(usuario, id);
+    return cliente.getTransacoes().stream()
+        .map(ExtratoDTO::fromTransacao)
+        .collect(Collectors.toList());
   }
 }

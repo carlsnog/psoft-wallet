@@ -20,4 +20,6 @@ public interface ClienteService {
   void remover(Long id);
 
   List<ClienteResponseDTO> listarPorNome(String nome);
+
+  byte[] gerarExtratoCsv(Usuario usuario, Long id);
 }

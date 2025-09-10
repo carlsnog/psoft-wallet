@@ -13,7 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -117,5 +120,29 @@ public class ClienteController {
       @Parameter(description = "ID do cliente") @PathVariable Long id) {
     clienteService.remover(id);
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{id}/extrato/csv")
+  @Autenticado(TipoAutenticacao.NORMAL)
+  @Operation(
+      summary = "Exportar extrato CSV",
+      description = "Exporta todas as operações do cliente em formato CSV")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Extrato exportado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Não autorizado")
+      })
+  public ResponseEntity<?> exportarExtratoCsv(
+      @Parameter(description = "ID do cliente") @PathVariable Long id,
+      @RequestUser Usuario usuario) {
+
+    byte[] csv = clienteService.gerarExtratoCsv(usuario, id);
+    ByteArrayResource resource = new ByteArrayResource(csv);
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=extrato.csv")
+        .contentType(MediaType.parseMediaType("text/csv"))
+        .body(resource);
   }
 }

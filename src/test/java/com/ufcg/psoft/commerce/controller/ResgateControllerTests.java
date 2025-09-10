@@ -10,13 +10,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.ResgateConfirmacaoDTO;
 import com.ufcg.psoft.commerce.dto.ResgateCreateDTO;
 import com.ufcg.psoft.commerce.dto.ResgateResponseDTO;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
-import com.ufcg.psoft.commerce.model.Acao;
-import com.ufcg.psoft.commerce.model.Admin;
-import com.ufcg.psoft.commerce.model.Ativo;
-import com.ufcg.psoft.commerce.model.AtivoCarteira;
-import com.ufcg.psoft.commerce.model.Cliente;
+import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
 import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
 import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
@@ -885,6 +883,226 @@ public class ResgateControllerTests {
       ResgateResponseDTO resgateFinalizado =
           objectMapper.readValue(responseConfirmarJsonString, ResgateResponseDTO.class);
       assertEquals(ResgateStatusEnum.EM_CONTA, resgateFinalizado.getStatus());
+    }
+  }
+
+  @Nested
+  @DisplayName("Cálculo de imposto no resgate")
+  class ResgateImpostoTests {
+
+    @Test
+    @DisplayName("Tesouro Direto: 10% sobre lucro")
+    void impostoTesouroLucro() throws Exception {
+      Cliente cliente = criarCliente("Carlos", "111111");
+      Tesouro tesouro =
+          Tesouro.builder()
+              .nome("Tesouro_TEST")
+              .descricao("Tesouro Selic")
+              .cotacao(BigDecimal.valueOf(100))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.TESOURO)
+              .build();
+      ativoRepository.save(tesouro);
+
+      criarAtivoCarteira(cliente, tesouro, 1);
+      Resgate resgate = criarResgate(cliente, tesouro, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(150));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(0, new BigDecimal("5.0").compareTo(resultado.getImpostoPago()));
+    }
+
+    @Test
+    @DisplayName("Ação: 15% sobre lucro")
+    void impostoAcaoLucro() throws Exception {
+      Cliente cliente = criarCliente("Paula", "222222");
+      Acao acao =
+          Acao.builder()
+              .nome("PETR4_TEST")
+              .descricao("Petrobras")
+              .cotacao(BigDecimal.valueOf(20))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.ACAO)
+              .build();
+      ativoRepository.save(acao);
+
+      criarAtivoCarteira(cliente, acao, 10);
+      Resgate resgate = criarResgate(cliente, acao, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(50));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(0, new BigDecimal("30").compareTo(resultado.getLucro()));
+      assertEquals(0, new BigDecimal("4.5").compareTo(resultado.getImpostoPago()));
+    }
+
+    @Test
+    @DisplayName("Cripto: 15% quando lucro até 5000")
+    void impostoCriptoAte5000() throws Exception {
+      Cliente cliente = criarCliente("Lucas", "333333");
+      Cripto cripto =
+          Cripto.builder()
+              .nome("BTC_TEST")
+              .descricao("Bitcoin")
+              .cotacao(BigDecimal.valueOf(1000))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.CRIPTO)
+              .build();
+      ativoRepository.save(cripto);
+
+      criarAtivoCarteira(cliente, cripto, 1);
+      Resgate resgate = criarResgate(cliente, cripto, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(4000));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(0, new BigDecimal("3000").compareTo(resultado.getLucro()));
+      assertEquals(0, new BigDecimal("450").compareTo(resultado.getImpostoPago()));
+    }
+
+    @Test
+    @DisplayName("Cripto: 22,5% quando lucro acima de 5000")
+    void impostoCriptoAcima5000() throws Exception {
+      Cliente cliente = criarCliente("Joana", "444444");
+      Cripto cripto =
+          Cripto.builder()
+              .nome("ETH_TEST")
+              .descricao("Ethereum")
+              .cotacao(BigDecimal.valueOf(1000))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.CRIPTO)
+              .build();
+      ativoRepository.save(cripto);
+
+      criarAtivoCarteira(cliente, cripto, 1);
+      Resgate resgate = criarResgate(cliente, cripto, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(7000));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(0, new BigDecimal("6000").compareTo(resultado.getLucro()));
+      assertEquals(0, new BigDecimal("1350").compareTo(resultado.getImpostoPago()));
+    }
+
+    @Test
+    @DisplayName("Sem lucro: imposto deve ser zero")
+    void impostoSemLucro() throws Exception {
+      Cliente cliente = criarCliente("Pedro", "555555");
+      Acao acao =
+          Acao.builder()
+              .nome("VALE_TEST")
+              .descricao("Vale")
+              .cotacao(BigDecimal.valueOf(50))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.ACAO)
+              .build();
+      ativoRepository.save(acao);
+
+      criarAtivoCarteira(cliente, acao, 1);
+      Resgate resgate = criarResgate(cliente, acao, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(50));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(0, BigDecimal.ZERO.compareTo(resultado.getImpostoPago()));
+      assertEquals(0, BigDecimal.ZERO.compareTo(resultado.getLucro()));
+    }
+
+    @Test
+    @DisplayName("lucro Negativo: imposto deve ser zero")
+    void impostoComLucroNegativo() throws Exception {
+      Cliente cliente = criarCliente("Pedro", "178908");
+      Acao acao =
+          Acao.builder()
+              .nome("VALE")
+              .descricao("Vale")
+              .cotacao(BigDecimal.valueOf(50))
+              .status(StatusAtivo.DISPONIVEL)
+              .tipo(AtivoTipo.ACAO)
+              .build();
+      ativoRepository.save(acao);
+
+      criarAtivoCarteira(cliente, acao, 1);
+      Resgate resgate = criarResgate(cliente, acao, ResgateStatusEnum.SOLICITADO);
+      resgate.setValorUnitario(BigDecimal.valueOf(30));
+      resgateRepository.save(resgate);
+
+      ResgateConfirmacaoDTO dto = new ResgateConfirmacaoDTO();
+      dto.setStatusAtual(resgate.getStatus());
+
+      String responseJson =
+          driver
+              .post(URI_RESGATES + "/" + resgate.getId() + "/confirmar", dto, Admin.getInstance())
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ResgateResponseDTO resultado = objectMapper.readValue(responseJson, ResgateResponseDTO.class);
+      assertEquals(new BigDecimal("-20.00"), resultado.getLucro());
+      assertEquals(BigDecimal.ZERO, resultado.getImpostoPago());
     }
   }
 }
