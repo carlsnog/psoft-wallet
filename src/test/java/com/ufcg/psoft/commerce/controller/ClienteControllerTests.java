@@ -968,6 +968,81 @@ public class ClienteControllerTests {
           () -> assertNotNull(resultado),
           () -> assertEquals(0, resultado.size(), "Deve retornar lista vazia"));
     }
+
+    @Test
+    @DisplayName(
+        "Quando cliente solicita extrato com filtro por nome parcial do ativo (case-insensitive) retorna múltiplos matches")
+    void quandoClienteSolicitaExtratoComFiltroNomeAtivoParcial() throws Exception {
+      // Arrange - criar dois ativos com variações no nome
+      Ativo a1 =
+          ativoRepository.save(
+              Acao.builder()
+                  .nome("PETR4_TEST")
+                  .descricao("Petrobras Test")
+                  .cotacao(BigDecimal.valueOf(30.0))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.ACAO)
+                  .build());
+
+      Ativo a2 =
+          ativoRepository.save(
+              Acao.builder()
+                  .nome("petR4_SPECIAL")
+                  .descricao("Petrobras Special")
+                  .cotacao(BigDecimal.valueOf(31.0))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.ACAO)
+                  .build());
+
+      // compras para ambos
+      compraRepository.save(
+          Compra.builder()
+              .cliente(cliente)
+              .ativo(a1)
+              .quantidade(2)
+              .valorUnitario(a1.getCotacao())
+              .abertaEm(LocalDateTime.now().minusDays(2))
+              .status(CompraStatusEnum.EM_CARTEIRA)
+              .finalizadaEm(LocalDateTime.now().minusDays(1))
+              .build());
+
+      compraRepository.save(
+          Compra.builder()
+              .cliente(cliente)
+              .ativo(a2)
+              .quantidade(3)
+              .valorUnitario(a2.getCotacao())
+              .abertaEm(LocalDateTime.now().minusDays(1))
+              .status(CompraStatusEnum.EM_CARTEIRA)
+              .finalizadaEm(LocalDateTime.now())
+              .build());
+
+      // filtro parcial (lowercase) que deve bater com ambos
+      ExtratoFiltrosDTO filtros = ExtratoFiltrosDTO.builder().nomeAtivo("petr4").build();
+
+      // Act
+      String responseJsonString =
+          driver
+              .post("/clientes/extrato", filtros, cliente)
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      List<ExtratoDTO> resultado =
+          objectMapper.readValue(responseJsonString, new TypeReference<List<ExtratoDTO>>() {});
+
+      // Assert -> ambos os ativos aparecem (2 transacoes)
+      assertAll(
+          () -> assertNotNull(resultado),
+          () ->
+              assertEquals(2, resultado.size(), "Deve retornar 2 transações que contenham 'petr4'"),
+          () ->
+              assertTrue(
+                  resultado.stream().allMatch(e -> e.ativo().toLowerCase().contains("petr4")),
+                  "Todos os nomes devem conter 'petr4' (case-insensitive)"));
+    }
   }
 
   @Nested
