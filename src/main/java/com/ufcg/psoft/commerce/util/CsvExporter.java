@@ -21,7 +21,7 @@ public class CsvExporter {
                     "Tipo",
                     "Ativo",
                     "Quantidade",
-                    "Valor Unitário",
+                    "Valor Unitario",
                     "Total",
                     "Lucro",
                     "Imposto Pago",

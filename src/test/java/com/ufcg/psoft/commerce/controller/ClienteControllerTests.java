@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -14,13 +15,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.enums.AtivoTipo;
 import com.ufcg.psoft.commerce.enums.PlanoEnum;
+import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.http.exception.ErrorDTO;
+import com.ufcg.psoft.commerce.model.Acao;
 import com.ufcg.psoft.commerce.model.Admin;
+import com.ufcg.psoft.commerce.model.Ativo;
 import com.ufcg.psoft.commerce.model.Cliente;
+import com.ufcg.psoft.commerce.model.transacao.compra.Compra;
+import com.ufcg.psoft.commerce.model.transacao.compra.CompraStatusEnum;
+import com.ufcg.psoft.commerce.model.transacao.resgate.Resgate;
+import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
+import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
+import com.ufcg.psoft.commerce.repository.AtivoRepository;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.repository.CompraRepository;
+import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.utils.CustomDriver;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +61,10 @@ public class ClienteControllerTests {
   CustomDriver driver;
 
   @Autowired ClienteRepository clienteRepository;
+  @Autowired AtivoRepository ativoRepository;
+  @Autowired CompraRepository compraRepository;
+  @Autowired ResgateRepository resgateRepository;
+  @Autowired AtivoCarteiraRepository ativoCarteiraRepository;
 
   ObjectMapper objectMapper = new ObjectMapper();
 
@@ -78,6 +97,10 @@ public class ClienteControllerTests {
 
   @AfterEach
   void tearDown() {
+    ativoCarteiraRepository.deleteAll();
+    resgateRepository.deleteAll();
+    compraRepository.deleteAll();
+    ativoRepository.deleteAll();
     clienteRepository.deleteAll();
   }
 
@@ -389,6 +412,158 @@ public class ClienteControllerTests {
           () ->
               assertEquals(
                   "Codigo de acesso deve ter exatamente 6 digitos numericos", errors.get(0)));
+    }
+  }
+
+  @Nested
+  @DisplayName("Conjunto de casos de verificação de exportação de extrato CSV")
+  class ClienteVerificacaoExtratoCsv {
+
+    @Test
+    @DisplayName("Quando cliente tenta solicitar extrato CSV de outro cliente")
+    void quandoClienteTentaSolicitarExtratoCsvDeOutroCliente() throws Exception {
+      // Arrange
+      Cliente outroCliente =
+          clienteRepository.save(
+              Cliente.builder()
+                  .nome("Outro Cliente")
+                  .plano(PlanoEnum.NORMAL)
+                  .endereco("Rua Outra, 456")
+                  .codigoAcesso("654321")
+                  .build());
+
+      // Act
+      String responseJsonString =
+          driver
+              .get(URI_CLIENTES + "/" + outroCliente.getId() + "/extrato/csv", cliente)
+              .andExpect(status().isForbidden())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+
+      // Assert
+      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
+      assertEquals("Acesso negado", resultado.getMessage());
+    }
+
+    @Test
+    @DisplayName("Quando cliente tenta solicitar extrato CSV de cliente inexistente")
+    void quandoClienteTentaSolicitarExtratoCsvDeClienteInexistente() throws Exception {
+      // Act
+      String responseJsonString =
+          driver
+              .get(URI_CLIENTES + "/999999/extrato/csv", cliente)
+              .andExpect(status().isForbidden())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      ErrorDTO resultado = objectMapper.readValue(responseJsonString, ErrorDTO.class);
+
+      // Assert
+      assertEquals(ErrorCode.FORBIDDEN, resultado.getCode());
+      assertEquals("Acesso negado", resultado.getMessage());
+    }
+
+    @Test
+    @DisplayName("Quando admin solicita extrato CSV de qualquer cliente")
+    void quandoAdminSolicitaExtratoCsvDeQualquerCliente() throws Exception {
+      // Act
+      driver
+          .get(URI_CLIENTES + "/" + cliente.getId() + "/extrato/csv", Admin.getInstance())
+          .andExpect(status().isOk())
+          .andDo(print());
+    }
+
+    @Test
+    @DisplayName("Quando cliente com transações solicita extrato CSV")
+    void quandoClienteComTransacoesSolicitaExtratoCsv() throws Exception {
+      // Arrange - Criar ativo e transações para o cliente
+      Ativo ativo =
+          ativoRepository.save(
+              Acao.builder()
+                  .nome("PETR4_TEST")
+                  .descricao("Petrobras Test")
+                  .cotacao(BigDecimal.valueOf(30.0))
+                  .status(StatusAtivo.DISPONIVEL)
+                  .tipo(AtivoTipo.ACAO)
+                  .build());
+
+      // Criar compra finalizada
+      compraRepository.save(
+          Compra.builder()
+              .cliente(cliente)
+              .ativo(ativo)
+              .quantidade(5)
+              .valorUnitario(BigDecimal.valueOf(30.0))
+              .abertaEm(LocalDateTime.now().minusDays(2))
+              .status(CompraStatusEnum.EM_CARTEIRA)
+              .finalizadaEm(LocalDateTime.now().minusDays(1))
+              .build());
+
+      // Criar resgate finalizado
+      resgateRepository.save(
+          Resgate.builder()
+              .cliente(cliente)
+              .ativo(ativo)
+              .quantidade(2)
+              .valorUnitario(BigDecimal.valueOf(35.0))
+              .abertaEm(LocalDateTime.now().minusHours(5))
+              .status(ResgateStatusEnum.EM_CONTA)
+              .finalizadaEm(LocalDateTime.now().minusHours(1))
+              .build());
+
+      // Act
+      String responseContent =
+          driver
+              .get(URI_CLIENTES + "/" + cliente.getId() + "/extrato/csv", cliente)
+              .andExpect(status().isOk())
+              .andDo(print())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      // Assert - Verifica estrutura e conteúdo do CSV
+      String[] lines = responseContent.split("\n");
+
+      assertAll(
+          () -> assertNotNull(responseContent),
+          () ->
+              assertTrue(
+                  lines.length >= 3, "CSV deve ter pelo menos 3 linhas (header + 2 transações)"),
+          () -> assertTrue(lines[0].contains("Tipo"), "Primeira linha deve conter header 'Tipo'"),
+          () -> assertTrue(lines[0].contains("Ativo"), "Primeira linha deve conter header 'Ativo'"),
+          () ->
+              assertTrue(
+                  lines[0].contains("Quantidade"),
+                  "Primeira linha deve conter header 'Quantidade'"),
+          () ->
+              assertTrue(
+                  lines[0].contains("Valor Unitario"),
+                  "Primeira linha deve conter header 'Valor Unitario'"),
+          () -> assertTrue(lines[0].contains("Total"), "Primeira linha deve conter header 'Total'"),
+          () -> assertTrue(lines[0].contains("Lucro"), "Primeira linha deve conter header 'Lucro'"),
+          () ->
+              assertTrue(
+                  lines[0].contains("Imposto Pago"),
+                  "Primeira linha deve conter header 'Imposto Pago'"),
+          () ->
+              assertTrue(
+                  lines[0].contains("Aberta Em"), "Primeira linha deve conter header 'Aberta Em'"),
+          () ->
+              assertTrue(
+                  lines[0].contains("Finalizada Em"),
+                  "Primeira linha deve conter header 'Finalizada Em'"),
+          () -> assertTrue(lines[1].contains("Compra"), "CSV deve conter transação de COMPRA"),
+          () -> assertTrue(lines[1].contains("5"), "CSV deve conter quantidade da compra"),
+          () -> assertTrue(lines[1].contains("PETR4_TEST"), "CSV deve conter nome do ativo"),
+          () -> assertTrue(lines[2].contains("Resgate"), "CSV deve conter transação de RESGATE"),
+          () -> assertTrue(lines[2].contains("PETR4_TEST"), "CSV deve conter nome do ativo"),
+          () -> assertTrue(lines[2].contains("2"), "CSV deve conter quantidade do resgate"));
     }
   }
 

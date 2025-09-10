@@ -21,5 +21,5 @@ public interface ClienteService {
 
   List<ClienteResponseDTO> listarPorNome(String nome);
 
-  byte[] gerarExtratoCsv(Long clienteId);
+  byte[] gerarExtratoCsv(Usuario usuario, Long id);
 }

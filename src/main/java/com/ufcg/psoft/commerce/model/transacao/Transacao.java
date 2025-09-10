@@ -53,6 +53,8 @@ public abstract class Transacao {
 
   protected abstract TransacaoState getState();
 
+  public abstract String getTipoTransacao();
+
   public final void confirmar(Usuario usuario) {
     getState().confirmar(usuario);
   }
@@ -84,6 +86,4 @@ public abstract class Transacao {
   public BigDecimal getImpostoPago() {
     return BigDecimal.ZERO;
   }
-
-  public abstract String getTipoTransacao();
 }

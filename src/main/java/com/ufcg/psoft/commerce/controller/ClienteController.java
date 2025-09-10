@@ -137,7 +137,7 @@ public class ClienteController {
       @Parameter(description = "ID do cliente") @PathVariable Long id,
       @RequestUser Usuario usuario) {
 
-    byte[] csv = clienteService.gerarExtratoCsv(id);
+    byte[] csv = clienteService.gerarExtratoCsv(usuario, id);
     ByteArrayResource resource = new ByteArrayResource(csv);
 
     return ResponseEntity.ok()
