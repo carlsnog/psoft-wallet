@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
+import com.ufcg.psoft.commerce.dto.ExtratoFiltrosDTO;
 import com.ufcg.psoft.commerce.enums.TipoAutenticacao;
 import com.ufcg.psoft.commerce.http.auth.Autenticado;
 import com.ufcg.psoft.commerce.http.request.RequestUser;
@@ -144,5 +145,23 @@ public class ClienteController {
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=extrato.csv")
         .contentType(MediaType.parseMediaType("text/csv"))
         .body(resource);
+  }
+
+  @PostMapping("/extrato")
+  @Autenticado(TipoAutenticacao.NORMAL)
+  @Operation(
+      summary = "Listar extrato com filtros",
+      description = "Lista operações do cliente com filtros aplicados")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Extrato listado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Não autorizado")
+      })
+  public ResponseEntity<?> listarExtratoFiltrado(
+      @RequestUser Usuario usuario, @RequestBody @Valid ExtratoFiltrosDTO filtros) {
+
+    var extrato = clienteService.listarExtrato(usuario, filtros);
+    return ResponseEntity.ok(extrato);
   }
 }

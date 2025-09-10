@@ -4,14 +4,18 @@ import com.ufcg.psoft.commerce.dto.CarteiraResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.ClienteUpsertDTO;
 import com.ufcg.psoft.commerce.dto.ExtratoDTO;
+import com.ufcg.psoft.commerce.dto.ExtratoFiltrosDTO;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Usuario;
+import com.ufcg.psoft.commerce.model.transacao.Transacao;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import com.ufcg.psoft.commerce.repository.TransacaoRepository;
 import com.ufcg.psoft.commerce.util.CsvExporter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +23,15 @@ import org.springframework.stereotype.Service;
 public class ClienteServiceImpl implements ClienteService {
 
   private final ClienteRepository clienteRepository;
+  private final TransacaoRepository transacaoRepository;
   private final ModelMapper modelMapper;
 
-  public ClienteServiceImpl(ClienteRepository clienteRepository, ModelMapper modelMapper) {
+  public ClienteServiceImpl(
+      ClienteRepository clienteRepository,
+      TransacaoRepository transacaoRepository,
+      ModelMapper modelMapper) {
     this.clienteRepository = clienteRepository;
+    this.transacaoRepository = transacaoRepository;
     this.modelMapper = modelMapper;
   }
 
@@ -96,14 +105,73 @@ public class ClienteServiceImpl implements ClienteService {
 
   @Override
   public byte[] gerarExtratoCsv(Usuario usuario, Long clienteId) {
-    var extrato = gerarExtrato(usuario, clienteId);
+    if (!usuario.isAdmin()) {
+      var cliente = (Cliente) usuario;
+      if (!clienteId.equals(cliente.getId())) {
+        throw new CommerceException(ErrorCode.ACAO_APENAS_ADMIN);
+      }
+    }
+
+    var extrato = gerarExtrato(usuario, clienteId).collect(Collectors.toList());
     return CsvExporter.gerarCsv(extrato);
   }
 
-  private List<ExtratoDTO> gerarExtrato(Usuario usuario, Long id) {
-    var cliente = getCliente(usuario, id);
-    return cliente.getTransacoes().stream()
-        .map(ExtratoDTO::fromTransacao)
-        .collect(Collectors.toList());
+  @Override
+  public List<ExtratoDTO> listarExtrato(Usuario usuario, ExtratoFiltrosDTO filtros) {
+    return gerarExtrato(usuario, filtros);
+  }
+
+  private List<ExtratoDTO> gerarExtrato(Usuario usuario, ExtratoFiltrosDTO filtros) {
+    Stream<ExtratoDTO> transacoesStream = gerarExtrato(usuario, filtros.getClienteId());
+
+    if (filtros.getDataInicio() != null) {
+      transacoesStream =
+          transacoesStream.filter(
+              t -> t.abertaEm() != null && !t.abertaEm().isBefore(filtros.getDataInicio()));
+    }
+
+    if (filtros.getDataFim() != null) {
+      transacoesStream =
+          transacoesStream.filter(
+              t -> t.abertaEm() != null && !t.abertaEm().isAfter(filtros.getDataFim()));
+    }
+
+    if (filtros.getTipoAtivo() != null) {
+      transacoesStream =
+          transacoesStream.filter(
+              t -> t.ativo() != null && t.ativo().contains(filtros.getTipoAtivo().name()));
+    }
+
+    if (filtros.getTipoOperacao() != null && !filtros.getTipoOperacao().trim().isEmpty()) {
+      transacoesStream =
+          transacoesStream.filter(
+              t -> t.tipo() != null && t.tipo().equalsIgnoreCase(filtros.getTipoOperacao().trim()));
+    }
+
+    if (filtros.getNomeAtivo() != null && !filtros.getNomeAtivo().trim().isEmpty()) {
+      transacoesStream =
+          transacoesStream.filter(
+              t ->
+                  t.ativo() != null
+                      && t.ativo()
+                          .toLowerCase()
+                          .contains(filtros.getNomeAtivo().trim().toLowerCase()));
+    }
+
+    return transacoesStream.collect(Collectors.toList());
+  }
+
+  private Stream<ExtratoDTO> gerarExtrato(Usuario usuario, Long filtroClienteId) {
+    List<Transacao> transacoes;
+    if (usuario.isAdmin() && filtroClienteId == null) {
+      transacoes = this.transacaoRepository.findAll();
+    } else if (usuario.isAdmin() && filtroClienteId != null) {
+      transacoes = this.transacaoRepository.findAllByCliente_Id(filtroClienteId);
+    } else {
+      var clienteId = ((Cliente) usuario).getId();
+      transacoes = this.transacaoRepository.findAllByCliente_Id(clienteId);
+    }
+
+    return transacoes.stream().map(ExtratoDTO::fromTransacao);
   }
 }

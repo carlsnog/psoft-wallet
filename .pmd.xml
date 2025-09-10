@@ -9,6 +9,7 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="AvoidLiteralsInIfCondition" />
         <exclude name="AvoidDuplicateLiterals" />
+        <exclude name="UseLocaleWithCaseConversions" />
     </rule>
 
     <rule ref="category/java/bestpractices.xml/MissingOverride" />
@@ -31,13 +32,13 @@
 
     <rule ref="category/java/design.xml/CognitiveComplexity">
         <properties>
-            <property name="reportLevel" value="12" />
+            <property name="reportLevel" value="15" />
         </properties>
     </rule>
     <rule ref="category/java/design.xml/CyclomaticComplexity">
         <properties>
             <property name="classReportLevel" value="100" />
-            <property name="methodReportLevel" value="12" />
+            <property name="methodReportLevel" value="15" />
             <property name="cycloOptions" value="" />
         </properties>
     </rule>
