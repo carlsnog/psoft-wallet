@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.compra;
 
 import com.ufcg.psoft.commerce.dto.CompraConfirmacaoDTO;
 import com.ufcg.psoft.commerce.dto.CompraCreateDTO;
+import com.ufcg.psoft.commerce.dto.CompraFilterDTO;
 import com.ufcg.psoft.commerce.dto.CompraResponseDTO;
 import com.ufcg.psoft.commerce.enums.StatusAtivo;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
@@ -15,12 +16,17 @@ import com.ufcg.psoft.commerce.repository.AtivoCarteiraRepository;
 import com.ufcg.psoft.commerce.repository.CompraRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.compra.listeners.liberada.CompraLiberadaEvent;
+import com.ufcg.psoft.commerce.service.extrato.CompraSpecifications;
+import com.ufcg.psoft.commerce.service.extrato.TransactionMapper;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -176,5 +182,25 @@ public class CompraServiceImpl implements CompraService {
     eventPublisher.publishEvent(new CompraLiberadaEvent(this, compra));
 
     return new CompraResponseDTO(compra);
+  }
+
+  @Override
+  public Page<CompraResponseDTO> listar(
+      Usuario usuario, CompraFilterDTO filter, Pageable pageable) {
+    if (!(usuario.isAdmin())) {
+
+      Cliente cliente = (Cliente) usuario;
+
+      if (filter == null) filter = new CompraFilterDTO();
+
+      Specification<Compra> base = CompraSpecifications.byFilter(filter);
+      Specification<Compra> clienteSpec =
+          (root, query, cb) -> cb.equal(root.get("cliente").get("id"), cliente.getId());
+      Specification<Compra> finalSpec = base.and(clienteSpec);
+      Page<Compra> page = compraRepository.findAll(finalSpec, pageable);
+      return page.map(TransactionMapper::toCompraResponseDTO);
+    } else {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO);
+    }
   }
 }

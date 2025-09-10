@@ -5,9 +5,11 @@ import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 
-public interface ResgateRepository extends JpaRepository<Resgate, Long> {
+public interface ResgateRepository
+    extends JpaRepository<Resgate, Long>, JpaSpecificationExecutor<Resgate> {
 
   Optional<Resgate> findByIdAndCliente_Id(long id, long clienteId);
 

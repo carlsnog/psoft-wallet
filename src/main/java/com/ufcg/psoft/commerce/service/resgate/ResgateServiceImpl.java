@@ -1,9 +1,6 @@
 package com.ufcg.psoft.commerce.service.resgate;
 
-import com.ufcg.psoft.commerce.dto.CarteiraAtivoResponseDTO;
-import com.ufcg.psoft.commerce.dto.ResgateConfirmacaoDTO;
-import com.ufcg.psoft.commerce.dto.ResgateCreateDTO;
-import com.ufcg.psoft.commerce.dto.ResgateResponseDTO;
+import com.ufcg.psoft.commerce.dto.*;
 import com.ufcg.psoft.commerce.http.exception.CommerceException;
 import com.ufcg.psoft.commerce.http.exception.ErrorCode;
 import com.ufcg.psoft.commerce.model.Ativo;
@@ -15,6 +12,8 @@ import com.ufcg.psoft.commerce.model.transacao.resgate.ResgateStatusEnum;
 import com.ufcg.psoft.commerce.repository.ResgateRepository;
 import com.ufcg.psoft.commerce.service.ativo.AtivoService;
 import com.ufcg.psoft.commerce.service.cliente.ClienteService;
+import com.ufcg.psoft.commerce.service.extrato.ResgateSpecifications;
+import com.ufcg.psoft.commerce.service.extrato.TransactionMapper;
 import com.ufcg.psoft.commerce.service.resgate.listeners.ResgateConfirmadoEvent;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -25,6 +24,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -200,5 +202,21 @@ public class ResgateServiceImpl implements ResgateService {
     resgate.finalizar();
 
     return removidos;
+  }
+
+  @Override
+  public Page<ResgateResponseDTO> listar(
+      Usuario usuario, ResgateFilterDTO filter, Pageable pageable) {
+    if (!(usuario.isAdmin())) {
+      Cliente cliente = (Cliente) usuario;
+      if (filter == null) filter = new ResgateFilterDTO();
+      Specification<Resgate> base = ResgateSpecifications.byFilter(filter);
+      Specification<Resgate> clienteSpec =
+          (root, query, cb) -> cb.equal(root.get("cliente").get("id"), cliente.getId());
+      Page<Resgate> page = resgateRepository.findAll(base.and(clienteSpec), pageable);
+      return page.map(TransactionMapper::toResgateResponseDTO);
+    } else {
+      throw new CommerceException(ErrorCode.ACAO_APENAS_CLIENTE_DONO);
+    }
   }
 }
