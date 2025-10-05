@@ -1,0 +1,35 @@
+services:
+  psoft-app:
+    image: psoft:latest
+    expose:
+      - '5080'
+    ports:
+      - '5080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://psoft-db:5432/commerce
+      SPRING_DATASOURCE_USERNAME: psoft
+      SPRING_DATASOURCE_PASSWORD: psoft
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL-AUTO: update
+      SPRING_JPA_SHOW-SQL: true
+    networks:
+      - network
+    depends_on:
+      - psoft-db
+  psoft-db:
+    image: postgres:latest
+    container_name: psoft-db
+    environment:
+      POSTGRES_USER: psoft
+      POSTGRES_PASSWORD: psoft
+      POSTGRES_DB: commerce
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - network
+
+volumes:
+  pg_data:
+
+networks:
+  network:
